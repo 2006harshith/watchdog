@@ -4,8 +4,9 @@ The one file that says where the project is. `/resume` reads it; `/save` updates
 Re-upload it to the Claude Project "WatchDog" at every save point.
 
 ## Current position
-- Save point: **SP1 — not started**
-- Next concrete step: get the SP1 prompt confirmed / go ahead with the SP1 prompt below (E0 data audit port).
+- Save point: **SP1 — in progress** (script + results done; docs/data_card.md not written yet)
+- Next concrete step: paste results/e0_audit_v2.json into the Claude Project, draft docs/data_card.md
+  there, bring it back here to commit, then close SP1 (tag sp01-e0-audit).
 - Pending teach-back: none
 
 ## Save points
@@ -13,7 +14,7 @@ Re-upload it to the Claude Project "WatchDog" at every save point.
 | SP | What | Core piece needing teach-back | Gate | Status | Tag |
 | --- | --- | --- | --- | --- | --- |
 | SP0 | Setup: uv env, package skeleton, pytest + ruff, CI green | — | — | done | sp00-setup |
-| SP1 | E0 data audit script in repo + docs/data_card.md | — | — | not started (a one-off Colab audit exists; not in repo) | |
+| SP1 | E0 data audit script in repo + docs/data_card.md | — | — | in progress (script + results done; data card pending) | |
 | SP2 | Data layer: one row per step (prefix), split module | splits | — | | |
 | SP3 | E1: reproduce the cross-family collapse; ESN monitor + eval harness; MLflow | metrics | **yes** | | |
 | SP4 | Feature sets: model-independent vs model-specific | features | — | | |
@@ -103,3 +104,15 @@ After the script runs: paste results/e0_audit_v2.json into the Claude Project; t
   line-length 100), tests/test_smoke.py, CI workflow (astral-sh/setup-uv pinned to v10.1.0 SHA).
   Local tests + ruff pass, pushed, GitHub Actions run green (run 36048770688). Tagged sp00-setup.
   Next: SP1 — E0 data audit script.
+- 2026-09-25 — done: SP1 script (scripts/e0_data_audit.py) written, run for real against the live
+  HF dataset (network access works in this environment, unlike the old Colab-only assumption), and
+  results/e0_audit_v2.json committed + pushed. Added pandas/pyarrow/huggingface_hub/python-dotenv.
+  Verified real schema by inspection rather than guessing. Key finding not in the prior one-off
+  audit: ~44% of rows (1592) have metadata == {} entirely (whole corpora like organic_demo7b_cold,
+  and large partial gaps in real_research7b/demo7b/etc.) — every per-row metadata check now guards
+  against this. Confirms failure_class==None not-verified-healthy = 2329 of 2348, episode_id
+  replay across corpora = 733 rows, Qwen gap = 758 rows, has_logprobs/latency_s/output_tokens
+  split cleanly by model. — next concrete step: paste results/e0_audit_v2.json into the Claude
+  Project, draft docs/data_card.md there, bring it back to commit, then close SP1 with tag
+  sp01-e0-audit. — open questions: none new beyond what's logged under "Open questions" above;
+  the empty-metadata finding should probably be added there once the data card is drafted.
