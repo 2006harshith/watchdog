@@ -4,15 +4,15 @@ The one file that says where the project is. `/resume` reads it; `/save` updates
 Re-upload it to the Claude Project "WatchDog" at every save point.
 
 ## Current position
-- Save point: **SP0 — not started**
-- Next concrete step: paste the SP0 prompt below into Claude Code.
+- Save point: **SP1 — not started**
+- Next concrete step: get the SP1 prompt confirmed / go ahead with the SP1 prompt below (E0 data audit port).
 - Pending teach-back: none
 
 ## Save points
 
 | SP | What | Core piece needing teach-back | Gate | Status | Tag |
 | --- | --- | --- | --- | --- | --- |
-| SP0 | Setup: uv env, package skeleton, pytest + ruff, CI green | — | — | not started | |
+| SP0 | Setup: uv env, package skeleton, pytest + ruff, CI green | — | — | done | sp00-setup |
 | SP1 | E0 data audit script in repo + docs/data_card.md | — | — | not started (a one-off Colab audit exists; not in repo) | |
 | SP2 | Data layer: one row per step (prefix), split module | splits | — | | |
 | SP3 | E1: reproduce the cross-family collapse; ESN monitor + eval harness; MLflow | metrics | **yes** | | |
@@ -99,3 +99,7 @@ After the script runs: paste results/e0_audit_v2.json into the Claude Project; t
 
 ## Session log
 <!-- /save appends: date — what got done — next concrete step — open questions -->
+- 2026-09-25: SP0 closed. `uv init --package`, pinned Python 3.11, dev deps pytest+ruff (ruff
+  line-length 100), tests/test_smoke.py, CI workflow (astral-sh/setup-uv pinned to v10.1.0 SHA).
+  Local tests + ruff pass, pushed, GitHub Actions run green (run 36048770688). Tagged sp00-setup.
+  Next: SP1 — E0 data audit script.
