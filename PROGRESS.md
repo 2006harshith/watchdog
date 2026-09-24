@@ -1,14 +1,12 @@
 # PROGRESS
 
 ## Current
-- Save point: SP1 — E0 data audit (in progress: script + results done, docs/data_card.md not written yet)
-- Last session: 2026-09-25 — SP1 follow-up checks added (organic manifest labels, derived task id vs
-  task_sha256, ollama7b/ollama_llama8b tool roster + failure_class) and appended to
-  results/e0_audit_v2.json.
-- Next concrete step: paste results/e0_audit_v2.json into the Claude chat Project, draft
-  docs/data_card.md there (flag: derived_task_id and task_sha256 disagree on episode grouping —
-  don't treat them as interchangeable dedup/split keys), bring it back to commit, then `/save SP1`
-  to tag sp01-audit.
+- Save point: SP2 — data layer: per-step table + splits (teach-back: splits)
+- Last session: 2026-09-25 — SP1 closed (tag sp01-audit): docs/data_card.md written from
+  results/e0_audit_v2.json (families/labels, task-identity caveats, the ollama7b/ollama_llama8b
+  matched pair for SP3, shortcut risks D4/D5/D6).
+- Next concrete step: plan SP2 (per-step table + task-disjoint, model-family-held-out splits) before
+  writing any code; wait for "go".
 
 ## SP0 prompt (paste into Claude Code)
 > Set up SP0 for this repo. Plan first, wait for my "go". Target state: `pyproject.toml` managed by uv
@@ -21,7 +19,7 @@
 | SP | What | Status | Tag |
 |---|---|---|---|
 | SP0 | Setup: uv env, CLAUDE.md, CI with one test | done | sp00-setup |
-| SP1 | E0 data audit → docs/data_card.md | in progress | |
+| SP1 | E0 data audit → docs/data_card.md | done | sp01-audit |
 | SP2 | Data layer: per-step table + splits (teach-back: splits) | not started | |
 | SP3 | E1 reproduce collapse — GATE (teach-back: metrics). Pass: on the same held-out llama3.1:8b episodes, the qwen-fitted monitor is >= 0.15 AUROC below the llama-fitted one, with non-overlapping episode-bootstrap 95% CIs. Reference: 0.527 vs 0.885, arXiv 2608.02464 §5 (transferred vs refitted, not before/after) | not started | |
 | SP4 | Feature sets (teach-back: feature definitions) | not started | |
@@ -34,17 +32,11 @@
 | SP11 | Phase 2: budgeted human review | not started | |
 
 ## Open questions
-- Gemini episodes in agent-trajectory-sentinel carry a licence clause against building competing models — check before training on them (SP1).
-
-- Colab E0 audit v1 (2026-09-25), to be re-run from the repo in SP1:
-  - parquet 3,581 rows vs card 2,823; the extra 758 are all qwen2.5:7b.
-  - failure_class None = 2,348 = rows with tau NaN. The card lists organic failures labelled post hoc
-    (hallucinated, incomplete, arithmetic error); those may be inside None. Treating None as healthy
-    could mislabel them. Find where organic labels live before SP2.
-  - tau (0-indexed) is 2 for most failures (median 2, 75% 3, max 6): an injection artefact. Prefix
-    label must be 1 only for step_idx >= tau.
-  - has_logprobs False on 999 rows; latency_s and output_tokens per step: likely model identifiers.
-  - rate_limit / timeout classes may be detectable from latency/error flags alone: report separately.
+- (resolved in docs/data_card.md, SP1) Gemini licence clause → D6: eval-only, never training.
+- (resolved in docs/data_card.md, SP1) Organic labels live only in traces/organic7b/organic_labels.csv;
+  organic rows excluded from SP2–SP6 (D1).
+- task_sha256 vs task-text-hash disagree on episode grouping (229 vs 311 groups on the same 1,989
+  rows) — SP2 must pick one and say why before building splits on it.
 
 ## Decisions (after HANDOFF.md)
 - 2026-09-25: Python import package is `watchdog_agent` (see CLAUDE.md "Naming").
@@ -55,6 +47,12 @@
 
 ## Session log
 <!-- /save appends here, newest first: date · SP · what changed · tests · next step -->
+- 2026-09-25 · SP1 (close) · Wrote docs/data_card.md from results/e0_audit_v2.json: licence terms
+  per model family (Gemini D6 eval-only rule), size/schema, families & labels table, task-identity
+  caveats (task_sha256 vs derived-task-id disagreement), the ollama7b/ollama_llama8b matched pair for
+  SP3, and shortcut risks (D4 API-class split, D5 all-healthy corpora as recal pools, D6 above) ·
+  tests: pass (pytest + ruff) · next: plan SP2 (per-step table + task-disjoint, family-held-out
+  splits), wait for "go". Tag sp01-audit.
 - 2026-09-25 · SP1 · Added 3 checks to scripts/e0_data_audit.py: organic manifest/collection_meta
   label scan (no organic* corpus outside organic7b carries a per-episode label beyond the existing
   null failure_class), derived_task_id (sha256 of normalised steps[0].task) vs task_sha256 grouping
