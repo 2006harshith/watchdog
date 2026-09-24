@@ -1,27 +1,18 @@
 ---
 name: resume
-description: Start-of-session check-in for the watchdog repo. Reads PROGRESS.md, recent commits and working-tree state, runs the tests, and states the exact next step.
+description: Resume work on the watchdog project from the last save point. Use at the start of every session.
 disable-model-invocation: true
 ---
 
-Start-of-session routine. Do these in order and do not start any new work.
+Resume the project. Do these in order and do not start any new work:
 
-1. Read `CLAUDE.md` and `PROGRESS.md` in full.
-2. Run `git status --short` and `git log --oneline -5`.
-3. If `pyproject.toml` exists, run `uv run pytest -q` and `uv run ruff check .`. If it doesn't exist,
-   say the project is before SP0 and skip this step.
-4. If there are uncommitted changes, list them and ask whether to keep them (continue the work) or discard
-   them. Never discard anything without an explicit "discard".
-
-Then reply in at most five lines:
-- Save point and its status
-- Tests: pass / fail (which) / not set up yet
-- Uncommitted changes: none, or a short summary
-- Pending or failed teach-back, if any
-- The exact next step
-
-Rules for choosing the next step:
-- A pending or failed teach-back is always the next step (CLAUDE.md hard rule).
-- If the next step is the first step of a new save point and PROGRESS.md has no prompt or spec for it,
-  say: "Get the SP spec from the Claude Project first" and stop.
-- Otherwise take the "Next concrete step" from PROGRESS.md.
+1. Read `PROGRESS.md` and `CLAUDE.md`.
+2. Run `git status` and `git log --oneline -5`. If there are uncommitted changes, list them and ask whether to keep or discard them. Do not discard anything yourself.
+3. If `pyproject.toml` exists, run `uv run pytest -q` and report pass/fail counts. If tests fail, say so first.
+4. If any entry under "Teach-backs" in `PROGRESS.md` is "pending" or "fail", the next step is that teach-back, before anything else.
+5. Reply in at most five lines:
+   - current save point and its status
+   - what the last session finished
+   - test status
+   - the exact next step (a command or a prompt)
+   - whether the next step needs a spec from the chat Project first (true for the first step of a new save point)

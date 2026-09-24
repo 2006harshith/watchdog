@@ -6,6 +6,7 @@ and outputs a calibrated probability that the run has already failed, using mode
 signals (tool-call structure, state changes, repetition, verifier results). It must keep working
 after the underlying LLM is swapped, recalibrating from a few healthy runs without failure labels.
 
+Full background (decisions, evidence, per-save-point detail, verified vs unverified): `docs/HANDOFF.md`.
 Current position: always read `PROGRESS.md` first. The plan (save points SP0–SP11) lives in the
 "Watchdog — Project Blueprint" doc; the save point table is summarised in `PROGRESS.md`.
 
@@ -50,24 +51,24 @@ diff small, and point out anything non-obvious in it.
 - Windows 10, native (Git Bash available). GPU: GTX 1650 4 GB — not needed before SP7.
 - Python 3.11 via uv. Run everything as `uv run <cmd>` (e.g. `uv run pytest`, `uv run python -m watchdog_agent.cli ...`).
 - GPU jobs (SP7) run on Colab/Kaggle by cloning this repo; notebooks contain no logic, only calls into the package.
-- Dataset: `sunnydubey1111/agent-trajectory-sentinel` on Hugging Face (repo_type="dataset").
-  Download with `huggingface_hub` into the default HF cache; never copy data into the repo, never commit data.
-  Download only the files a script needs (e.g. `data/episodes.parquet`), not the ~5k raw trace files.
-- Secrets (e.g. `HF_TOKEN`) live in `.env`, which is gitignored.
+- Hugging Face datasets download to the default HF cache; never commit data. Dataset:
+  `sunnydubey1111/agent-trajectory-sentinel` (repo_type="dataset"). Download only the files a script
+  needs (e.g. `data/episodes.parquet`), never the whole snapshot (~5k trace files, rate-limited).
+- `HF_TOKEN` lives in `.env` (gitignored).
 
 ## Naming
-- Repo name: `watchdog` (placeholder). Python import package: `watchdog_agent`.
-  Not `watchdog`: that name is taken by a PyPI package that Streamlit (SP9) installs on Windows/Linux,
-  and the two would clash on import.
+- Repo: `watchdog` (placeholder). Python import package: `watchdog_agent`, not `watchdog`: PyPI's
+  `watchdog` is a Streamlit dependency on Windows/Linux (checked in streamlit 1.64.0 metadata),
+  so a local package with that name would clash at import time from SP9 on.
 
 ## Layout (grows by save point)
 ```
 src/watchdog_agent/  package code
-tests/               pytest; one test file per module
-scripts/             one-off scripts (e.g. e0_data_audit.py)
-configs/             YAML experiment configs
-results/             small JSON/CSV result files (committed); MLflow store in mlruns/ (gitignored)
-docs/                data_card.md, decisions.md, per-SP notes
+tests/             pytest; one test file per module
+scripts/           one-off scripts (e.g. e0_data_audit.py)
+configs/           YAML experiment configs
+results/           small JSON/CSV result files (committed); MLflow store in mlruns/ (gitignored)
+docs/              data_card.md, decisions.md, per-SP notes
 ```
 
 ## Git

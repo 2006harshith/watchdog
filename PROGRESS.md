@@ -1,118 +1,60 @@
-# PROGRESS — watchdog
+# PROGRESS
 
-The one file that says where the project is. `/resume` reads it; `/save` updates it.
-Re-upload it to the Claude Project "WatchDog" at every save point.
-
-## Current position
-- Save point: **SP1 — in progress** (script + results done; docs/data_card.md not written yet)
-- Next concrete step: paste results/e0_audit_v2.json into the Claude Project, draft docs/data_card.md
-  there, bring it back here to commit, then close SP1 (tag sp01-e0-audit).
-- Pending teach-back: none
-
-## Save points
-
-| SP | What | Core piece needing teach-back | Gate | Status | Tag |
-| --- | --- | --- | --- | --- | --- |
-| SP0 | Setup: uv env, package skeleton, pytest + ruff, CI green | — | — | done | sp00-setup |
-| SP1 | E0 data audit script in repo + docs/data_card.md | — | — | in progress (script + results done; data card pending) | |
-| SP2 | Data layer: one row per step (prefix), split module | splits | — | | |
-| SP3 | E1: reproduce the cross-family collapse; ESN monitor + eval harness; MLflow | metrics | **yes** | | |
-| SP4 | Feature sets: model-independent vs model-specific | features | — | | |
-| SP5 | E2 ablation: XGBoost (+GRU) per feature set, held-out families | — | **yes** | | |
-| SP6 | E3 recalibration curve: detection @5% FAR vs 0–50 healthy runs | calibration / threshold | — | | |
-| SP7 | E4 cost/latency vs LLM judges (local, Groq, LoRA on Colab) | — | **yes** | | |
-| SP8 | E5 organic runs on AgentDojo, 3 families | — | **yes** | | |
-| SP9 | Supervisor (continue/retry/halt/escalate) + Streamlit demo on HF Spaces | — | — | | |
-| SP10 | Write-up: arXiv report, README, blog | — | — | | |
-| SP11 | Phase 2 — E6 budgeted human review | — | — | only after SP8 | |
-
-A save point is closed when: tests pass, work is committed, git tag `spNN-<name>` exists, this file is updated.
-
----
+## Current
+- Save point: SP1 — E0 data audit (in progress: script + results done, docs/data_card.md not written yet)
+- Last session: 2026-09-25 — SP0 closed (tag sp00-setup); SP1 script run for real against the live
+  HF dataset and results/e0_audit_v2.json committed and pushed.
+- Next concrete step: paste results/e0_audit_v2.json into the Claude chat Project, draft
+  docs/data_card.md there, bring it back to commit, then `/save SP1` to tag sp01-audit.
 
 ## SP0 prompt (paste into Claude Code)
+> Set up SP0 for this repo. Plan first, wait for my "go". Target state: `pyproject.toml` managed by uv
+> (Python 3.11, package `watchdog_agent` under `src/`), dev dependencies pytest and ruff only, one trivial
+> test in `tests/test_smoke.py`, `.gitignore` (Python, .env, mlruns/, data caches), and a GitHub
+> Actions workflow that runs `uv run pytest` and `uv run ruff check` on every push. Move
+> `scripts/e0_data_audit.py` in as-is. Done when `uv run pytest` passes locally and CI is green.
 
-```text
-SP0 — setup. Read CLAUDE.md and PROGRESS.md first.
-Goal: an empty but working Python project with tests and CI.
-1. `uv init` as a package with a src layout; Python import package name `watchdog_agent`
-   (src/watchdog_agent/__init__.py with __version__ = "0.0.1"). Pin Python 3.11 (`uv python pin 3.11`).
-2. Dev dependencies via `uv add --dev pytest ruff`. Ruff config in pyproject.toml (line-length 100).
-3. tests/test_smoke.py: imports watchdog_agent and asserts __version__ is a string.
-4. .github/workflows/ci.yml: on push and pull_request, install uv with the official astral-sh setup-uv
-   action (look up its current major version in its README; do not guess), then `uv sync --locked`,
-   `uv run ruff check .`, `uv run pytest`.
-5. Keep the existing .gitignore; add anything uv needs.
-Done when: `uv run pytest` and `uv run ruff check .` pass locally, the commit is pushed,
-and the GitHub Actions run is green.
-Plan first (files you will create, commands you will run), then wait for my "go".
-```
+## Save points
+| SP | What | Status | Tag |
+|---|---|---|---|
+| SP0 | Setup: uv env, CLAUDE.md, CI with one test | done | sp00-setup |
+| SP1 | E0 data audit → docs/data_card.md | in progress | |
+| SP2 | Data layer: per-step table + splits (teach-back: splits) | not started | |
+| SP3 | E1 reproduce collapse — GATE (teach-back: metrics). Pass: on the same held-out llama3.1:8b episodes, the qwen-fitted monitor is >= 0.15 AUROC below the llama-fitted one, with non-overlapping episode-bootstrap 95% CIs. Reference: 0.527 vs 0.885, arXiv 2608.02464 §5 (transferred vs refitted, not before/after) | not started | |
+| SP4 | Feature sets (teach-back: feature definitions) | not started | |
+| SP5 | E2 ablation — GATE | not started | |
+| SP6 | E3 recalibration curve (teach-back: threshold logic) | not started | |
+| SP7 | E4 cost/latency vs LLM judges — GATE | not started | |
+| SP8 | E5 organic runs on AgentDojo — GATE | not started | |
+| SP9 | Supervisor agent + Streamlit demo on HF Spaces | not started | |
+| SP10 | Write-up: arXiv report, README, blog | not started | |
+| SP11 | Phase 2: budgeted human review | not started | |
 
-## SP1 prompt (after SP0 is tagged)
+## Open questions
+- Gemini episodes in agent-trajectory-sentinel carry a licence clause against building competing models — check before training on them (SP1).
 
-```text
-SP1 — E0 data audit. Below is the audit code I ran once in Colab. Port it into
-scripts/e0_data_audit.py, runnable as `uv run python scripts/e0_data_audit.py`.
-- Get data with huggingface_hub.hf_hub_download(repo_id="sunnydubey1111/agent-trajectory-sentinel",
-  repo_type="dataset", filename=...). HF cache only; nothing in the repo. Download only
-  data/episodes.parquet plus the few label/manifest files the checks need, NOT all ~5k trace files.
-- Read HF_TOKEN from .env if present (python-dotenv, or plain env var — say which and why).
-- Deps: `uv add pandas pyarrow huggingface_hub`.
-Then extend it with these checks and write results/e0_audit_v2.json:
-1. corpus value counts; crosstab corpus x model x failure_class (including None).
-2. Organic labels: for organic* corpora list all metadata keys and value counts of metadata.success,
-   accepted_because and any label-like key; load traces/organic7b/organic_labels.csv, report columns
-   and counts. How many failure_class==None rows are NOT verified healthy?
-3. Duplicates/replays: rows per metadata.provenance.task_sha256; task_sha256 appearing under >1 model;
-   episode_id in >1 corpus; duplicate trace_sha256.
-4. Qwen: 3005 rows here vs 2,247 on the dataset card. Which corpora explain the gap?
-5. tau: tau/T distribution per failure_class; share with tau==2; T distribution healthy vs failed per corpus.
-6. has_logprobs x model crosstab. Per failure_class: mean latency_s, output_tokens, share of steps with error==True.
-7. Injection provenance: share of failures with non-empty metadata.injection; requested_class vs
-   failure_class agreement; size of rejected.json / landing_failures.json per corpus.
-Inspect real key names; don't guess them. Plan first, wait for "go".
-<paste the Colab audit code here>
-```
+- Colab E0 audit v1 (2026-09-25), to be re-run from the repo in SP1:
+  - parquet 3,581 rows vs card 2,823; the extra 758 are all qwen2.5:7b.
+  - failure_class None = 2,348 = rows with tau NaN. The card lists organic failures labelled post hoc
+    (hallucinated, incomplete, arithmetic error); those may be inside None. Treating None as healthy
+    could mislabel them. Find where organic labels live before SP2.
+  - tau (0-indexed) is 2 for most failures (median 2, 75% 3, max 6): an injection artefact. Prefix
+    label must be 1 only for step_idx >= tau.
+  - has_logprobs False on 999 rows; latency_s and output_tokens per step: likely model identifiers.
+  - rate_limit / timeout classes may be detectable from latency/error flags alone: report separately.
 
-After the script runs: paste results/e0_audit_v2.json into the Claude Project; the data card
-(docs/data_card.md) is drafted there, then committed here.
-
----
-
-## Open questions (from the one-off Colab audit, 2026-09-25)
-- `failure_class == None` (2348 rows) may hide organic failures that are labelled post-hoc elsewhere.
-- Failure onset tau is almost always 2 (median 2, max 6): an injection artefact; prefix labels must be
-  "failed by step k" (k >= tau).
-- `organic_demo7b_cold_retry` has ~16 replay variants of the same episodes → leakage risk; split by task.
-- Model imbalance: Qwen 3005 / Llama 433 / Gemini 143 rows; only 3 real families.
-- `has_logprobs`, `latency_s`, `output_tokens` likely identify the model → not model-independent.
-- Source of the SP3 target "0.885 → ~0.53" is not on the dataset card. Owner to supply the citation.
-- Licence: Gemini outputs (Google ToS: no developing competing models) → use Gemini for evaluation only.
-
-## Decisions
-- 2026-09-25: Python import package named `watchdog_agent`, not `watchdog` (PyPI `watchdog` is a
-  Streamlit dependency on Windows/Linux; verified in streamlit 1.64.0 metadata).
+## Decisions (after HANDOFF.md)
+- 2026-09-25: Python import package is `watchdog_agent` (see CLAUDE.md "Naming").
 
 ## Teach-backs
-
-| Date | SP | Core piece | Questions (short) | Answer summary | Result |
-| --- | --- | --- | --- | --- | --- |
+<!-- core piece · SP · date · 3 questions · one-line summary of answers · pass/fail/pending -->
+(none yet)
 
 ## Session log
-<!-- /save appends: date — what got done — next concrete step — open questions -->
-- 2026-09-25: SP0 closed. `uv init --package`, pinned Python 3.11, dev deps pytest+ruff (ruff
-  line-length 100), tests/test_smoke.py, CI workflow (astral-sh/setup-uv pinned to v10.1.0 SHA).
-  Local tests + ruff pass, pushed, GitHub Actions run green (run 36048770688). Tagged sp00-setup.
-  Next: SP1 — E0 data audit script.
-- 2026-09-25 — done: SP1 script (scripts/e0_data_audit.py) written, run for real against the live
-  HF dataset (network access works in this environment, unlike the old Colab-only assumption), and
-  results/e0_audit_v2.json committed + pushed. Added pandas/pyarrow/huggingface_hub/python-dotenv.
-  Verified real schema by inspection rather than guessing. Key finding not in the prior one-off
-  audit: ~44% of rows (1592) have metadata == {} entirely (whole corpora like organic_demo7b_cold,
-  and large partial gaps in real_research7b/demo7b/etc.) — every per-row metadata check now guards
-  against this. Confirms failure_class==None not-verified-healthy = 2329 of 2348, episode_id
-  replay across corpora = 733 rows, Qwen gap = 758 rows, has_logprobs/latency_s/output_tokens
-  split cleanly by model. — next concrete step: paste results/e0_audit_v2.json into the Claude
-  Project, draft docs/data_card.md there, bring it back to commit, then close SP1 with tag
-  sp01-e0-audit. — open questions: none new beyond what's logged under "Open questions" above;
-  the empty-metadata finding should probably be added there once the data card is drafted.
+<!-- /save appends here, newest first: date · SP · what changed · tests · next step -->
+- 2026-09-25 · SP1 (housekeeping) · Fixed PROGRESS.md status (SP0/SP1 had reverted to "not
+  started" from a stale starter-kit paste; corrected to reflect the real repo state), rewrote
+  SP3's gate wording, added the HANDOFF.md pointer to CLAUDE.md, restored scripts/e0_data_audit.py
+  after it was overwritten back to the pre-SP1 Colab stub by the same stale paste · tests: pass ·
+  next: paste results/e0_audit_v2.json into the Claude chat Project, draft docs/data_card.md, then
+  `/save SP1` to close SP1.
