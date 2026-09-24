@@ -2,10 +2,13 @@
 
 ## Current
 - Save point: SP1 — E0 data audit (in progress: script + results done, docs/data_card.md not written yet)
-- Last session: 2026-09-25 — SP0 closed (tag sp00-setup); SP1 script run for real against the live
-  HF dataset and results/e0_audit_v2.json committed and pushed.
+- Last session: 2026-09-25 — SP1 follow-up checks added (organic manifest labels, derived task id vs
+  task_sha256, ollama7b/ollama_llama8b tool roster + failure_class) and appended to
+  results/e0_audit_v2.json.
 - Next concrete step: paste results/e0_audit_v2.json into the Claude chat Project, draft
-  docs/data_card.md there, bring it back to commit, then `/save SP1` to tag sp01-audit.
+  docs/data_card.md there (flag: derived_task_id and task_sha256 disagree on episode grouping —
+  don't treat them as interchangeable dedup/split keys), bring it back to commit, then `/save SP1`
+  to tag sp01-audit.
 
 ## SP0 prompt (paste into Claude Code)
 > Set up SP0 for this repo. Plan first, wait for my "go". Target state: `pyproject.toml` managed by uv
@@ -52,6 +55,14 @@
 
 ## Session log
 <!-- /save appends here, newest first: date · SP · what changed · tests · next step -->
+- 2026-09-25 · SP1 · Added 3 checks to scripts/e0_data_audit.py: organic manifest/collection_meta
+  label scan (no organic* corpus outside organic7b carries a per-episode label beyond the existing
+  null failure_class), derived_task_id (sha256 of normalised steps[0].task) vs task_sha256 grouping
+  agreement (disagree — 1,989 rows with both, groupings differ), and ollama7b vs ollama_llama8b tool
+  roster + failure_class side by side (same single tool roster, llama8b has proportionally more
+  failures in every class). Results appended to results/e0_audit_v2.json · tests: pass (pytest +
+  ruff) · next: paste results/e0_audit_v2.json into the chat Project, draft docs/data_card.md,
+  `/save SP1` to close.
 - 2026-09-25 · SP1 (housekeeping) · Fixed PROGRESS.md status (SP0/SP1 had reverted to "not
   started" from a stale starter-kit paste; corrected to reflect the real repo state), rewrote
   SP3's gate wording, added the HANDOFF.md pointer to CLAUDE.md, restored scripts/e0_data_audit.py

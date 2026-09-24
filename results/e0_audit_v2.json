@@ -1163,5 +1163,247 @@
         "rejected.json": 1380
       }
     }
+  },
+  "organic_manifest_labels": {
+    "organic7b": {
+      "manifest_type": "list",
+      "manifest_episode_keys": [
+        "T",
+        "episode_id",
+        "failure_class",
+        "file",
+        "has_logprobs",
+        "model",
+        "tau",
+        "temperature"
+      ],
+      "label_like_keys": [],
+      "manifest_row_count": 30,
+      "manifest_rows_with_failure_class": 0
+    },
+    "organic_demo7b": {
+      "manifest_type": "list",
+      "manifest_episode_keys": [
+        "T",
+        "episode_id",
+        "expected_total",
+        "failure_class",
+        "file",
+        "has_logprobs",
+        "model",
+        "seed",
+        "tau",
+        "temperature"
+      ],
+      "label_like_keys": [],
+      "manifest_row_count": 55,
+      "manifest_rows_with_failure_class": 0
+    },
+    "organic_demo7b_cold": {
+      "manifest_type": "list",
+      "manifest_episode_keys": [
+        "T",
+        "episode_id",
+        "expected_total",
+        "failure_class",
+        "file",
+        "has_logprobs",
+        "model",
+        "n_nudges",
+        "n_withheld",
+        "seed",
+        "tau",
+        "temperature",
+        "withhold_rate"
+      ],
+      "label_like_keys": [],
+      "manifest_row_count": 120,
+      "manifest_rows_with_failure_class": 0
+    },
+    "organic_demo7b_ext": {
+      "manifest_type": "list",
+      "manifest_episode_keys": [
+        "T",
+        "episode_id",
+        "expected_total",
+        "failure_class",
+        "file",
+        "has_logprobs",
+        "model",
+        "seed",
+        "tau",
+        "temperature"
+      ],
+      "label_like_keys": [],
+      "manifest_row_count": 120,
+      "manifest_rows_with_failure_class": 0
+    },
+    "organic_demo7b_holdout": {
+      "manifest_type": "list",
+      "manifest_episode_keys": [
+        "T",
+        "episode_id",
+        "expected_total",
+        "failure_class",
+        "file",
+        "has_logprobs",
+        "model",
+        "n_nudges",
+        "n_parallel",
+        "n_withheld",
+        "seed",
+        "tau",
+        "temperature",
+        "withhold_rate"
+      ],
+      "label_like_keys": [],
+      "manifest_row_count": 120,
+      "manifest_rows_with_failure_class": 0,
+      "collection_meta_keys": [
+        "attempts",
+        "latency_dims_valid",
+        "min_failures",
+        "min_healthy",
+        "model",
+        "n_collected",
+        "n_parallel",
+        "n_target",
+        "seed_base",
+        "stopped_early",
+        "temperature",
+        "withhold_rate"
+      ]
+    },
+    "organic_demo7b_provoked": {
+      "manifest_type": "list",
+      "manifest_episode_keys": [
+        "T",
+        "episode_id",
+        "expected_total",
+        "failure_class",
+        "file",
+        "has_logprobs",
+        "model",
+        "n_withheld",
+        "seed",
+        "tau",
+        "temperature",
+        "withhold_rate"
+      ],
+      "label_like_keys": [],
+      "manifest_row_count": 120,
+      "manifest_rows_with_failure_class": 0
+    },
+    "organic_llama8b": {
+      "manifest_type": "list",
+      "manifest_episode_keys": [
+        "T",
+        "episode_id",
+        "expected_total",
+        "failure_class",
+        "file",
+        "has_logprobs",
+        "model",
+        "n_withheld",
+        "seed",
+        "tau",
+        "temperature",
+        "withhold_rate"
+      ],
+      "label_like_keys": [],
+      "manifest_row_count": 120,
+      "manifest_rows_with_failure_class": 0
+    },
+    "organic_llama8b_cold": {
+      "manifest_type": "list",
+      "manifest_episode_keys": [
+        "T",
+        "episode_id",
+        "expected_total",
+        "failure_class",
+        "file",
+        "has_logprobs",
+        "model",
+        "n_nudges",
+        "n_parallel",
+        "n_withheld",
+        "seed",
+        "tau",
+        "temperature",
+        "withhold_rate"
+      ],
+      "label_like_keys": [],
+      "manifest_row_count": 120,
+      "manifest_rows_with_failure_class": 0,
+      "collection_meta_keys": [
+        "attempts",
+        "latency_dims_valid",
+        "min_failures",
+        "min_healthy",
+        "model",
+        "n_collected",
+        "n_parallel",
+        "n_target",
+        "seed_base",
+        "stopped_early",
+        "temperature",
+        "withhold_rate"
+      ]
+    }
+  },
+  "derived_task_id": {
+    "rows_with_no_task_text": 1592,
+    "distinct_derived_task_ids": 229,
+    "derived_id_vs_task_sha256_same_grouping": false,
+    "rows_with_both_ids": 1989,
+    "distinct_derived_ids_per_task_name_family": {
+      "count": 8.0,
+      "mean": 19.737949785408777,
+      "std": 46.59721621594424,
+      "min": 1.0,
+      "25%": 2.5684921634101476,
+      "50%": 3.814814814814815,
+      "75%": 5.0,
+      "max": 135.0
+    },
+    "derived_ids_shared_ollama7b_and_ollama_llama8b": 11,
+    "derived_ids_ollama7b_total": 24,
+    "derived_ids_ollama_llama8b_total": 25
+  },
+  "ollama_comparison": {
+    "ollama7b": {
+      "tool_roster_union": [
+        "calculator",
+        "get_weather",
+        "lookup_flight",
+        "lookup_hotel",
+        "search_catalog"
+      ],
+      "distinct_tool_rosters": 1,
+      "failure_class_counts": {
+        "none": 70,
+        "looping": 24,
+        "context_corruption": 22,
+        "goal_drift": 21,
+        "tool_cascade": 18
+      }
+    },
+    "ollama_llama8b": {
+      "tool_roster_union": [
+        "calculator",
+        "get_weather",
+        "lookup_flight",
+        "lookup_hotel",
+        "search_catalog"
+      ],
+      "distinct_tool_rosters": 1,
+      "failure_class_counts": {
+        "none": 77,
+        "goal_drift": 32,
+        "context_corruption": 32,
+        "looping": 29,
+        "tool_cascade": 23
+      }
+    }
   }
 }

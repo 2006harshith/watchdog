@@ -8,7 +8,9 @@ writes results/e0_audit_v2.json. Nothing here trains a model.
 Run: uv run python scripts/e0_data_audit.py
 """
 
+import hashlib
 import json
+import re
 from pathlib import Path
 
 import pandas as pd
@@ -40,6 +42,21 @@ LABEL_FILES = [
 ]
 # The only organic* corpus with a verified-label CSV in the dataset.
 ORGANIC_LABELS_FILE = "traces/organic7b/organic_labels.csv"
+
+# Found via HfApi.list_repo_files (not guessed): every non-jsonl file under an
+# organic* corpus. All 8 have manifest.json; two also have collection_meta.json
+# (aggregate collection params, not per-episode); organic7b alone also has
+# organic_labels.csv (handled separately above) and review_sheet.txt (free text).
+ORGANIC_MANIFEST_FILES = {
+    "organic7b": ["manifest.json", "review_sheet.txt"],
+    "organic_demo7b": ["manifest.json"],
+    "organic_demo7b_cold": ["manifest.json"],
+    "organic_demo7b_ext": ["manifest.json"],
+    "organic_demo7b_holdout": ["manifest.json", "collection_meta.json"],
+    "organic_demo7b_provoked": ["manifest.json"],
+    "organic_llama8b": ["manifest.json"],
+    "organic_llama8b_cold": ["manifest.json", "collection_meta.json"],
+}
 
 
 def counts_dict(s: pd.Series) -> dict:
@@ -86,6 +103,17 @@ def download_label_files() -> dict[str, Path]:
         local = Path(hf_hub_download(repo_id=REPO_ID, repo_type="dataset", filename=rel))
         corpus = rel.split("/")[1]
         paths.setdefault(corpus, {})[local.name] = local
+    return paths
+
+
+def download_organic_manifest_files() -> dict[str, dict[str, Path]]:
+    paths: dict[str, dict[str, Path]] = {}
+    for corpus, names in ORGANIC_MANIFEST_FILES.items():
+        for name in names:
+            local = Path(
+                hf_hub_download(repo_id=REPO_ID, repo_type="dataset", filename=f"traces/{corpus}/{name}")
+            )
+            paths.setdefault(corpus, {})[name] = local
     return paths
 
 
@@ -234,6 +262,87 @@ def check_injection_provenance(df: pd.DataFrame, label_file_paths: dict) -> dict
     }
 
 
+def check_organic_manifest_labels(manifest_paths: dict[str, dict[str, Path]]) -> dict:
+    per_corpus = {}
+    for corpus, files in manifest_paths.items():
+        entry: dict = {}
+        if "manifest.json" in files:
+            manifest = json.loads(files["manifest.json"].read_text(encoding="utf-8"))
+            entry["manifest_type"] = type(manifest).__name__
+            episode_keys = sorted(manifest[0].keys()) if manifest else []
+            entry["manifest_episode_keys"] = episode_keys
+            label_like_keys = sorted(k for k in episode_keys if "label" in k.lower() or "success" in k.lower())
+            entry["label_like_keys"] = label_like_keys
+            entry["manifest_row_count"] = len(manifest)
+            entry["manifest_rows_with_failure_class"] = sum(1 for row in manifest if row.get("failure_class"))
+            for key in label_like_keys:
+                entry[f"manifest_rows_with_{key}"] = sum(1 for row in manifest if row.get(key))
+        if "collection_meta.json" in files:
+            meta = json.loads(files["collection_meta.json"].read_text(encoding="utf-8"))
+            entry["collection_meta_keys"] = sorted(meta.keys())
+        per_corpus[corpus] = entry
+    return per_corpus
+
+
+def normalise_task_text(text: str) -> str:
+    return re.sub(r"\s+", " ", text.strip())
+
+
+def check_derived_task_id(df: pd.DataFrame) -> dict:
+    def first_task(steps: list) -> str | None:
+        if not steps:
+            return None
+        return steps[0].get("task")
+
+    task_text = df["steps_parsed"].map(first_task)
+    has_task = task_text.notna()
+    derived_id = task_text[has_task].map(lambda t: hashlib.sha256(normalise_task_text(t).encode()).hexdigest())
+
+    task_sha = df["metadata_parsed"].map(lambda m: m.get("provenance", {}).get("task_sha256"))
+    both = has_task & task_sha.notna()
+    agree = None
+    if both.any():
+        derived_groups = df.loc[both, "episode_id"].groupby(derived_id[both]).apply(frozenset)
+        sha_groups = df.loc[both, "episode_id"].groupby(task_sha[both]).apply(frozenset)
+        agree = bool(set(derived_groups) == set(sha_groups))
+
+    task_name = df["metadata_parsed"].map(lambda m: m.get("provenance", {}).get("task_name"))
+    has_family = has_task & task_name.notna()
+    ids_per_family = (
+        pd.Series(derived_id[has_family].values, index=task_name[has_family].values)
+        .groupby(level=0)
+        .nunique()
+        .describe()
+    )
+
+    ollama7b_ids = set(derived_id[has_task & (df.loc[has_task, "corpus"] == "ollama7b")])
+    llama8b_ids = set(derived_id[has_task & (df.loc[has_task, "corpus"] == "ollama_llama8b")])
+
+    return {
+        "rows_with_no_task_text": int((~has_task).sum()),
+        "distinct_derived_task_ids": int(derived_id.nunique()),
+        "derived_id_vs_task_sha256_same_grouping": agree,
+        "rows_with_both_ids": int(both.sum()),
+        "distinct_derived_ids_per_task_name_family": describe_dict(ids_per_family),
+        "derived_ids_shared_ollama7b_and_ollama_llama8b": len(ollama7b_ids & llama8b_ids),
+        "derived_ids_ollama7b_total": len(ollama7b_ids),
+        "derived_ids_ollama_llama8b_total": len(llama8b_ids),
+    }
+
+
+def check_ollama_comparison(df: pd.DataFrame) -> dict:
+    result = {}
+    for corpus in ["ollama7b", "ollama_llama8b"]:
+        sub = df[df["corpus"] == corpus]
+        tool_sets = sub["metadata_parsed"].map(lambda m: tuple(sorted(m.get("provenance", {}).get("tools", []))))
+        result[corpus] = {
+            "tool_roster_union": sorted({t for ts in tool_sets for t in ts}),
+            "distinct_tool_rosters": tool_sets.nunique(),
+            "failure_class_counts": counts_dict(sub["failure_class"]),
+        }
+    return result
+
+
 def main() -> None:
     # HF_TOKEN isn't exported into the shell on Windows; load .env explicitly so
     # huggingface_hub (which reads HF_TOKEN from the environment) picks it up.
@@ -242,6 +351,7 @@ def main() -> None:
     df = load_episodes()
     organic_labels_path = download_organic_labels()
     label_file_paths = download_label_files()
+    organic_manifest_paths = download_organic_manifest_files()
     steps_df = build_steps_df(df)
 
     results = {
@@ -252,6 +362,9 @@ def main() -> None:
         "tau": check_tau(df),
         "logprobs_latency": check_logprobs_latency(df, steps_df),
         "injection_provenance": check_injection_provenance(df, label_file_paths),
+        "organic_manifest_labels": check_organic_manifest_labels(organic_manifest_paths),
+        "derived_task_id": check_derived_task_id(df),
+        "ollama_comparison": check_ollama_comparison(df),
     }
 
     out_path = Path(__file__).resolve().parent.parent / "results" / "e0_audit_v2.json"
