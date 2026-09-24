@@ -1,0 +1,27 @@
+# secrets
+.env
+
+# python / uv
+.venv/
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.ruff_cache/
+
+# experiment tracking
+mlruns/
+
+# data never lives in the repo (HF cache only)
+/data/
+*.parquet
+*.jsonl
+
+# notebooks' scratch output
+.ipynb_checkpoints/
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
