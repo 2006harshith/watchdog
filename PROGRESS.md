@@ -1,12 +1,14 @@
 # PROGRESS
 
 ## Current
-- Save point: SP2 — data layer: per-step table + splits (teach-back: splits)
-- Last session: 2026-09-25 — SP1 closed (tag sp01-audit): docs/data_card.md written from
-  results/e0_audit_v2.json (families/labels, task-identity caveats, the ollama7b/ollama_llama8b
-  matched pair for SP3, shortcut risks D4/D5/D6).
-- Next concrete step: plan SP2 (per-step table + task-disjoint, model-family-held-out splits) before
-  writing any code; wait for "go".
+- Save point: SP2 — data layer: per-step table + splits (teach-back: splits, PENDING — do not start
+  new work until this passes)
+- Last session: 2026-09-25 — src/watchdog_agent/data.py (load_episodes, family, task_group via
+  union-find, to_step_table) and src/watchdog_agent/splits.py (leave_one_family_out, grouped_kfold,
+  healthy_subset) written and tested; results/sp2_split_summary.json generated. Teach-back questions
+  asked, owner has not yet answered.
+- Next concrete step: run the SP2 splits teach-back (3 questions already asked in chat — owner
+  answers, then grade and log below) before any further work; only then `/save SP2`.
 
 ## SP0 prompt (paste into Claude Code)
 > Set up SP0 for this repo. Plan first, wait for my "go". Target state: `pyproject.toml` managed by uv
@@ -20,7 +22,7 @@
 |---|---|---|---|
 | SP0 | Setup: uv env, CLAUDE.md, CI with one test | done | sp00-setup |
 | SP1 | E0 data audit → docs/data_card.md | done | sp01-audit |
-| SP2 | Data layer: per-step table + splits (teach-back: splits) | not started | |
+| SP2 | Data layer: per-step table + splits (teach-back: splits) | in progress | |
 | SP3 | E1 reproduce collapse — GATE (teach-back: metrics). Pass: on the same held-out llama3.1:8b episodes, the qwen-fitted monitor is >= 0.15 AUROC below the llama-fitted one, with non-overlapping episode-bootstrap 95% CIs. Reference: 0.527 vs 0.885, arXiv 2608.02464 §5 (transferred vs refitted, not before/after) | not started | |
 | SP4 | Feature sets (teach-back: feature definitions) | not started | |
 | SP5 | E2 ablation — GATE | not started | |
@@ -35,18 +37,38 @@
 - (resolved in docs/data_card.md, SP1) Gemini licence clause → D6: eval-only, never training.
 - (resolved in docs/data_card.md, SP1) Organic labels live only in traces/organic7b/organic_labels.csv;
   organic rows excluded from SP2–SP6 (D1).
-- task_sha256 vs task-text-hash disagree on episode grouping (229 vs 311 groups on the same 1,989
-  rows) — SP2 must pick one and say why before building splits on it.
+- (resolved in SP2, D3) task_sha256 vs task-text-hash disagreement: task_group is now the union-find
+  connected component over rows sharing either key (OR, not a pick-one), so both signals contribute.
+- SP2 finding: leave_one_family_out(test_family="qwen") leaves only 34 non-overlapping train runs
+  from llama+gemini (302/336 dropped for task_group overlap with qwen). SP3 needs a design call on
+  whether/how a qwen-held-out arm is even meaningful with that little train data, or whether SP3 only
+  ever holds out llama/gemini (matches the paper's llama-held-out setting anyway).
 
 ## Decisions (after HANDOFF.md)
 - 2026-09-25: Python import package is `watchdog_agent` (see CLAUDE.md "Naming").
 
 ## Teach-backs
 <!-- core piece · SP · date · 3 questions · one-line summary of answers · pass/fail/pending -->
-(none yet)
+- 2026-09-25 · SP2 · splits (src/watchdog_agent/splits.py + task_group in data.py) · Q1: why drop
+  overlapping train rows by task_group (not task_sha256 alone) in leave_one_family_out — what does
+  task_group catch that task_sha256 alone misses? Q2: why fold-by-group (not fold-by-row) in
+  grouped_kfold, and what would break in an SP3 concatenated-out-of-fold AUROC if it were fold-by-row?
+  Q3: walk through what breaks in leave_one_family_out for real_research7b (291/291 orphan rows) if
+  assign_task_groups used the literal "unknown:&lt;corpus&gt;" one-bucket-per-corpus fallback instead
+  of singleton-per-row, and that corpus needed to be inside a training set · answers: not yet given ·
+  PENDING — do not start new SP2/SP3 work until graded.
 
 ## Session log
 <!-- /save appends here, newest first: date · SP · what changed · tests · next step -->
+- 2026-09-25 · SP2 · Added src/watchdog_agent/data.py (load_episodes: drops organic* per D1, adds
+  family via model_to_family, adds task_group/task_known via assign_task_groups's union-find over
+  task_sha256 OR normalised-task-text-hash, orphan rows get singleton groups per owner's call;
+  to_step_table for the per-step frame) and src/watchdog_agent/splits.py (leave_one_family_out,
+  grouped_kfold, healthy_subset, all seeded). scripts/sp2_summary.py →
+  results/sp2_split_summary.json. tests/test_data.py + tests/test_splits.py (11 tests, incl. a
+  real-data smoke test and the union-find transitivity case) · tests: pass (pytest + ruff) · next:
+  splits teach-back is PENDING (3 questions asked, unanswered) — grade before anything else, then
+  `/save SP2` to close.
 - 2026-09-25 · SP1 (close) · Wrote docs/data_card.md from results/e0_audit_v2.json: licence terms
   per model family (Gemini D6 eval-only rule), size/schema, families & labels table, task-identity
   caveats (task_sha256 vs derived-task-id disagreement), the ollama7b/ollama_llama8b matched pair for

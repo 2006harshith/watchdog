@@ -1,0 +1,38 @@
+{
+  "rows_per_family": {
+    "qwen": 2440,
+    "llama": 193,
+    "gemini": 143
+  },
+  "task_groups_per_family": {
+    "gemini": 42,
+    "llama": 25,
+    "qwen": 1003
+  },
+  "unknown_task_rows_per_corpus": {
+    "demo7b": 113,
+    "demo7b_scoped": 120,
+    "demo_real": 48,
+    "real_ollama7b": 61,
+    "real_research3b": 82,
+    "real_research7b": 291,
+    "real_research7b_long": 72
+  },
+  "leave_one_family_out_overlap_drops": {
+    "gemini": {
+      "train_runs": 1938,
+      "test_runs": 143,
+      "train_runs_dropped_for_task_overlap": 695
+    },
+    "llama": {
+      "train_runs": 2267,
+      "test_runs": 193,
+      "train_runs_dropped_for_task_overlap": 316
+    },
+    "qwen": {
+      "train_runs": 34,
+      "test_runs": 2440,
+      "train_runs_dropped_for_task_overlap": 302
+    }
+  }
+}

@@ -21,6 +21,11 @@ build-backend = "uv_build"
 [tool.ruff]
 line-length = 100
 
+[tool.pytest.ini_options]
+markers = [
+    "smoke: hits the live Hugging Face dataset instead of synthetic data",
+]
+
 [dependency-groups]
 dev = [
     "pytest>=9.1.1",
