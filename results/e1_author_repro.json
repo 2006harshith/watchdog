@@ -1,0 +1,62 @@
+{
+  "what": "author-protocol reproduction of arXiv 2608.02464 section 5 (esn_cusum_max)",
+  "author_commit": "1b3e07fee53ae13407173c3ea932adb4a43e8230",
+  "source": "ollama7b",
+  "target": "ollama_llama8b",
+  "tolerance_auroc": 0.01,
+  "author": {
+    "in_domain": {
+      "auroc": 0.8847,
+      "auprc": 0.9552,
+      "detection_rate": 0.7672,
+      "healthy_fa_rate": 0.125
+    },
+    "transfer": {
+      "auroc": 0.5275,
+      "auprc": 0.8702,
+      "detection_rate": 0.9052,
+      "healthy_fa_rate": 0.75
+    }
+  },
+  "ours": {
+    "in_domain": {
+      "auroc": 0.884698275862069,
+      "auprc": 0.9552149962048213,
+      "detection_rate": 0.7672413793103449,
+      "healthy_fa_rate": 0.125,
+      "theta": 126.96243376015428,
+      "n_test_healthy": 16,
+      "n_test_failed": 116,
+      "channels": [
+        "e",
+        "u",
+        "m",
+        "x"
+      ],
+      "n_fit": 46,
+      "n_val": 15
+    },
+    "transfer": {
+      "auroc": 0.6804956896551724,
+      "auprc": 0.9227401155540598,
+      "detection_rate": 0.9310344827586207,
+      "healthy_fa_rate": 0.75,
+      "theta": 146.38458591150967,
+      "n_test_healthy": 16,
+      "n_test_failed": 116,
+      "channels": [
+        "e",
+        "u",
+        "m",
+        "x"
+      ],
+      "n_fit": 42,
+      "n_val": 14
+    }
+  },
+  "auroc_delta_ours_minus_author": {
+    "in_domain": -0.0,
+    "transfer": 0.153
+  },
+  "passed": false
+}

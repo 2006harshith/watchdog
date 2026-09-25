@@ -1,0 +1,39 @@
+# SP3 E1: reproduce the transfer collapse, task-disjoint. Read by scripts/run_e1.py.
+source_corpus: ollama7b          # monitor A fits on its healthy qwen2.5:7b runs
+target_corpus: ollama_llama8b    # all 193 llama3.1:8b runs are the eval set; B refits on them
+target_family: llama
+k: 5
+fold_seed: 0
+# Share of each fit pool's runs (whole task groups) held out as healthy validation runs:
+# they set the alarm threshold and the per-fold score standardisation.
+val_fraction: 0.25
+
+esn:                              # author defaults (make_hybrids @ 1b3e07f)
+  channels: [e, u, m, x]
+  K: 8
+  seed: 1300
+  fa_budget: 0.05
+
+bootstrap:
+  n: 10000
+  seed: 0
+
+tpr_at_fpr_alpha: 0.05
+
+gate:
+  min_gap: 0.15                   # AUROC_B - AUROC_A, pooled
+sanity_min_auroc_b: 0.70          # below this the refitted baseline itself looks broken
+divergence_flag: 0.05             # |pooled AUROC - mean per-fold AUROC|
+
+sensitivity:
+  fold_seeds: [1, 2, 3]           # AUROC only
+  leave_one_task_group_out: true
+  cluster_bootstrap: true         # CIs resampling task groups instead of runs
+
+reference:
+  paper: {A: 0.527, B: 0.885}                 # arXiv 2608.02464 section 5
+  released_artifacts: {A: 0.6805, B: 0.8847}  # results/e1_author_repro.json (author protocol)
+
+mlflow:
+  tracking_dir: mlruns
+  experiment: sp3-e1
