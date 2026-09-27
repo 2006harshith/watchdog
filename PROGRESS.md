@@ -1,46 +1,18 @@
 # PROGRESS
 
 ## Current
-- Save point: SP3 — E1 reproduce the collapse (in progress). SP2 stays open (code done, untagged):
-  splits teach-back DEFERRED by owner override on 2026-09-25; it must pass before `/save SP2` tags it.
-- Last session: 2026-09-25 — SP3 Step 0 report done (author code: Apache-2.0, esn_cusum_max is the
-  0.885/0.527 source, author protocol not task-disjoint, 16 healthy test runs; logprobs 100%; llama
-  fold 1 = 108 runs because one task has 83 runs). Owner said "go" on all Step 0 recommendations.
-  Step 1 done: src/watchdog_agent/metrics.py + tests/test_metrics.py; `uv add numpy`,
-  `uv add --dev scikit-learn` (1.9.1).
-- Step 2 done (metrics teach-back DEFERRED by owner override): author's ESN vendored verbatim into
-  src/watchdog_agent/baselines/esn/_vendor (Apache-2.0, 1b3e07f; only import paths + headers
-  changed; ruff-excluded), wrapper ESNBaseline in baselines/esn/monitor.py, 7 tests.
-  scripts/reproduce_author_transfer.py -> results/e1_author_repro.json: in-domain reproduces
-  EXACTLY (AUROC 0.8847, AUPRC 0.9552, det 0.7672, FA 0.125); transfer does NOT (AUROC 0.6805 vs
-  0.5275). Not the channel set; parquet == released trace files (sha256 match). Released
-  code+data do not reproduce the paper's 0.527.
-- Step 3 done: src/watchdog_agent/experiments/e1.py, scripts/run_e1.py, configs/e1.yaml, 8 tests;
-  `uv add mlflow pyyaml` (mlflow 3.16.1 refuses the ./mlruns file store -> sqlite at
-  mlruns/mlflow.db, artifacts in mlruns/artifacts). Run is deterministic (2 identical runs).
-  RESULT (results/e1_collapse.json): GATE FAIL, no collapse under the task-disjoint protocol.
-  AUROC A (qwen-fit) 0.644 [0.554, 0.730], B (llama-refit) 0.634 [0.547, 0.717]; gap -0.009,
-  paired CI [-0.046, 0.025]. Sanity flag: B < 0.70. Sensitivity agrees (cluster bootstrap gap
-  -0.009; fold seeds 1-3 gaps -0.08/-0.13/-0.02; leave-one-task-group-out 0.647 vs 0.655).
-  TPR at 5% FPR ~3-4% for both; FA at default threshold 0.36 for both.
-- 2026-09-25 (saved): owner approved SP3 diagnostics D-1..D-4 (twin audit, split ablation for B and
-  A, clean-commit rerun of E1 -> results/e1_diagnostics.json); plan in chat, decisions 1-4 accepted.
-- SP3 diagnostics done (results/e1_diagnostics.json; experiments/author_protocol.py,
-  experiments/e1_diagnostics.py, scripts/run_e1_diagnostics.py, 25 tests):
-  D-1: exact tool-call twins are common (llama 118/193 runs in twin clusters, qwen 82/155; the 77
-  healthy llama runs are only 33 distinct trajectories; no qwen<->llama twins). In the author's
-  in-domain split 10/16 healthy test runs are exact twins of fit runs (+10 context_corruption
-  failures identical to a healthy fit run); 121/132 test runs share a task group with fit.
-  D-2 (B, n_fit 46, 20 seeds): random 0.884 (sd 0.06; seed 0 = 0.8847), twin-aware 0.678 (sd 0.17),
-  task-disjoint 0.623 (sd 0.20; 10 of 30 seeds skipped as infeasible/one-class test).
-  D-3 (A, n_fit 20): qwen fit on test task groups 0.558 vs excluded 0.591 — task overlap gives A
-  no advantage. D-4: E1 from clean commit 1a3787a identical; results/e1_collapse.json replaced
-  with the clean-commit version.
-- Saved 2026-09-27. Next concrete step: paste results/e1_collapse.json, e1_author_repro.json and
-  e1_diagnostics.json into the chat Project with "SP3 gate FAILED; diagnostics attached. Red-team
-  the result and decide what SP4+ should target." (the in-domain 0.885 is mostly exact-twin
-  leakage; model swap is not what breaks this monitor). Pending teach-backs before SP3 can close:
-  metrics (deferred), E1 + diagnostic split logic; SP2 splits (deferred).
+- Save point: SP4 — next, but its spec (and SP5's) is being rewritten in the chat Project after SP3's
+  reframe (docs/decisions.md). No SP4 code until that spec is pasted. Date: 2026-09-27.
+- SP3 closed 2026-09-27 (tag sp03-e1): gate FAIL. Task-disjoint E1: AUROC A 0.644, B 0.634, gap
+  -0.009 [-0.046, 0.025]; the paper's in-domain 0.885 is mostly exact-twin leakage (D-2: median
+  0.896 random vs 0.683 twin-aware). Write-up: docs/sp3_e1_result.md. GitHub issue drafted, not
+  posted: docs/drafts/github_issue_author.md.
+- SP2 is still untagged; its teach-back is owner-marked passed, so `/save SP2` can now close it.
+- Teach-back answers are owed before deploy (SP9): see "Teach-backs" below.
+- Next concrete step: in the chat Project, send "We're starting SP4 (rewritten after SP3). Read
+  PROGRESS.md, docs/decisions.md and docs/sp3_e1_result.md. Write the SP4 spec paste-ready for Claude
+  Code, including D7 (drop the 787 no-tool-call runs) and task-group cluster CIs as primary." Paste
+  the spec into Claude Code; plan, wait for "go".
 
 ## SP0 prompt (paste into Claude Code)
 > Set up SP0 for this repo. Plan first, wait for my "go". Target state: `pyproject.toml` managed by uv
@@ -55,9 +27,9 @@
 | SP0 | Setup: uv env, CLAUDE.md, CI with one test | done | sp00-setup |
 | SP1 | E0 data audit → docs/data_card.md | done | sp01-audit |
 | SP2 | Data layer: per-step table + splits (teach-back: splits) | code done; teach-back owner-marked passed; untagged | |
-| SP3 | E1 reproduce collapse — GATE (teach-back: metrics). Pass: on the same held-out llama3.1:8b episodes, the qwen-fitted monitor is >= 0.15 AUROC below the llama-fitted one, with non-overlapping episode-bootstrap 95% CIs. Reference: 0.527 vs 0.885, arXiv 2608.02464 §5 (transferred vs refitted, not before/after) | E1 run: gate FAIL (no collapse, task-disjoint); diagnostics next; teach-back deferred | |
-| SP4 | Feature sets (teach-back: feature definitions) | not started | |
-| SP5 | E2 ablation — GATE | not started | |
+| SP3 | E1 reproduce collapse — GATE (teach-back: metrics). Pass: on the same held-out llama3.1:8b episodes, the qwen-fitted monitor is >= 0.15 AUROC below the llama-fitted one, with non-overlapping episode-bootstrap 95% CIs. Reference: 0.527 vs 0.885, arXiv 2608.02464 §5 (transferred vs refitted, not before/after) | done — gate FAIL (no collapse task-disjoint; docs/sp3_e1_result.md); teach-back owner-marked passed | sp03-e1 |
+| SP4 | Feature sets (teach-back: feature definitions) (spec to be rewritten after SP3) | not started | |
+| SP5 | E2 ablation — GATE (spec to be rewritten after SP3) | not started | |
 | SP6 | E3 recalibration curve (teach-back: threshold logic) | not started | |
 | SP7 | E4 cost/latency vs LLM judges — GATE | not started | |
 | SP8 | E5 organic runs on AgentDojo — GATE | not started | |
@@ -75,15 +47,16 @@
   from llama+gemini (302/336 dropped for task_group overlap with qwen). SP3 needs a design call on
   whether/how a qwen-held-out arm is even meaningful with that little train data, or whether SP3 only
   ever holds out llama/gemini (matches the paper's llama-held-out setting anyway).
-- SP3: E1 gate FAIL — under task-disjoint folds B (llama-refit, 0.634) is no better than A
+- (resolved 2026-09-27: reframe, see docs/decisions.md) SP3: E1 gate FAIL — under task-disjoint folds B (llama-refit, 0.634) is no better than A
   (qwen-fit, 0.644), and B trips the < 0.70 sanity flag. Is the paper's "collapse" a task-overlap
   effect rather than a model-swap effect? D-2/D-3 diagnostics test this; then the chat Project
   decides what SP4+ should target (task shift vs model shift). Diagnostics say yes: most of B's
   0.885 comes from exact-twin healthy runs in test (twin-aware 0.678, task-disjoint 0.623).
 - SP3/D-1: 10 context_corruption "failures" in llama have a tool-call sequence identical to a
   healthy run — is the injection visible to any model-independent tool-level signal? (SP4 input)
-- SP3: the paper's transfer AUROC 0.527 does not reproduce from released code+data (0.6805). Ask the
-  author which ollama7b data produced it? (owner's call; public GitHub issue)
+- SP3: the paper's transfer AUROC 0.527 does not reproduce from released code+data (0.6805). Issue
+  drafted in docs/drafts/github_issue_author.md; owner to post it and record the author's answer.
+- SP4 spec: the rewritten SP4/SP5 specs and the SP5 gate are decided in the chat Project.
 
 ## Decisions (after HANDOFF.md)
 - 2026-09-25: Python import package is `watchdog_agent` (see CLAUDE.md "Naming").
@@ -101,6 +74,17 @@
 - 2026-09-27: Owner marked all four open teach-backs (SP2 splits, SP3 metrics, SP3 E1 split logic,
   SP3 diagnostic split logic) PASSED without answering them, for time. The questions stay logged
   below; answering all of them is a pre-deploy requirement (before SP9). They no longer block tags.
+- 2026-09-27 (SP3 close-out, full record in docs/decisions.md):
+  - SP3 gate FAIL under rule (a) and rule (b): AUROC A 0.644 [0.554, 0.730], B 0.634 [0.547, 0.717],
+    gap -0.009, paired CI [-0.046, 0.025] (results/e1_collapse.json: monitors.*.auroc, gate.*).
+  - Direction: reframe to unseen tasks + families. Task-disjoint, the llama- and qwen-fitted monitors
+    are equal, so the problem is unseen tasks/families, not the model swap as such. Recalibration
+    after a swap is about thresholds, not ranking. SP4/SP5 specs to be rewritten in the Project;
+    SP5 gate decided there.
+  - D7: drop the 787 runs with no tool calls (7 corpora; = SP2's task-orphan rows). Implemented in
+    the SP4 data change.
+  - SP5 baseline to beat: the author's ESN on the same task-disjoint splits.
+  - From SP4 on: task-group cluster bootstrap is the primary CI; every headline reports n_healthy.
 
 ## Teach-backs
 <!-- core piece · SP · date · 3 questions · one-line summary of answers · pass/fail/pending -->
@@ -137,6 +121,13 @@
 
 ## Session log
 <!-- /save appends here, newest first: date · SP · what changed · tests · next step -->
+- 2026-09-27 · SP3 (close) · Close-out: teach-backs owner-marked passed (questions logged, answers
+  owed before deploy); twin_audit gained runs_in_mixing_clusters (+ test); diagnostics JSON
+  regenerated from clean commit cf6d42c (pre-existing keys identical); docs/decisions.md (gate FAIL,
+  reframe, D7, SP5 baseline, cluster CIs primary); docs/sp3_e1_result.md (negative result, unpaired
+  D-2 comparison: median 0.896 vs 0.683, 12/20 below min random, P = 0.875);
+  docs/drafts/github_issue_author.md (not posted). Tag sp03-e1 · tests: pass (216, ruff clean) ·
+  next: get the rewritten SP4 spec from the chat Project.
 - 2026-09-27 · SP3 · Diagnostics D-1..D-4 (results/e1_diagnostics.json): exact tool-call twins
   common, 10/16 healthy test runs in the author's in-domain split are twins of fit runs; B AUROC
   random 0.884 / twin-aware 0.678 / task-disjoint 0.623; A gains nothing from task overlap
