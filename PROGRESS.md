@@ -25,10 +25,22 @@
   TPR at 5% FPR ~3-4% for both; FA at default threshold 0.36 for both.
 - 2026-09-25 (saved): owner approved SP3 diagnostics D-1..D-4 (twin audit, split ablation for B and
   A, clean-commit rerun of E1 -> results/e1_diagnostics.json); plan in chat, decisions 1-4 accepted.
-- Next concrete step: implement SP3 diagnostics (experiments/author_protocol.py,
-  experiments/e1_diagnostics.py, scripts/run_e1_diagnostics.py, tests), run D-4 from this commit in
-  a temporary git worktree, then paste results/e1_collapse.json, e1_author_repro.json and
-  e1_diagnostics.json into the chat Project to decide what the SP3 gate FAIL means for SP4+.
+- SP3 diagnostics done (results/e1_diagnostics.json; experiments/author_protocol.py,
+  experiments/e1_diagnostics.py, scripts/run_e1_diagnostics.py, 25 tests):
+  D-1: exact tool-call twins are common (llama 118/193 runs in twin clusters, qwen 82/155; the 77
+  healthy llama runs are only 33 distinct trajectories; no qwen<->llama twins). In the author's
+  in-domain split 10/16 healthy test runs are exact twins of fit runs (+10 context_corruption
+  failures identical to a healthy fit run); 121/132 test runs share a task group with fit.
+  D-2 (B, n_fit 46, 20 seeds): random 0.884 (sd 0.06; seed 0 = 0.8847), twin-aware 0.678 (sd 0.17),
+  task-disjoint 0.623 (sd 0.20; 10 of 30 seeds skipped as infeasible/one-class test).
+  D-3 (A, n_fit 20): qwen fit on test task groups 0.558 vs excluded 0.591 — task overlap gives A
+  no advantage. D-4: E1 from clean commit 1a3787a identical; results/e1_collapse.json replaced
+  with the clean-commit version.
+- Saved 2026-09-27. Next concrete step: paste results/e1_collapse.json, e1_author_repro.json and
+  e1_diagnostics.json into the chat Project with "SP3 gate FAILED; diagnostics attached. Red-team
+  the result and decide what SP4+ should target." (the in-domain 0.885 is mostly exact-twin
+  leakage; model swap is not what breaks this monitor). Pending teach-backs before SP3 can close:
+  metrics (deferred), E1 + diagnostic split logic; SP2 splits (deferred).
 
 ## SP0 prompt (paste into Claude Code)
 > Set up SP0 for this repo. Plan first, wait for my "go". Target state: `pyproject.toml` managed by uv
@@ -66,7 +78,10 @@
 - SP3: E1 gate FAIL — under task-disjoint folds B (llama-refit, 0.634) is no better than A
   (qwen-fit, 0.644), and B trips the < 0.70 sanity flag. Is the paper's "collapse" a task-overlap
   effect rather than a model-swap effect? D-2/D-3 diagnostics test this; then the chat Project
-  decides what SP4+ should target (task shift vs model shift).
+  decides what SP4+ should target (task shift vs model shift). Diagnostics say yes: most of B's
+  0.885 comes from exact-twin healthy runs in test (twin-aware 0.678, task-disjoint 0.623).
+- SP3/D-1: 10 context_corruption "failures" in llama have a tool-call sequence identical to a
+  healthy run — is the injection visible to any model-independent tool-level signal? (SP4 input)
 - SP3: the paper's transfer AUROC 0.527 does not reproduce from released code+data (0.6805). Ask the
   author which ollama7b data produced it? (owner's call; public GitHub issue)
 
@@ -100,9 +115,19 @@
 - 2026-09-25 · SP3 · split logic in E1 (src/watchdog_agent/experiments/e1.py: plan_grouped_folds,
   plan_leave_one_group_out, split_by_task_group — task-disjoint A/B fit pools and the inner
   task-group validation split) · questions not yet asked · PENDING — required before `/save SP3`.
+- 2026-09-27 · SP3 · diagnostic split logic (src/watchdog_agent/experiments/e1_diagnostics.py:
+  trajectory_hash twin definition, twin_aware_split, task_disjoint_split, source_pools) · questions
+  not yet asked · PENDING — can be folded into the E1 split teach-back above.
 
 ## Session log
 <!-- /save appends here, newest first: date · SP · what changed · tests · next step -->
+- 2026-09-27 · SP3 · Diagnostics D-1..D-4 (results/e1_diagnostics.json): exact tool-call twins
+  common, 10/16 healthy test runs in the author's in-domain split are twins of fit runs; B AUROC
+  random 0.884 / twin-aware 0.678 / task-disjoint 0.623; A gains nothing from task overlap
+  (0.558 vs 0.591); E1 identical from clean commit 1a3787a (results/e1_collapse.json now carries
+  the clean git block). Moved load_corpus/author_split into experiments/author_protocol.py ·
+  tests: pass (215, ruff clean) · next: paste the three SP3 result JSONs into the chat Project for
+  review and the SP4+ direction decision.
 - 2026-09-25 · SP3 · Step 0 report (author code Apache-2.0; esn_cusum_max is the 0.885/0.527
   source; author protocol not task-disjoint). metrics.py + 164 tests (core, teach-back deferred).
   Vendored author ESN (baselines/esn/_vendor @1b3e07f) + ESNBaseline wrapper; author-protocol

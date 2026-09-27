@@ -55,8 +55,8 @@
     }
   },
   "git": {
-    "commit": "64622a4f847bc19346953cf87d3d834d065db180",
-    "dirty": true
+    "commit": "1a3787ac05b0163d958b201df9b382004d188868",
+    "dirty": false
   },
   "reference": {
     "paper": {

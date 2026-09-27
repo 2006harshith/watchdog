@@ -17,17 +17,14 @@ import sys
 from pathlib import Path
 
 import numpy as np
-import pandas as pd
 from dotenv import load_dotenv
-from huggingface_hub import hf_hub_download
 
 from watchdog_agent.baselines.esn import ESNBaseline, Run
-from watchdog_agent.baselines.esn._vendor.common import rng_for
-from watchdog_agent.data import REPO_ID, load_episodes
+from watchdog_agent.data import load_episodes
+from watchdog_agent.experiments.author_protocol import author_split, load_corpus
 from watchdog_agent.metrics import auprc, auroc
 
 SOURCE, TARGET = "ollama7b", "ollama_llama8b"
-MIN_T = 4
 TOLERANCE = 0.01
 # results/tables/model_transfer_family.csv @ 1b3e07f, monitor esn_cusum_max
 AUTHOR = {
@@ -35,37 +32,6 @@ AUTHOR = {
     "transfer": {"auroc": 0.5275, "auprc": 0.8702, "detection_rate": 0.9052, "healthy_fa_rate": 0.75},
 }
 OUT = Path("results/e1_author_repro.json")
-
-
-def load_corpus(episodes: pd.DataFrame, corpus: str) -> tuple[list[Run], dict[str, int], tuple[str, ...]]:
-    manifest_path = hf_hub_download(REPO_ID, repo_type="dataset", filename=f"traces/{corpus}/manifest.json")
-    manifest = json.loads(Path(manifest_path).read_text("utf-8"))
-    rows = episodes[episodes["corpus"] == corpus].set_index("episode_id")
-    runs, taus = [], {}
-    for entry in manifest:
-        if entry["T"] < MIN_T:
-            continue
-        row = rows.loc[entry["episode_id"]]
-        failure_class = None if entry["tau"] is None else entry["failure_class"]
-        runs.append(Run(uid=row["uid"], steps=row["steps_parsed"], failure_class=failure_class))
-        taus[row["uid"]] = entry["tau"]
-    # Author's channel rule (load_real): drop surprisal if < 90% of the corpus has logprobs.
-    n_logprobs = sum(bool(e.get("has_logprobs")) for e in manifest)
-    base = ("e", "u", "m") if n_logprobs >= 0.9 * len(manifest) else ("e", "m")
-    return runs, taus, base + ("x",)
-
-
-def author_split(runs: list[Run]) -> tuple[list[Run], list[Run], list[Run]]:
-    healthy = [r for r in runs if r.failure_class is None]
-    failed = [r for r in runs if r.failure_class is not None]
-    perm = rng_for(0, "real-split").permutation(len(healthy))
-    # round() as in the author's code: Python rounds half to even.
-    n_fit = round(0.6 * len(healthy))
-    n_val = round(0.2 * len(healthy))
-    fit = [healthy[i] for i in perm[:n_fit]]
-    val = [healthy[i] for i in perm[n_fit : n_fit + n_val]]
-    test = [healthy[i] for i in perm[n_fit + n_val :]] + failed
-    return fit, val, test
 
 
 def evaluate(baseline: ESNBaseline, test: list[Run], taus: dict[str, int]) -> dict:
