@@ -2,14 +2,18 @@ import json
 
 import numpy as np
 import pandas as pd
+import pytest
 
 from watchdog_agent.baselines.esn import RunScore
 from watchdog_agent.experiments.e1 import (
     CSV_COLUMNS,
+    decide_seed_sweep,
+    dominant_task_and_length_checks,
     plan_grouped_folds,
     plan_leave_one_group_out,
     run_e1,
     score_plans,
+    seed_sweep_rows,
     split_by_task_group,
     write_outputs,
 )
@@ -140,6 +144,59 @@ def test_each_eval_run_scored_exactly_once_per_monitor():
         fold_rows = scores[scores["fold"] == plan.fold]
         assert sorted(fold_rows["uid"]) == sorted(plan.eval_uids)
     assert sum(info["eval_runs"] for info in fold_info) == len(target_uids)
+
+
+SWEEP_CFG = {
+    **PLAN_ARGS,
+    "fold_seed": 0,
+    "esn": {"channels": ["e", "u", "m", "x"], "K": 8, "seed": 1300, "fa_budget": 0.05},
+}
+
+
+def test_seed_sweep_rows_are_paired_across_esn_seeds():
+    rows = seed_sweep_rows(EPISODES, SWEEP_CFG, [1300, 1301], n_boot=200, boot_seed=0)
+    assert [r["esn_seed"] for r in rows] == [1300, 1301]
+    assert rows[0]["eval_key"] == rows[1]["eval_key"]  # same runs in the same folds
+    assert rows[0]["n_eval"] == rows[1]["n_eval"] == 48
+    assert decide_seed_sweep(rows, RULE)["all_rows_paired"]
+
+
+RULE = {"threshold": 0.15, "overturned_if_median_gap_at_least": 0.15, "holds_min_seeds": 27}
+
+
+def _rows(gaps, uppers):
+    return [{"gap_B_minus_A": g, "cluster_ci_B_minus_A": {"hi": u}, "eval_key": "k"}
+            for g, u in zip(gaps, uppers)]
+
+
+def test_decide_seed_sweep_outcomes():
+    assert decide_seed_sweep(_rows([0.0] * 30, [0.1] * 30), RULE)["outcome"] == "CLAIM HOLDS"
+    assert decide_seed_sweep(_rows([0.2] * 30, [0.3] * 30), RULE)["outcome"] == "CLAIM OVERTURNED"
+    # 26 of 30 upper bounds below 0.15 and median gap below 0.15: neither rule fires
+    mixed = decide_seed_sweep(_rows([0.0] * 30, [0.1] * 26 + [0.2] * 4), RULE)
+    assert mixed["outcome"] == "SEED-SENSITIVE"
+    assert mixed["n_seeds_cluster_upper_below_threshold"] == 26
+
+
+def test_dominant_task_and_length_checks_on_a_known_case():
+    # dominant group "big": score == length, failed runs are the longer ones -> AUROC 1 for both
+    scores = pd.DataFrame({
+        "uid": [f"u{i}" for i in range(8)],
+        "task_group": ["big"] * 6 + ["small"] * 2,
+        "label": [0, 0, 0, 1, 1, 1, 0, 1],
+        "score_A": [1, 2, 3, 4, 5, 6, 0.5, 0.1],
+        "score_B": [1, 2, 3, 4, 5, 6, 0.1, 0.5],
+    })
+    length_of = {f"u{i}": i + 1 for i in range(8)}
+    out = dominant_task_and_length_checks(scores, length_of)
+    assert out["dominant_task_group_runs"] == 6
+    assert out["auroc_dominant_only"]["A"] == out["auroc_dominant_only"]["B"] == 1.0
+    assert out["auroc_excluding_dominant"]["A"] == 0.0
+    assert out["auroc_excluding_dominant"]["B"] == 1.0
+    assert out["length_as_score_auroc"]["dominant_only"] == 1.0
+    assert out["spearman_score_vs_length"]["A"] == pytest.approx(
+        pd.Series(scores["score_A"]).rank().corr(pd.Series(range(1, 9)).rank())
+    )
 
 
 def test_end_to_end_synthetic_run_writes_json_with_all_keys(tmp_path):

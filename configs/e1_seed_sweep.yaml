@@ -1,0 +1,18 @@
+# SP3 D-5: paired ESN-seed sweep of E1. Read by scripts/run_e1_seed_sweep.py.
+# Folds, inner splits, standardisation and every other setting come from base_config; only the ESN seed
+# changes, so each seed scores the same 193 runs with the same folds (paired by construction).
+base_config: configs/e1.yaml
+esn_seeds: [1300, 1301, 1302, 1303, 1304, 1305, 1306, 1307, 1308, 1309,
+            1310, 1311, 1312, 1313, 1314, 1315, 1316, 1317, 1318, 1319,
+            1320, 1321, 1322, 1323, 1324, 1325, 1326, 1327, 1328, 1329]
+# Task-group cluster bootstrap of B - A, per seed. Same n and seed as E1's cluster sensitivity, so the
+# seed-1300 row reproduces results/e1_collapse.json exactly.
+bootstrap: {n: 10000, seed: 0}
+
+# Pre-registered 2026-09-27, before the sweep was run. Checked in this order:
+rule:
+  threshold: 0.15
+  overturned_if_median_gap_at_least: 0.15   # CLAIM OVERTURNED if median(B - A) >= this
+  holds_min_seeds: 27                       # CLAIM HOLDS if cluster-CI upper bound of B - A < threshold
+                                            #   in >= this many of the 30 seeds
+                                            # otherwise SEED-SENSITIVE

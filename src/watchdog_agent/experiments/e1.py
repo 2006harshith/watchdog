@@ -11,6 +11,7 @@ Gate (rule b): pooled AUROC_B - AUROC_A >= min_gap AND the paired run-bootstrap 
 difference has lower bound > 0. Rule a (gap AND non-overlapping individual CIs) is reported too.
 """
 
+import hashlib
 import json
 import random
 import subprocess
@@ -417,6 +418,119 @@ def run_e1(
         sensitivity["leave_one_task_group_out"] = _pooled_aurocs(lotgo) | {"n_folds": len(lotgo_plans)}
     result["sensitivity"] = sensitivity
     return result, scores
+
+
+# ---------------------------------------------------------------- D-5: ESN-seed sweep
+
+
+def eval_key(scores: pd.DataFrame) -> str:
+    """sha256 of the sorted (uid, fold) pairs: two E1 runs with the same key scored the same runs in
+    the same folds, so their results are paired."""
+    pairs = sorted(zip(scores["uid"], scores["fold"].astype(int)))
+    return hashlib.sha256(json.dumps(pairs).encode("utf-8")).hexdigest()
+
+
+def _mean_per_fold_auroc(scores: pd.DataFrame, name: str) -> float:
+    return float(np.mean([
+        auroc(g["label"].to_numpy(), g[f"raw_score_{name}"].to_numpy())
+        for _, g in scores.groupby("fold")
+        if g["label"].nunique() == 2
+    ]))
+
+
+def seed_sweep_rows(
+    episodes: pd.DataFrame,
+    cfg: dict,
+    esn_seeds: list[int],
+    n_boot: int,
+    boot_seed: int,
+    on_row: Callable[[dict], None] | None = None,
+) -> list[dict]:
+    """E1 once per ESN seed. Folds and inner splits are planned once and reused, so only the ESN
+    seed changes between rows."""
+    plans = plan_grouped_folds(
+        episodes,
+        source_corpus=cfg["source_corpus"],
+        target_corpus=cfg["target_corpus"],
+        target_family=cfg["target_family"],
+        k=cfg["k"],
+        fold_seed=cfg["fold_seed"],
+        val_fraction=cfg["val_fraction"],
+    )
+    rows = []
+    for esn_seed in esn_seeds:
+        seeded = cfg | {"esn": cfg["esn"] | {"seed": esn_seed}}
+        scores, _ = score_plans(episodes, plans, default_monitor_factory(seeded))
+        diff = paired_bootstrap_diff(
+            auroc, scores["label"].to_numpy(), scores["score_A"].to_numpy(),
+            scores["score_B"].to_numpy(), scores["task_group"].to_numpy(), n_boot, seed=boot_seed,
+        )
+        row = {
+            "esn_seed": esn_seed,
+            "n_eval": len(scores),
+            "eval_key": eval_key(scores),
+            **_pooled_aurocs(scores),
+            "mean_per_fold_auroc_A": _mean_per_fold_auroc(scores, "A"),
+            "mean_per_fold_auroc_B": _mean_per_fold_auroc(scores, "B"),
+            "cluster_ci_B_minus_A": _ci(diff),
+        }
+        rows.append(row)
+        if on_row:
+            on_row(row)
+    return rows
+
+
+def decide_seed_sweep(rows: list[dict], rule: dict) -> dict:
+    gaps = np.array([r["gap_B_minus_A"] for r in rows])
+    uppers = np.array([r["cluster_ci_B_minus_A"]["hi"] for r in rows])
+    threshold = rule["threshold"]
+    n_upper_below = int((uppers < threshold).sum())
+    median_gap = float(np.median(gaps))
+    if median_gap >= rule["overturned_if_median_gap_at_least"]:
+        outcome = "CLAIM OVERTURNED"
+    elif n_upper_below >= rule["holds_min_seeds"]:
+        outcome = "CLAIM HOLDS"
+    else:
+        outcome = "SEED-SENSITIVE"
+    return {
+        "outcome": outcome,
+        "n_seeds": len(rows),
+        "n_seeds_cluster_upper_below_threshold": n_upper_below,
+        "n_seeds_gap_at_least_threshold": int((gaps >= threshold).sum()),
+        "median_gap_B_minus_A": median_gap,
+        "min_gap_B_minus_A": float(gaps.min()),
+        "max_gap_B_minus_A": float(gaps.max()),
+        "all_rows_paired": len({r["eval_key"] for r in rows}) == 1,
+    }
+
+
+def dominant_task_and_length_checks(scores: pd.DataFrame, length_of: dict[str, int]) -> dict:
+    """On one seed's E1 scores: AUROC without / within the largest task group, and whether the
+    max-over-steps episode score tracks run length (a longer run gets more chances at a high max)."""
+    dominant = scores["task_group"].value_counts().idxmax()
+    in_dom = scores["task_group"] == dominant
+    length = scores["uid"].map(length_of)
+
+    def aurocs(sub: pd.DataFrame) -> dict:
+        y = sub["label"].to_numpy()
+        return {name: auroc(y, sub[f"score_{name}"].to_numpy()) for name in MONITORS} | {
+            "n_runs": len(sub), "n_healthy": int((y == 0).sum())
+        }
+
+    def spearman(a: pd.Series, b: pd.Series) -> float:
+        # Spearman = Pearson correlation of the ranks; .rank() gives tied values their mean rank.
+        return float(a.rank().corr(b.rank()))
+
+    return {
+        "dominant_task_group_runs": int(in_dom.sum()),
+        "auroc_excluding_dominant": aurocs(scores[~in_dom]),
+        "auroc_dominant_only": aurocs(scores[in_dom]),
+        "length_as_score_auroc": {
+            "pooled": auroc(scores["label"].to_numpy(), length.to_numpy()),
+            "dominant_only": auroc(scores.loc[in_dom, "label"].to_numpy(), length[in_dom].to_numpy()),
+        },
+        "spearman_score_vs_length": {name: spearman(scores[f"score_{name}"], length) for name in MONITORS},
+    }
 
 
 def _to_json(obj):
