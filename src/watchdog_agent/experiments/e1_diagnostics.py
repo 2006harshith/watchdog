@@ -51,16 +51,28 @@ def twin_audit(episodes: pd.DataFrame) -> dict:
         with_tools = sub[sub["steps_parsed"].map(_has_tool_calls)]
         hashes = with_tools["steps_parsed"].map(trajectory_hash)
         clusters = [g for _, g in with_tools.groupby(hashes) if len(g) > 1]
+        mixing = [g for g in clusters if g["failure_class"].isna().any() and g["failure_class"].notna().any()]
+        mixing_runs = pd.concat(mixing) if mixing else with_tools.iloc[:0]
         out[corpus] = {
             "runs": len(sub),
             "runs_without_tool_calls": len(sub) - len(with_tools),
             "twin_clusters": len(clusters),
             "runs_in_twin_clusters": int(sum(len(g) for g in clusters)),
             "largest_cluster": int(max((len(g) for g in clusters), default=0)),
-            "clusters_mixing_healthy_and_failed": int(sum(
-                g["failure_class"].isna().any() and g["failure_class"].notna().any() for g in clusters
-            )),
+            "clusters_mixing_healthy_and_failed": len(mixing),
             "clusters_spanning_task_groups": int(sum(g["task_group"].nunique() > 1 for g in clusters)),
+            # A failed run whose tool calls match a healthy run's exactly cannot be told apart by
+            # any tool-level signal; these counts size that label-quality problem.
+            "runs_in_mixing_clusters": {
+                "total": len(mixing_runs),
+                "by_label": {
+                    "healthy": int(mixing_runs["failure_class"].isna().sum()),
+                    "failed": int(mixing_runs["failure_class"].notna().sum()),
+                },
+                "by_failure_class": {
+                    str(cls): int(n) for cls, n in mixing_runs["failure_class"].value_counts().items()
+                },
+            },
         }
     return out
 

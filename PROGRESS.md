@@ -54,7 +54,7 @@
 |---|---|---|---|
 | SP0 | Setup: uv env, CLAUDE.md, CI with one test | done | sp00-setup |
 | SP1 | E0 data audit → docs/data_card.md | done | sp01-audit |
-| SP2 | Data layer: per-step table + splits (teach-back: splits) | code done; teach-back deferred | |
+| SP2 | Data layer: per-step table + splits (teach-back: splits) | code done; teach-back owner-marked passed; untagged | |
 | SP3 | E1 reproduce collapse — GATE (teach-back: metrics). Pass: on the same held-out llama3.1:8b episodes, the qwen-fitted monitor is >= 0.15 AUROC below the llama-fitted one, with non-overlapping episode-bootstrap 95% CIs. Reference: 0.527 vs 0.885, arXiv 2608.02464 §5 (transferred vs refitted, not before/after) | E1 run: gate FAIL (no collapse, task-disjoint); diagnostics next; teach-back deferred | |
 | SP4 | Feature sets (teach-back: feature definitions) | not started | |
 | SP5 | E2 ablation — GATE | not started | |
@@ -98,6 +98,9 @@
   standardisation from a 25% task-group-disjoint healthy validation slice of each fit pool (not
   the fit runs, which are in-sample for the ESN); k=5 grouped folds primary + leave-one-task-
   group-out sensitivity.
+- 2026-09-27: Owner marked all four open teach-backs (SP2 splits, SP3 metrics, SP3 E1 split logic,
+  SP3 diagnostic split logic) PASSED without answering them, for time. The questions stay logged
+  below; answering all of them is a pre-deploy requirement (before SP9). They no longer block tags.
 
 ## Teach-backs
 <!-- core piece · SP · date · 3 questions · one-line summary of answers · pass/fail/pending -->
@@ -108,16 +111,29 @@
   Q3: walk through what breaks in leave_one_family_out for real_research7b (291/291 orphan rows) if
   assign_task_groups used the literal "unknown:&lt;corpus&gt;" one-bucket-per-corpus fallback instead
   of singleton-per-row, and that corpus needed to be inside a training set · answers: not yet given ·
-  DEFERRED (owner override 2026-09-25) — must pass before SP2 is tagged.
-- 2026-09-25 · SP3 · metrics (src/watchdog_agent/metrics.py) · code + 164 tests pass (sklearn
-  parity incl. ties, hand cases, unit-whole bootstrap, paired diff) · questions not yet asked ·
-  DEFERRED (owner override 2026-09-25) — required before `/save SP3`.
+  PASSED (owner-marked 2026-09-27, not answered; owner will answer all before deploy).
+- 2026-09-25 · SP3 · metrics (src/watchdog_agent/metrics.py) · Q1: AUROC is computed from ranks;
+  why does a tied (failed, healthy) pair count 1/2, and what AUROC does a monitor that gives every
+  run the same score get? Q2: in E1 the individual AUROC CIs of A [0.554, 0.730] and B [0.547, 0.717]
+  overlap almost completely, yet the paired CI of B-A is only [-0.046, 0.025]; why is the paired
+  interval so much narrower, and why is it the right one for the gate? Q3: why resample runs or task
+  groups rather than steps, and why is the task-group cluster CI of the gap ([-0.19, 0.07]) wider
+  than the run-level one? · answers: not yet given · PASSED (owner-marked 2026-09-27, not answered;
+  owner will answer all before deploy).
 - 2026-09-25 · SP3 · split logic in E1 (src/watchdog_agent/experiments/e1.py: plan_grouped_folds,
-  plan_leave_one_group_out, split_by_task_group — task-disjoint A/B fit pools and the inner
-  task-group validation split) · questions not yet asked · PENDING — required before `/save SP3`.
+  plan_leave_one_group_out, split_by_task_group) · Q1: A_f excludes qwen runs whose task_group is
+  in fold f; what would A's score measure if it did not? Q2: why are the alarm threshold and the
+  pooled-score standardisation set on a task-group-disjoint validation slice, not on the fit runs?
+  Q3: fold 1 holds 108/193 runs because one task has 83 runs; what does that do to pooled vs mean
+  per-fold AUROC, and why is pooled-after-standardisation the primary? · answers: not yet given ·
+  PASSED (owner-marked 2026-09-27, not answered; owner will answer all before deploy).
 - 2026-09-27 · SP3 · diagnostic split logic (src/watchdog_agent/experiments/e1_diagnostics.py:
-  trajectory_hash twin definition, twin_aware_split, task_disjoint_split, source_pools) · questions
-  not yet asked · PENDING — can be folded into the E1 split teach-back above.
+  trajectory_hash, twin_aware_split, task_disjoint_split, source_pools) · Q1: twins are defined on
+  tool calls (name, args, result) only; name one way two "twins" could still differ to the ESN and one
+  way two non-twins could look identical to it. Q2: in the twin-aware split, why are trimmed twins
+  dropped rather than sent to test? Q3: task-disjoint D-2 skipped 10 of 30 seeds; how could that skip
+  rule bias the reported 0.623? · answers: not yet given · PASSED (owner-marked 2026-09-27, not
+  answered; owner will answer all before deploy).
 
 ## Session log
 <!-- /save appends here, newest first: date · SP · what changed · tests · next step -->

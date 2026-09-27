@@ -1,3 +1,4 @@
+import pandas as pd
 import pytest
 
 from watchdog_agent.baselines.esn import Run
@@ -7,6 +8,7 @@ from watchdog_agent.experiments.e1_diagnostics import (
     source_pools,
     task_disjoint_split,
     trajectory_hash,
+    twin_audit,
     twin_aware_split,
 )
 
@@ -31,6 +33,27 @@ def test_hash_changes_with_result_and_ignores_args_key_order():
     reordered = [_step("3")]
     reordered[0]["tool_events"][0]["args"] = {"b": 2, "a": 1}
     assert trajectory_hash(reordered) == trajectory_hash([_step("3")])
+
+
+def test_twin_audit_counts_runs_in_mixing_clusters():
+    # cluster "1": 2 healthy; cluster "2": healthy + looping + looping (mixing);
+    # cluster "3": 2 goal_drift; plus one singleton that is no twin of anything.
+    layout = [("1", None), ("1", None), ("2", None), ("2", "looping"), ("2", "looping"),
+              ("3", "goal_drift"), ("3", "goal_drift"), ("solo", "looping")]
+    episodes = pd.DataFrame({
+        "corpus": "c",
+        "task_group": "g",
+        "failure_class": [fc for _, fc in layout],
+        "steps_parsed": [[_step(result)] for result, _ in layout],
+    })
+    audit = twin_audit(episodes)["c"]
+    assert audit["twin_clusters"] == 3
+    assert audit["clusters_mixing_healthy_and_failed"] == 1
+    assert audit["runs_in_mixing_clusters"] == {
+        "total": 3,
+        "by_label": {"healthy": 1, "failed": 2},
+        "by_failure_class": {"looping": 2},
+    }
 
 
 def test_hash_keeps_step_boundaries():
