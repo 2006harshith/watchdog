@@ -7,7 +7,7 @@
   -0.009 [-0.046, 0.025]; the paper's in-domain 0.885 is mostly exact-twin leakage (D-2: median
   0.896 random vs 0.683 twin-aware). Write-up: docs/sp3_e1_result.md. GitHub issue drafted, not
   posted: docs/drafts/github_issue_author.md.
-- SP2 is still untagged; its teach-back is owner-marked passed, so `/save SP2` can now close it.
+- SP2 closed 2026-09-27 (tag sp02-data; code from 64622a4, tag on the closing commit).
 - Teach-back answers are owed before deploy (SP9): see "Teach-backs" below.
 - Next concrete step: in the chat Project, send "We're starting SP4 (rewritten after SP3). Read
   PROGRESS.md, docs/decisions.md and docs/sp3_e1_result.md. Write the SP4 spec paste-ready for Claude
@@ -26,7 +26,7 @@
 |---|---|---|---|
 | SP0 | Setup: uv env, CLAUDE.md, CI with one test | done | sp00-setup |
 | SP1 | E0 data audit → docs/data_card.md | done | sp01-audit |
-| SP2 | Data layer: per-step table + splits (teach-back: splits) | code done; teach-back owner-marked passed; untagged | |
+| SP2 | Data layer: per-step table + splits (teach-back: splits) | done (teach-back owner-marked passed) | sp02-data |
 | SP3 | E1 reproduce collapse — GATE (teach-back: metrics). Pass: on the same held-out llama3.1:8b episodes, the qwen-fitted monitor is >= 0.15 AUROC below the llama-fitted one, with non-overlapping episode-bootstrap 95% CIs. Reference: 0.527 vs 0.885, arXiv 2608.02464 §5 (transferred vs refitted, not before/after) | done — gate FAIL (no collapse task-disjoint; docs/sp3_e1_result.md); teach-back owner-marked passed | sp03-e1 |
 | SP4 | Feature sets (teach-back: feature definitions) (spec to be rewritten after SP3) | not started | |
 | SP5 | E2 ablation — GATE (spec to be rewritten after SP3) | not started | |
@@ -121,6 +121,9 @@
 
 ## Session log
 <!-- /save appends here, newest first: date · SP · what changed · tests · next step -->
+- 2026-09-27 · SP2 (close) · No code change; SP2 marked done (splits teach-back owner-marked
+  passed, answers owed before deploy). Tag sp02-data · tests: pass (216, ruff clean) · next: get the
+  rewritten SP4 spec from the chat Project.
 - 2026-09-27 · SP3 (close) · Close-out: teach-backs owner-marked passed (questions logged, answers
   owed before deploy); twin_audit gained runs_in_mixing_clusters (+ test); diagnostics JSON
   regenerated from clean commit cf6d42c (pre-existing keys identical); docs/decisions.md (gate FAIL,
