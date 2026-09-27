@@ -51,6 +51,20 @@ change, not now.
 The author's ESN (`esn_cusum_max`, vendored at 1b3e07f), run on the same task-disjoint splits as the
 new monitor.
 
+### D-5: ESN-seed sweep outcome — CLAIM HOLDS
+Source: `results/e1_seed_sweep.json`. E1 was repeated over 30 paired ESN seeds (1300–1329), under a rule
+pre-registered in `configs/e1_seed_sweep.yaml`. The outcome is CLAIM HOLDS (`outcome`):
+- the task-cluster 95% upper bound of B − A is below 0.15 in 30 of 30 seeds, max 0.126;
+- pooled B − A has median −0.005 (`summary`).
+Mean per-fold AUROC favours B in 30 of 30 seeds (median +0.074, max +0.114; `rows[*]`), so a smaller
+model-swap effect may remain.
+
+### Proposed for the SP4 spec (not decided)
+- A length-only baseline in SP5. Run length alone scores AUROC 0.592 pooled, and the ESN score's Spearman
+  correlation with length is 0.85 / 0.80 (`seed_1300_checks`).
+- Matched-step prefix evaluation (score every run at the same step k) instead of the episode maximum, which
+  rewards longer runs.
+
 ### Reporting from SP4 on
 - The task-group cluster bootstrap is the primary CI; the run bootstrap is secondary.
 - Every headline number reports n_healthy.

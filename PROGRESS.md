@@ -3,10 +3,11 @@
 ## Current
 - Save point: SP4 — next, but its spec (and SP5's) is being rewritten in the chat Project after SP3's
   reframe (docs/decisions.md). No SP4 code until that spec is pasted. Date: 2026-09-27.
-- SP3 closed 2026-09-27 (tag sp03-e1): gate FAIL. Task-disjoint E1: AUROC A 0.644, B 0.634, gap
-  -0.009 [-0.046, 0.025]; the paper's in-domain 0.885 is mostly exact-twin leakage (D-2: median
-  0.896 random vs 0.683 twin-aware). Write-up: docs/sp3_e1_result.md. GitHub issue drafted, not
-  posted: docs/drafts/github_issue_author.md.
+- SP3 closed 2026-09-27 (tag sp03-e1 at 3e061bb): gate FAIL. Task-disjoint E1: AUROC A 0.644, B
+  0.634, gap -0.009 [-0.046, 0.025]; the paper's in-domain 0.885 is mostly exact-twin leakage (D-2:
+  median 0.896 random vs 0.683 twin-aware). D-5 added after the tag: 30 paired ESN seeds, CLAIM HOLDS
+  (results/e1_seed_sweep.json, clean commit 43cb2c2). Write-up: docs/sp3_e1_result.md. GitHub issue
+  drafted, not posted: docs/drafts/github_issue_author.md.
 - SP2 closed 2026-09-27 (tag sp02-data; code from 64622a4, tag on the closing commit).
 - Teach-back answers are owed before deploy (SP9): see "Teach-backs" below.
 - Next concrete step: in the chat Project, send "We're starting SP4 (rewritten after SP3). Read
@@ -27,7 +28,7 @@
 | SP0 | Setup: uv env, CLAUDE.md, CI with one test | done | sp00-setup |
 | SP1 | E0 data audit → docs/data_card.md | done | sp01-audit |
 | SP2 | Data layer: per-step table + splits (teach-back: splits) | done (teach-back owner-marked passed) | sp02-data |
-| SP3 | E1 reproduce collapse — GATE (teach-back: metrics). Pass: on the same held-out llama3.1:8b episodes, the qwen-fitted monitor is >= 0.15 AUROC below the llama-fitted one, with non-overlapping episode-bootstrap 95% CIs. Reference: 0.527 vs 0.885, arXiv 2608.02464 §5 (transferred vs refitted, not before/after) | done — gate FAIL (no collapse task-disjoint; docs/sp3_e1_result.md); teach-back owner-marked passed | sp03-e1 |
+| SP3 | E1 reproduce collapse — GATE (teach-back: metrics). Pass: on the same held-out llama3.1:8b episodes, the qwen-fitted monitor is >= 0.15 AUROC below the llama-fitted one, with non-overlapping episode-bootstrap 95% CIs. Reference: 0.527 vs 0.885, arXiv 2608.02464 §5 (transferred vs refitted, not before/after) | done — gate FAIL; diagnostics D-1..D-5 done (docs/sp3_e1_result.md); teach-back owner-marked passed | sp03-e1 |
 | SP4 | Feature sets (teach-back: feature definitions) (spec to be rewritten after SP3) | not started | |
 | SP5 | E2 ablation — GATE (spec to be rewritten after SP3) | not started | |
 | SP6 | E3 recalibration curve (teach-back: threshold logic) | not started | |
@@ -57,6 +58,11 @@
 - SP3: the paper's transfer AUROC 0.527 does not reproduce from released code+data (0.6805). Issue
   drafted in docs/drafts/github_issue_author.md; owner to post it and record the author's answer.
 - SP4 spec: the rewritten SP4/SP5 specs and the SP5 gate are decided in the chat Project.
+- SP3/D-5: pooled AUROC shows no B advantage, but mean per-fold AUROC favours B in 30/30 seeds (median
+  +0.074). Is that a real, smaller model-swap effect, or fold weighting (the 108-run fold counts the
+  same as the 16-run one)? Relevant to how SP5 aggregates across folds.
+- SP3/D-5: the episode-max score tracks run length (Spearman 0.85/0.80). Proposed for SP4, not decided:
+  a length-only baseline in SP5 and matched-step prefix evaluation.
 
 ## Decisions (after HANDOFF.md)
 - 2026-09-25: Python import package is `watchdog_agent` (see CLAUDE.md "Naming").
@@ -85,6 +91,11 @@
     the SP4 data change.
   - SP5 baseline to beat: the author's ESN on the same task-disjoint splits.
   - From SP4 on: task-group cluster bootstrap is the primary CI; every headline reports n_healthy.
+- 2026-09-27: D-5 (30 paired ESN seeds, pre-registered rule): CLAIM HOLDS. Task-cluster upper bound of
+  B-A < 0.15 in 30/30 seeds (max 0.126); pooled B-A median -0.005. Mean per-fold AUROC favours B in
+  30/30 (median +0.074, max +0.114): a smaller model-swap effect may remain (results/e1_seed_sweep.json).
+- Proposed for the SP4 spec, NOT decided: a length-only baseline in SP5 (length alone AUROC 0.592;
+  ESN score vs length Spearman 0.85/0.80), and matched-step prefix evaluation instead of episode-max.
 
 ## Teach-backs
 <!-- core piece · SP · date · 3 questions · one-line summary of answers · pass/fail/pending -->
@@ -121,6 +132,13 @@
 
 ## Session log
 <!-- /save appends here, newest first: date · SP · what changed · tests · next step -->
+- 2026-09-27 · SP3 (D-5, after tag) · Paired ESN-seed sweep (seed_sweep_rows / decide_seed_sweep /
+  dominant_task_and_length_checks in experiments/e1.py, scripts/run_e1_seed_sweep.py,
+  configs/e1_seed_sweep.yaml with the pre-registered rule, 3 tests); results/e1_seed_sweep.json from
+  clean commit 43cb2c2: CLAIM HOLDS (cluster upper bound < 0.15 in 30/30, pooled median -0.005;
+  per-fold favours B 30/30, median +0.074); length confound (Spearman 0.85/0.80, length AUROC 0.592).
+  docs/sp3_e1_result.md headline + D-5 + length limit; docs/decisions.md D-5 + SP4 proposals · tests:
+  pass (219, ruff clean) · next: get the rewritten SP4 spec from the chat Project.
 - 2026-09-27 · SP2 (close) · No code change; SP2 marked done (splits teach-back owner-marked
   passed, answers owed before deploy). Tag sp02-data · tests: pass (216, ruff clean) · next: get the
   rewritten SP4 spec from the chat Project.

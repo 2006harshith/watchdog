@@ -1,9 +1,18 @@
 # SP3 / E1: the transfer collapse does not survive task-disjoint evaluation
 
+The original gap is not robust to leakage-controlled evaluation. On this corpus pair, no B advantage of 0.15
+or more appears under task-disjoint evaluation. Across 30 paired ESN seeds, the task-cluster 95% upper bound
+of B−A stays below 0.15 (max 0.126), and pooled B−A has median −0.005. Mean per-fold AUROC does favour B in
+all 30 seeds (median +0.074, max +0.114), so a smaller model-swap effect may remain. This is not an
+equivalence claim.
+(Sweep keys: `rows[*].cluster_ci_B_minus_A.hi`, `summary.median_gap_B_minus_A`,
+`rows[*].mean_per_fold_auroc_B` − `rows[*].mean_per_fold_auroc_A`.)
+
 Files: `results/e1_author_repro.json` (repro), `results/e1_collapse.json` (E1), `results/e1_diagnostics.json`
-(diag). Each number is followed by its file and JSON key path. A = monitor fitted on healthy qwen2.5:7b
-runs (ollama7b); B = same monitor type refitted on healthy llama3.1:8b runs (ollama_llama8b); both scored on
-llama runs. Monitor: the author's `esn_cusum_max` (channel-max ESN-CUSUM), vendored verbatim at 1b3e07f.
+(diag), `results/e1_seed_sweep.json` (sweep). Each number is followed by its file and JSON key path.
+A = monitor fitted on healthy qwen2.5:7b runs (ollama7b); B = same monitor type refitted on healthy
+llama3.1:8b runs (ollama_llama8b); both scored on llama runs. Monitor: the author's `esn_cusum_max`
+(channel-max ESN-CUSUM), vendored verbatim at 1b3e07f.
 
 ## 1. Claim tested
 arXiv 2608.02464 §5: on the same llama3.1:8b runs, A reaches episode AUROC 0.527 and B 0.885, i.e. a cheap
@@ -75,6 +84,21 @@ twin-aware is the like-for-like comparison with random.
 `d3_source_overlap_A.overlap`, `.excluded`). Sharing tasks gives A no advantage, which fits the absence of
 cross-model twins.
 
+**ESN-seed sweep (D-5).** E1 repeated with ESN seeds 1300–1329, same folds, splits and 193 runs (paired; sweep
+`summary.all_rows_paired` true). The seed-1300 row equals E1 exactly (`seed_1300_matches_e1_collapse`).
+Pre-registered in `configs/e1_seed_sweep.yaml` before the run (sweep `rule`): CLAIM OVERTURNED if median B − A
+≥ 0.15; else CLAIM HOLDS if the task-cluster 95% upper bound of B − A is < 0.15 in ≥ 27/30 seeds; else
+SEED-SENSITIVE. Outcome: CLAIM HOLDS (`outcome`).
+- Pooled AUROC (primary): B − A median −0.005, range −0.020 to +0.012 (`summary.median_gap_B_minus_A`,
+  `.min_gap_B_minus_A`, `.max_gap_B_minus_A`); 0 of 30 seeds reach 0.15
+  (`summary.n_seeds_gap_at_least_threshold`); cluster upper bound below 0.15 in 30 of 30
+  (`summary.n_seeds_cluster_upper_below_threshold`), largest 0.126 (seed 1301), smallest lower bound −0.193
+  (seed 1305) (`rows[*].cluster_ci_B_minus_A`).
+- Mean per-fold AUROC (secondary): B − A is positive in 30 of 30 seeds, median +0.074, range +0.008 to +0.114
+  (`rows[*].mean_per_fold_auroc_B` − `rows[*].mean_per_fold_auroc_A`). The two aggregations disagree in sign;
+  the per-fold mean weights the five folds equally, so the 108-run fold counts as much as the 16-run one
+  (E1 `counts.per_fold[*].eval_runs`).
+
 Reading: B's 0.885 is mostly explained by healthy test runs that are exact twins of fit runs. Keeping twins on
 one side of the split lowers B's median from 0.896 to 0.683 at a comparable test size. Under task-disjoint E1,
 A and B score 0.644 and 0.634 on the same 193 runs. The model swap is not what separates A from B in the
@@ -83,11 +107,17 @@ paper's setting.
 ## 5. Limits
 - One corpus pair (ollama7b → ollama_llama8b) and 193 llama runs.
 - The author's protocol scores only 16 healthy test runs; the task-disjoint D-2 test sets are smaller still.
-- One task holds 83 of 193 llama runs; whichever fold or split gets it dominates.
+- One task holds 83 of 193 llama runs; whichever fold or split gets it dominates. Seed 1300 without it: A 0.697,
+  B 0.634 (110 runs, 54 healthy); on it alone: A 0.287, B 0.329 (83 runs, 23 healthy) (sweep
+  `seed_1300_checks.auroc_excluding_dominant`, `.auroc_dominant_only`).
+- Length confound. The episode score (max over steps) tracks run length: Spearman 0.85 (A) and 0.80 (B)
+  (sweep `seed_1300_checks.spearman_score_vs_length`). Length alone scores AUROC 0.592 pooled, and 0.280 on the
+  dominant task vs the ESN's 0.287 (A; B 0.329) (sweep `seed_1300_checks.length_as_score_auroc`,
+  `seed_1300_checks.auroc_dominant_only`). Part of what the ESN ranks is length, not failure.
 - Failures are injected, not organic. 10 llama and 13 qwen failed runs, all context_corruption, have tool
   calls identical to a healthy run (diag `d1_twins.per_corpus.<corpus>.runs_in_mixing_clusters.by_failure_class`),
   so no tool-level signal can separate them.
-- ESN seed fixed at 1300 throughout; all spread shown is split variation.
+- ESN seed fixed at 1300 in E1 and D-1–D-3; D-5 varies it (30 seeds) for E1 only.
 - Task-disjoint D-2 skipped 10 of 30 seeds drawn (8 left a one-class test set, 2 could not be filled with
   whole task groups; diag `d2_split_ablation_B.task_disjoint.skipped_seeds`); its 20 seeds are a selected subset.
 - Twins are defined on tool calls only; text, timing and logprobs are ignored.
