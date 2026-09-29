@@ -98,3 +98,51 @@ tools) and qwen research corpora vs real_gemini_long.
 With gemini out of every train set, `leave_one_family_out(test_family="qwen")` trains on 21 llama
 runs (172 dropped for task overlap) (`results/sp2_split_summary.json`,
 `leave_one_family_out_overlap_drops.qwen`). Holding out qwen is not a usable setting.
+
+## 2026-09-29 — SP5 Decisions and GATE (verbatim from the SP5 spec; also closes SP4 close-out item 4)
+Pre-registered: `configs/e2.yaml` encodes these and is committed before any E2 model is trained.
+
+```text
+Decisions (defaults chosen; override before pasting)
+TL rename kept. Groups: TL (tool level), MS (model level: latency, output tokens, text length, surprisal), ENV, TEXT (the char-3-gram hash).
+Headline classes: looping, goal_drift, context_corruption.
+Error-visible group, reported separately: tool_cascade, rate_limit, timeout.
+Also reported separately: malformed_json, wrong_document.
+This revises D4, using qwen-only evidence (SP4 4b).
+Held-out qwen is dropped for good (21 train runs after D6).
+Model: sklearn HistGradientBoostingClassifier.
+It is already a dependency, so nothing new is added.
+It handles NaN natively and learns which way missing values go at each split.
+Rejected: XGBoost (uv add xgboost). It is the same model family and gains nothing here.
+Fixed hyperparameters, no tuning on any test family: max_depth 3, learning_rate 0.05, max_iter 300, l2_regularization 1.0, early_stopping off, random_state 0.
+Sensitivity: two other fixed configs, reported but not gated.
+Training rows:
+one row per (uid, t) for t = 2..8 on the training families, with D8 labels (failed with tau <= t = 1; healthy = 0; failed with tau > t excluded);
+sample weight 1 / (the run's number of rows), so long runs don't dominate;
+classes: headline + error-visible + API all included as positives in training (the monitor must flag any failure). Evaluation filters by class.
+Label-free re-expression (core piece: calibration logic).
+Healthy-percentile transform per feature and checkpoint: x → the mid-rank fraction of that family's HEALTHY prefix values at the same t that are ≤ x.
+It is bounded to [0,1] and can't divide by zero (z-scores explode when a feature is constant on healthy runs, e.g. is_error on qwen). The idiom is np.searchsorted on the sorted healthy values.
+Source families: transformed by their own healthy runs, per corpus, because corpora differ in task and tools.
+Target family, cross-fitted by 5 task-group folds: fold f is transformed with healthy runs from the other folds only. The runs used for the transform are never scored with it.
+Sensitivity: z-score with a std floor.
+D6 reading: calibration is not training.
+Computing per-feature percentiles or a threshold from gemini healthy runs, used only to score gemini at evaluation time, counts as evaluation-time calibration, not training.
+Nothing fitted on gemini is saved or reused.
+This is a conservative reading of "evaluation only", not legal advice. Override → the gemini arms run raw only.
+ESN baseline, the stronger of two variants per test family, decided on the test result (conservative toward us):
+(i) qwen healthy runs from ollama7b only (E1's setting);
+(ii) all training-pool healthy runs. It is scored at matched steps, so AUROC needs no standardisation.
+GATE (pre-registered; written into configs/e2.yaml before the first run)
+Test family: llama held out; train on the leave_one_family_out(llama) pool (1,337 qwen runs; D6, D7).
+Primary metric: mean matched-step AUROC over t = 3,4, headline classes vs all healthy runs.
+PASS if the paired task-group cluster-bootstrap 95% CI of (TL-pct − ESN_best) has lower bound > 0.
+Not gated, all reported:
+gemini (26–27 headline positives);
+TPR@5%FPR (5% is 3–4 of 60–77 healthy runs);
+every other arm.
+Secondary, pre-registered expectations (the direction is stated so it can be wrong):
+TL-pct > TL-raw on llama;
+TL-pct ≥ MS-pct on llama.
+FAIL → the negative result is written up; SP6 (thresholds from few healthy runs) becomes the main contribution.
+```

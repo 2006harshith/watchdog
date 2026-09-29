@@ -1,8 +1,9 @@
 # PROGRESS
 
 ## Current
-- Save point: SP5 (E2 ablation, GATE) — next; its spec is written in the chat Project from the SP4
-  results. No SP5 code until that spec is pasted. Date: 2026-09-29.
+- Save point: SP5 (E2 ablation, GATE) — in progress. Step 0 done: Decisions and GATE recorded
+  verbatim (docs/decisions.md, Decisions below) and pre-registered in configs/e2.yaml, committed
+  before any E2 model is trained. Date: 2026-09-29.
 - SP4 closed 2026-09-29 (tag sp04-features): D7/D6 data changes, matched-step evaluation, 118
   features (TL/MS/ENV/TEXT; TL was MI until the close-out), feature audit (results/sp4_feature_audit.json, clean commit e9ef64f).
   Headline: TL (ex-MI) is NOT model-independent in practice (healthy-run family AUROC 0.95-0.96 in the matched
@@ -19,15 +20,9 @@
   drafted, not posted: docs/drafts/github_issue_author.md.
 - SP2 closed 2026-09-27 (tag sp02-data; code from 64622a4, tag on the closing commit).
 - Teach-back answers are owed before deploy (SP9): see "Teach-backs" below.
-- Next concrete step: paste the "Proposed for SP5" section of the Project's specs/SP4-review.md
-  into Claude Code with "Record this verbatim in docs/decisions.md and PROGRESS.md (SP4 close-out
-  item 4), then /save". Then re-upload PROGRESS.md and paste results/sp4_feature_audit.json into the
-  chat Project, and send "We're starting SP5. Read PROGRESS.md, docs/decisions.md and
-  results/sp4_feature_audit.json. TL features identify the model family on healthy runs (4a), and
-  tool_cascade/rate_limit/timeout are is_error injection artefacts (4b). Write the SP5 spec
-  paste-ready for Claude Code: baseline = ESN matched-step A 0.646, decide the gate, whether
-  tool_cascade moves to the API-class report, and whether features are normalised on the target
-  family's healthy runs." Paste the spec into Claude Code; plan, wait for "go".
+- Next concrete step: owner reviews the SP5 Step 0 diff (configs/e2.yaml, the six FILLED-IN
+  settings flagged in it). On approval, tell Claude Code "SP5 Step 1: go" (recalibration.py, tests
+  first, then the recalibration teach-back).
 
 ## SP0 prompt (paste into Claude Code)
 > Set up SP0 for this repo. Plan first, wait for my "go". Target state: `pyproject.toml` managed by uv
@@ -84,15 +79,15 @@
   with invented args {a, b, c, ..., op} and errs 38% of the time; research 0.92-0.96: gemini hit live
   APIs, 42% errors, median result 49 chars vs ~280). Does SP5 normalise features on the target
   family's healthy runs, and does the "model-independent" claim get rewritten?
-- SP4/4b: tool_cascade, rate_limit, timeout inject is_error directly (single-feature AUROC 0.95-0.99).
-  Should tool_cascade move out of the D4 behaviour-class headline?
-- SP4: held-out qwen trains on 21 llama runs after D6; drop that setting for good?
-- SP6: healthy_subset has no D6 guard. Does setting a threshold on a few healthy gemini runs count as
-  "training" under D6?
+- (resolved 2026-09-29, SP5 Decisions) tool_cascade, rate_limit, timeout inject is_error directly (4b):
+  they form the error-visible group, reported separately; headline = looping, goal_drift,
+  context_corruption (revises D4).
+- (resolved 2026-09-29, SP5 Decisions) held-out qwen dropped for good (21 train runs after D6).
+- (resolved 2026-09-29, SP5 Decisions "D6 reading") percentiles or thresholds from gemini healthy runs,
+  used only to score gemini at evaluation time, are evaluation-time calibration, not training.
 - SP4: results/sp4_feature_audit.json not yet pasted into the chat Project (a SP4 done criterion).
-- SP4 close-out item 4 open: "Proposed for SP5" (TL rename, headline classes, standardisation arm,
-  gate) lives only in the Project's specs/SP4-review.md; must be recorded verbatim in
-  docs/decisions.md and PROGRESS.md before the SP5 spec is pasted.
+- (resolved 2026-09-29) SP4 close-out item 4: the SP5 spec's Decisions and GATE sections are recorded
+  verbatim in docs/decisions.md and PROGRESS.md (SP5 Step 0).
 - (resolved in SP4 close-out) Looping: loops are exact (name, args) repeats, one step after tau, not
   same-tool-new-args; exact repeat by t=3 0.11, t=4 0.32. A name-only same_tool_as_prev scores AUROC
   0.54-0.58 on qwen looping at t=3,4 (healthy runs repeat the tool 70% of the time), so not added.
@@ -143,6 +138,54 @@
   30/30 (median +0.074, max +0.114): a smaller model-swap effect may remain (results/e1_seed_sweep.json).
 - Proposed for the SP4 spec, NOT decided: a length-only baseline in SP5 (length alone AUROC 0.592;
   ESN score vs length Spearman 0.85/0.80), and matched-step prefix evaluation instead of episode-max.
+
+- 2026-09-29: SP5 Decisions and GATE, verbatim from the SP5 spec (same text in docs/decisions.md;
+  encoded in configs/e2.yaml):
+
+```text
+Decisions (defaults chosen; override before pasting)
+TL rename kept. Groups: TL (tool level), MS (model level: latency, output tokens, text length, surprisal), ENV, TEXT (the char-3-gram hash).
+Headline classes: looping, goal_drift, context_corruption.
+Error-visible group, reported separately: tool_cascade, rate_limit, timeout.
+Also reported separately: malformed_json, wrong_document.
+This revises D4, using qwen-only evidence (SP4 4b).
+Held-out qwen is dropped for good (21 train runs after D6).
+Model: sklearn HistGradientBoostingClassifier.
+It is already a dependency, so nothing new is added.
+It handles NaN natively and learns which way missing values go at each split.
+Rejected: XGBoost (uv add xgboost). It is the same model family and gains nothing here.
+Fixed hyperparameters, no tuning on any test family: max_depth 3, learning_rate 0.05, max_iter 300, l2_regularization 1.0, early_stopping off, random_state 0.
+Sensitivity: two other fixed configs, reported but not gated.
+Training rows:
+one row per (uid, t) for t = 2..8 on the training families, with D8 labels (failed with tau <= t = 1; healthy = 0; failed with tau > t excluded);
+sample weight 1 / (the run's number of rows), so long runs don't dominate;
+classes: headline + error-visible + API all included as positives in training (the monitor must flag any failure). Evaluation filters by class.
+Label-free re-expression (core piece: calibration logic).
+Healthy-percentile transform per feature and checkpoint: x → the mid-rank fraction of that family's HEALTHY prefix values at the same t that are ≤ x.
+It is bounded to [0,1] and can't divide by zero (z-scores explode when a feature is constant on healthy runs, e.g. is_error on qwen). The idiom is np.searchsorted on the sorted healthy values.
+Source families: transformed by their own healthy runs, per corpus, because corpora differ in task and tools.
+Target family, cross-fitted by 5 task-group folds: fold f is transformed with healthy runs from the other folds only. The runs used for the transform are never scored with it.
+Sensitivity: z-score with a std floor.
+D6 reading: calibration is not training.
+Computing per-feature percentiles or a threshold from gemini healthy runs, used only to score gemini at evaluation time, counts as evaluation-time calibration, not training.
+Nothing fitted on gemini is saved or reused.
+This is a conservative reading of "evaluation only", not legal advice. Override → the gemini arms run raw only.
+ESN baseline, the stronger of two variants per test family, decided on the test result (conservative toward us):
+(i) qwen healthy runs from ollama7b only (E1's setting);
+(ii) all training-pool healthy runs. It is scored at matched steps, so AUROC needs no standardisation.
+GATE (pre-registered; written into configs/e2.yaml before the first run)
+Test family: llama held out; train on the leave_one_family_out(llama) pool (1,337 qwen runs; D6, D7).
+Primary metric: mean matched-step AUROC over t = 3,4, headline classes vs all healthy runs.
+PASS if the paired task-group cluster-bootstrap 95% CI of (TL-pct − ESN_best) has lower bound > 0.
+Not gated, all reported:
+gemini (26–27 headline positives);
+TPR@5%FPR (5% is 3–4 of 60–77 healthy runs);
+every other arm.
+Secondary, pre-registered expectations (the direction is stated so it can be wrong):
+TL-pct > TL-raw on llama;
+TL-pct ≥ MS-pct on llama.
+FAIL → the negative result is written up; SP6 (thresholds from few healthy runs) becomes the main contribution.
+```
 
 ## Teach-backs
 <!-- core piece · SP · date · 3 questions · one-line summary of answers · pass/fail/pending -->

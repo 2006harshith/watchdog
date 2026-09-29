@@ -1,0 +1,115 @@
+# SP5 E2 ablation — GATE. PRE-REGISTERED: committed before any E2 model is trained; the commit hash
+# of this file goes into every E2 result. Source: docs/decisions.md, "2026-09-29 — SP5 Decisions and
+# GATE" (verbatim). Settings the decisions did not fix are marked FILLED IN; the owner approves them
+# in the Step 0 diff review, before the first run.
+
+families:
+  test: [llama, gemini]
+  eval_only: [gemini]                 # D6: never in a training pool (leave_one_family_out)
+  held_out_qwen: dropped              # 21 train runs after D6
+
+checkpoints:
+  train: [2, 3, 4, 5, 6, 7, 8]        # one row per (uid, t), D8 labels
+  score: [2, 3, 4]                    # t = 2 secondary: the ESN is in washout (scores 0)
+  primary: [3, 4]                     # the gate's mean is over these
+
+training:
+  sample_weight: inverse_rows_per_run # 1 / (the run's number of training rows)
+  positives: all_classes              # headline + error-visible + API; evaluation filters by class
+
+classes:
+  headline: [looping, goal_drift, context_corruption]
+  error_visible: [tool_cascade, rate_limit, timeout]
+  api: [malformed_json, wrong_document]
+
+arms:
+  feature_sets:
+    TL: [TL]
+    MS: [MS]
+    ENV: [ENV]
+    TEXT: [TEXT]
+    TL+MS: [TL, MS]
+    ALL: [TL, MS, ENV, TEXT]
+  transforms: [raw, pct]              # arm name = <feature set>-<transform>, e.g. TL-pct
+
+recalibration:
+  percentile: mid_rank                # (#healthy < x + #healthy <= x) / (2 n), via np.searchsorted
+  source_reference_by: corpus         # source families: their own healthy runs, per corpus, same t
+  target_cross_fit:                   # target family: 5 task-group folds, other folds' healthy runs only
+    k: 5
+    seed: 0
+  zscore_sensitivity:
+    std_floor: 0.1                    # FILLED IN: absolute, in feature units; sensitivity arm only
+
+model:                                # sklearn HistGradientBoostingClassifier, no tuning on any test family
+  primary:
+    max_depth: 3
+    learning_rate: 0.05
+    max_iter: 300
+    l2_regularization: 1.0
+    early_stopping: false             # 'auto' would switch on above 10,000 rows with a random, not
+    random_state: 0                   # task-grouped, validation split (checked in sklearn 1.9.1)
+  sensitivity:                        # FILLED IN: two other fixed configs, reported, not gated
+    shallow: {max_depth: 2, learning_rate: 0.05, max_iter: 500, l2_regularization: 1.0, early_stopping: false, random_state: 0}
+    deep: {max_depth: 5, learning_rate: 0.05, max_iter: 200, l2_regularization: 1.0, early_stopping: false, random_state: 0}
+  # FILLED IN, replaces "5 random_state seeds for TL-pct": with early_stopping off and max_features
+  # 1.0 the HGB is deterministic (random_state 0..4 gave identical predictions, max abs diff 0.0,
+  # checked 2026-09-29). TL-pct's real randomness is the target cross-fit fold assignment.
+  seed_sensitivity:
+    arm: TL-pct
+    target_cross_fit_seeds: [0, 1, 2, 3, 4]
+
+esn:                                  # author's esn_cusum_max, vendored @1b3e07f
+  K: 8
+  seed: 1300
+  fa_budget: 0.05
+  # FILLED IN: ESNBaseline.fit needs a healthy validation set (threshold only; AUROC ignores it):
+  # whole task groups, as E1.
+  val_fraction: 0.25
+  val_seed: 0
+  # FILLED IN: the author's own rule: drop the surprisal channel "u" when fewer than 90% of steps in
+  # the fit pool or the test family carry logprobs (gemini: none; all-qwen pool: ~58%).
+  channels: [e, u, m, x]
+  drop_u_below_logprob_coverage: 0.90
+  variants:
+    i: {pool: healthy, corpora: [ollama7b]}   # E1's setting, restricted to the training pool
+    ii: {pool: healthy, corpora: all}         # every healthy run in the training pool
+  best: higher_primary_metric_on_test_family  # decided on the test result, conservative toward TL
+  score: running max of the CUSUM stream over steps 0..t, unstandardised (one model, no folds)
+
+evaluation:
+  metric: matched_step_auroc
+  ci: task_group_cluster_bootstrap
+  subsets: [headline, error_visible, api, per_class]   # each vs all healthy runs of the test family
+  secondary_excluding_tool_level_indistinguishable: true   # SP4 4c positives, recomputed by uid
+  tpr_at_fpr_alpha: 0.05              # reported, not gated
+  permutation_importance:             # Step 3, interpretation only; feeds back into nothing
+    arm: TL-pct
+    family: llama
+    n_repeats: 10
+    top_k: 10
+    random_state: 0
+
+bootstrap:                            # FILLED IN: sizes
+  seed: 0
+  n_primary: 10000                    # gate, headline, all paired comparisons
+  n_secondary: 2000                   # per-class, error-visible, API, sensitivity arms
+
+gate:
+  test_family: llama
+  arm: TL-pct
+  baseline: ESN_best
+  metric: mean matched-step AUROC over checkpoints.primary, classes.headline vs all healthy runs
+  ci: paired task-group cluster bootstrap, 95%
+  pass_if_lower_bound_above: 0.0
+  on_fail: the negative result is written up; SP6 (thresholds from few healthy runs) becomes the main contribution
+
+secondary_expectations:               # pre-registered directions, reported, not gated
+  - {family: llama, a: TL-pct, b: TL-raw, expect: a_gt_b}
+  - {family: llama, a: TL-pct, b: MS-pct, expect: a_ge_b}
+
+not_gated: [gemini, tpr_at_5pct_fpr, every other arm]
+
+mlflow:
+  tracking_dir: mlruns
+  experiment: sp5-e2
