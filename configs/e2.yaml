@@ -16,6 +16,10 @@ checkpoints:
 training:
   sample_weight: inverse_rows_per_run # 1 / (the run's number of training rows)
   positives: all_classes              # headline + error-visible + API; evaluation filters by class
+  # FILLED IN (Step 1 finding, before any model was trained): 9 qwen (corpus, t) pairs at t = 7, 8
+  # hold only failed runs, so they have no healthy reference. Their rows are dropped from EVERY arm
+  # (raw too, so all arms train on identical rows); reaching that step at all is a length label.
+  drop_rows_without_healthy_reference: true
 
 classes:
   headline: [looping, goal_drift, context_corruption]

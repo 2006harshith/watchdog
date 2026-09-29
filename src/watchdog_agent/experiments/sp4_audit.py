@@ -91,7 +91,7 @@ def tool_prefix_signature(steps: Sequence[dict], t: int) -> tuple:
     return tuple(sig)
 
 
-def ceiling_counts(runs: pd.DataFrame, t: int) -> dict:
+def indistinguishable_positives(runs: pd.DataFrame, t: int) -> set[str]:
     """Positives at t (D8) whose tool-level prefix equals a healthy run's prefix in the same task
     group. A tool-level monitor gives both the same score, so it cannot rank the failed one higher.
     """
@@ -103,15 +103,26 @@ def ceiling_counts(runs: pd.DataFrame, t: int) -> dict:
             healthy_sigs.setdefault(frame.at[uid, "task_group"], set()).add(
                 tool_prefix_signature(frame.at[uid, "steps_parsed"], t)
             )
+    return {
+        uid
+        for uid, y in zip(cset.uids, cset.y)
+        if y == 1
+        and tool_prefix_signature(frame.at[uid, "steps_parsed"], t)
+        in healthy_sigs.get(frame.at[uid, "task_group"], set())
+    }
+
+
+def ceiling_counts(runs: pd.DataFrame, t: int) -> dict:
+    """Counts of indistinguishable_positives at t, overall and per failure class."""
+    cset = prefix_eval_set(runs, t)
+    frame = runs.set_index("uid")
+    hits = indistinguishable_positives(runs, t)
     by_class: dict[str, dict] = {}
     for uid, y in zip(cset.uids, cset.y):
         if y == 1:
-            cls = frame.at[uid, "failure_class"]
-            sig = tool_prefix_signature(frame.at[uid, "steps_parsed"], t)
-            hit = sig in healthy_sigs.get(frame.at[uid, "task_group"], set())
-            entry = by_class.setdefault(cls, {"n_pos": 0, "n_indistinguishable": 0})
+            entry = by_class.setdefault(frame.at[uid, "failure_class"], {"n_pos": 0, "n_indistinguishable": 0})
             entry["n_pos"] += 1
-            entry["n_indistinguishable"] += int(hit)
+            entry["n_indistinguishable"] += int(uid in hits)
     n_ind = sum(e["n_indistinguishable"] for e in by_class.values())
     return {
         "n_pos": cset.n_pos,

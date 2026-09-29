@@ -9,6 +9,7 @@ from watchdog_agent.evaluation import prefix_eval_set
 from watchdog_agent.experiments.sp4_audit import (
     ceiling_counts,
     family_predictability_auroc,
+    indistinguishable_positives,
     matched_step_esn_scores,
     standardised_running_max,
     tool_prefix_signature,
@@ -58,6 +59,10 @@ def _ceiling_runs():
             for u, g, c, tau, s in rows
         ]
     )
+
+
+def test_indistinguishable_positives_returns_the_uids():
+    assert indistinguishable_positives(_ceiling_runs(), t=2) == {"f_twin"}
 
 
 def test_ceiling_counts_failed_positives_indistinguishable_from_a_healthy_run_of_the_same_task():

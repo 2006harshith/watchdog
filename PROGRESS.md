@@ -243,6 +243,16 @@ FAIL → the negative result is written up; SP6 (thresholds from few healthy run
   "Do NOT owner-mark it"). Not graded, so not recorded as passed. Owed before deploy (SP9). Group
   renamed MI -> TL in the close-out; Q1 reads "is_error is TL".
 
+- 2026-09-29 · SP5 · recalibration: healthy-percentile re-expression
+  (src/watchdog_agent/recalibration.py) · Q1: why a mid-rank percentile instead of a z-score, what
+  happens to is_error count on qwen (constant 0 on healthy runs) under each, and what does the
+  percentile throw away that a z-score keeps? Q2: why must a healthy target run never sit in its own
+  reference, which way would in-sample bias push the AUROC, and why fold by task group rather than
+  by run? Q3: the transform needs to know which target runs are healthy; in what sense is it still
+  "label-free", what breaks if some reference runs are secretly failed, and what asymmetry does
+  transforming the source corpora in-sample (not cross-fitted) create? · answers: not yet given ·
+  NOT ANSWERED, owner override 2026-09-29 (Step 2 started). SP5 done criteria require it answered.
+
 ## Session log
 - 2026-09-29 · SP4 (close-out) · Looping and context_corruption checks (no feature added; findings
   in Open questions); feature group MI renamed TL everywhere (fffba52, 390 tests unchanged); audit
