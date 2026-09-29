@@ -1,8 +1,10 @@
 """SP4 core piece: per-step features and their causal prefix aggregation.
 
 Groups (docs/decisions.md, SP4 Step 0):
-- MI, model-independent: the structure of the tool calls and of what the tools returned
-  (repeats, new tools, errors, result size, time since the last error, step index).
+- TL, tool-level: the structure of the tool calls and of what the tools returned
+  (repeats, new tools, errors, result size, time since the last error, step index). Named for
+  what it reads, not for a property: SP4 4a showed these values still identify the model family
+  on healthy runs (it was "MI", model-independent, until the SP4 close-out).
 - MS, model-specific: the model's own output and timing (latency, output tokens, length of the
   final-answer text, token surprisal).
 - ENV: tool latency, which the environment sets, not the model.
@@ -23,7 +25,7 @@ NaN policy: a continuous feature that does not apply to a step is NaN (e.g. surp
 logprobs, result size on a synthesis step), never a made-up 0. XGBoost (SP5) handles NaN
 natively: each split learns a default branch for missing values ("sparsity-aware split
 finding"), so missingness itself becomes usable signal, which is why surprisal (missing for every
-gemini step) belongs to MS and not MI.
+gemini step) belongs to MS and not TL.
 """
 
 import json
@@ -39,16 +41,16 @@ TEXT_DIM = 32
 
 # name -> (group, kind). The kind decides the prefix aggregation (AGGREGATIONS).
 STEP_FEATURES: dict[str, tuple[str, str]] = {
-    "is_tool_call": ("MI", "binary"),
-    "exact_repeat": ("MI", "binary"),
-    "new_tool": ("MI", "binary"),
-    "is_error": ("MI", "binary"),
-    "result_error_prefix": ("MI", "binary"),
-    "consecutive_identical": ("MI", "continuous"),
-    "n_arg_keys": ("MI", "continuous"),
-    "result_chars_bucket": ("MI", "continuous"),
-    "steps_since_error": ("MI", "state"),
-    "step_index": ("MI", "state"),
+    "is_tool_call": ("TL", "binary"),
+    "exact_repeat": ("TL", "binary"),
+    "new_tool": ("TL", "binary"),
+    "is_error": ("TL", "binary"),
+    "result_error_prefix": ("TL", "binary"),
+    "consecutive_identical": ("TL", "continuous"),
+    "n_arg_keys": ("TL", "continuous"),
+    "result_chars_bucket": ("TL", "continuous"),
+    "steps_since_error": ("TL", "state"),
+    "step_index": ("TL", "state"),
     "log_latency": ("MS", "continuous"),
     "log_output_tokens": ("MS", "continuous"),
     "synth_text_log_chars": ("MS", "continuous"),
@@ -68,7 +70,7 @@ AGGREGATIONS = {
 }
 
 # Features defined on the prefix as a whole, not per step.
-PREFIX_ONLY: dict[str, str] = {"distinct_tools_per_call": "MI"}
+PREFIX_ONLY: dict[str, str] = {"distinct_tools_per_call": "TL"}
 
 
 def _column(group: str, name: str, agg: str | None = None) -> str:
@@ -76,7 +78,7 @@ def _column(group: str, name: str, agg: str | None = None) -> str:
 
 
 def _build_groups() -> dict[str, list[str]]:
-    groups: dict[str, list[str]] = {"MI": [], "MS": [], "ENV": [], "TEXT": []}
+    groups: dict[str, list[str]] = {"TL": [], "MS": [], "ENV": [], "TEXT": []}
     for name, (group, kind) in STEP_FEATURES.items():
         groups[group].extend(_column(group, name, agg) for agg in AGGREGATIONS[kind])
     for name, group in PREFIX_ONLY.items():
@@ -198,7 +200,7 @@ def _aggregate(rows: Sequence[dict[str, float]], t: int) -> dict[str, float]:
             out[_column(group, name, agg)] = float(vals[agg])
     n_calls = sum(r["is_tool_call"] for r in rows)
     n_distinct = sum(r["new_tool"] for r in rows)
-    out[_column("MI", "distinct_tools_per_call")] = n_distinct / n_calls if n_calls else math.nan
+    out[_column("TL", "distinct_tools_per_call")] = n_distinct / n_calls if n_calls else math.nan
     return out
 
 

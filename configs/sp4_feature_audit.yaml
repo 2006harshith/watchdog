@@ -8,7 +8,7 @@ api_classes: [malformed_json, wrong_document, rate_limit, timeout]   # D4: repor
 family_predictability:            # 4a: healthy runs only, label = family
   checkpoints: [3, 4, 5]
   n_splits: 5
-  groups: [MI, MS, ENV, TEXT]
+  groups: [TL, MS, ENV, TEXT]
   top_k: 5
   # Same framework and tool roster on both sides, so family is not confounded with task domain
   # (docs/decisions.md, "Step 4a uses matched corpus pairs").
@@ -22,7 +22,7 @@ family_predictability:            # 4a: healthy runs only, label = family
   # Secondary: every healthy run of each family; shows how much of the matched result is domain.
   all_runs_pairs: [[qwen, llama], [qwen, gemini], [llama, gemini]]
 
-univariate:                       # 4b: each MI feature alone, qwen only (the training family)
+univariate:                       # 4b: each TL feature alone, qwen only (the training family)
   family: qwen
   flag_threshold: 0.9             # flag max(AUROC, 1 - AUROC) above this
 

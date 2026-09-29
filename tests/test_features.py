@@ -183,9 +183,9 @@ def _five_steps():
 
 def test_binary_aggregation_count_rate_last3():
     row = prefix_features(_five_steps(), t=4)
-    assert row["mi__is_error__count"] == 2
-    assert row["mi__is_error__rate"] == pytest.approx(2 / 5)
-    assert row["mi__is_error__last3"] == 1  # steps 2, 3, 4
+    assert row["tl__is_error__count"] == 2
+    assert row["tl__is_error__rate"] == pytest.approx(2 / 5)
+    assert row["tl__is_error__last3"] == 1  # steps 2, 3, 4
 
 
 def test_continuous_aggregation_mean_max_last_last3_mean():
@@ -207,22 +207,22 @@ def test_continuous_aggregation_ignores_nan_and_all_nan_window_is_nan():
 
 def test_state_features_keep_only_the_value_at_t():
     row = prefix_features(_five_steps(), t=4)
-    assert row["mi__step_index__last"] == 4
-    assert row["mi__steps_since_error__last"] == 1
-    assert "mi__step_index__mean" not in row
+    assert row["tl__step_index__last"] == 4
+    assert row["tl__steps_since_error__last"] == 1
+    assert "tl__step_index__mean" not in row
 
 
 def test_max_consecutive_identical_calls():
     a = tool("a")
     row = prefix_features([a, a, a, tool("b"), a], t=4)
-    assert row["mi__consecutive_identical__max"] == 3
+    assert row["tl__consecutive_identical__max"] == 3
 
 
 def test_distinct_tools_per_call():
     row = prefix_features([tool("a"), tool("b", {"z": 1}), tool("a", {"q": 1}), synth()], t=3)
-    assert row["mi__distinct_tools_per_call"] == pytest.approx(2 / 3)
+    assert row["tl__distinct_tools_per_call"] == pytest.approx(2 / 3)
     row = prefix_features([synth(), synth(), synth()], t=2)
-    assert math.isnan(row["mi__distinct_tools_per_call"])
+    assert math.isnan(row["tl__distinct_tools_per_call"])
 
 
 def test_text_hash_aggregates_to_mean_and_last():
@@ -271,7 +271,7 @@ def test_feature_groups_are_disjoint_and_cover_every_column():
     seen = [name for names in FEATURE_GROUPS.values() for name in names]
     assert len(seen) == len(set(seen))
     assert set(seen) == set(prefix_features(_five_steps(), t=3))
-    assert set(FEATURE_GROUPS) == {"MI", "MS", "ENV", "TEXT"}
+    assert set(FEATURE_GROUPS) == {"TL", "MS", "ENV", "TEXT"}
     for group, names in FEATURE_GROUPS.items():
         assert all(n.startswith(f"{group.lower()}__") for n in names)
 
@@ -335,8 +335,8 @@ def test_prefix_feature_table_on_real_runs():
     assert len(table) > 0
     values = table.to_numpy(dtype=float)
     assert not np.isinf(values).any()
-    mi = table[FEATURE_GROUPS["MI"]]
-    # MI must be defined on every run with a tool call (D7 guarantees one); only the
+    mi = table[FEATURE_GROUPS["TL"]]
+    # TL must be defined on every run with a tool call (D7 guarantees one); only the
     # "not applicable" continuous features may be NaN.
     nan_ok = {c for c in mi.columns if "n_arg_keys" in c or "result_chars_bucket" in c}
     assert not mi.drop(columns=list(nan_ok)).isna().any().any()

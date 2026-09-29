@@ -1,7 +1,7 @@
 """SP4 Step 4: feature diagnostics. No monitor is trained here; no llama/gemini failure label is
 used except to score the ESN baseline (4d), exactly as E1 did.
 
-4a family predictability (healthy runs only, label = family), 4b univariate MI AUROC on qwen,
+4a family predictability (healthy runs only, label = family), 4b univariate TL AUROC on qwen,
 4c the tool-level ceiling, 4d the ESN at matched steps.
 """
 

@@ -86,7 +86,7 @@ def _family_block(healthy: pd.DataFrame, table: pd.DataFrame, fam_a: str, fam_b:
         g: family_predictability_auroc(rows[FEATURE_GROUPS[g]].reset_index(drop=True), fam, groups, fp["n_splits"])
         for g in fp["groups"]
     }
-    block["top_mi_features"] = top_family_features(rows[FEATURE_GROUPS["MI"]], fam, fp["top_k"])
+    block["top_tl_features"] = top_family_features(rows[FEATURE_GROUPS["TL"]], fam, fp["top_k"])
     return block
 
 
@@ -117,7 +117,7 @@ def family_predictability(episodes: pd.DataFrame, table: pd.DataFrame, cfg: dict
     }
 
 
-def univariate_mi(episodes: pd.DataFrame, table: pd.DataFrame, cfg: dict) -> dict:
+def univariate_tl(episodes: pd.DataFrame, table: pd.DataFrame, cfg: dict) -> dict:
     uv = cfg["univariate"]
     runs = episodes[episodes["family"] == uv["family"]]
     healthy = runs[runs["failure_class"].isna()]
@@ -128,7 +128,7 @@ def univariate_mi(episodes: pd.DataFrame, table: pd.DataFrame, cfg: dict) -> dic
             s = prefix_eval_set(pd.concat([healthy, runs[runs["failure_class"] == cls]]), t)
             if s.n_pos == 0:
                 continue
-            aurocs = {f: univariate_auroc(table, s, f) for f in FEATURE_GROUPS["MI"]}
+            aurocs = {f: univariate_auroc(table, s, f) for f in FEATURE_GROUPS["TL"]}
             out[str(t)][cls] = {
                 "kind": "behaviour" if cls in cfg["behaviour_classes"] else "api",
                 "n_pos": s.n_pos,
@@ -139,7 +139,7 @@ def univariate_mi(episodes: pd.DataFrame, table: pd.DataFrame, cfg: dict) -> dic
                 if max(a, 1 - a) > uv["flag_threshold"]:
                     flags.append({"t": t, "class": cls, "feature": f, "auroc": a})
     return {
-        "what": f"each MI feature alone at matched step t, {uv['family']} runs, healthy vs one class; "
+        "what": f"each TL feature alone at matched step t, {uv['family']} runs, healthy vs one class; "
         f"flag if max(AUROC, 1 - AUROC) > {uv['flag_threshold']}",
         "per_checkpoint": out,
         "flags": sorted(flags, key=lambda r: (r["class"], r["t"], -abs(r["auroc"] - 0.5))),
@@ -233,7 +233,7 @@ def main() -> int:
         "a_family_predictability": family_predictability(episodes, table, cfg),
     }
     print(f"4a done in {time.time() - start:.0f}s")
-    result["b_univariate_mi_qwen"] = univariate_mi(episodes, table, cfg)
+    result["b_univariate_tl_qwen"] = univariate_tl(episodes, table, cfg)
     result["c_tool_level_ceiling"] = ceiling(episodes, cfg)
     print(f"4b, 4c done in {time.time() - start:.0f}s")
     result["d_esn_matched_step"] = esn_matched_step(episodes, cfg)
