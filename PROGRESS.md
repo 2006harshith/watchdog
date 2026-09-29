@@ -4,11 +4,14 @@
 - Save point: SP5 (E2 ablation, GATE) — next; its spec is written in the chat Project from the SP4
   results. No SP5 code until that spec is pasted. Date: 2026-09-29.
 - SP4 closed 2026-09-29 (tag sp04-features): D7/D6 data changes, matched-step evaluation, 118
-  features (MI/MS/ENV/TEXT), feature audit (results/sp4_feature_audit.json, clean commit e9ef64f).
-  Headline: MI is NOT model-independent in practice (healthy-run family AUROC 0.95-0.96 in the matched
+  features (TL/MS/ENV/TEXT; TL was MI until the close-out), feature audit (results/sp4_feature_audit.json, clean commit e9ef64f).
+  Headline: TL (ex-MI) is NOT model-independent in practice (healthy-run family AUROC 0.95-0.96 in the matched
   booking pair via llama's invented calculator args; 0.92-0.96 in the research pair via gemini's live-API
   errors); ESN at matched steps A 0.646 [0.518, 0.736], B 0.694 [0.531, 0.825] (mean t=3,4) is the
-  number SP5 must beat. All three SP4 teach-backs owner-marked, not answered (see Decisions).
+  number SP5 must beat. SP4 split and metrics teach-backs owner-marked; feature-definitions
+  teach-back NOT ANSWERED (overridden twice). Close-out 2026-09-29 (tag sp04-closeout): MI renamed
+  TL, audit JSON regenerated from clean fffba52 (values identical); "Proposed for SP5" from the
+  Project's specs/SP4-review.md NOT yet recorded (close-out item 4).
 - SP3 closed 2026-09-27 (tag sp03-e1 at 3e061bb): gate FAIL. Task-disjoint E1: AUROC A 0.644, B
   0.634, gap -0.009 [-0.046, 0.025]; the paper's in-domain 0.885 is mostly exact-twin leakage (D-2:
   median 0.896 random vs 0.683 twin-aware). D-5 added after the tag: 30 paired ESN seeds, CLAIM HOLDS
@@ -16,9 +19,11 @@
   drafted, not posted: docs/drafts/github_issue_author.md.
 - SP2 closed 2026-09-27 (tag sp02-data; code from 64622a4, tag on the closing commit).
 - Teach-back answers are owed before deploy (SP9): see "Teach-backs" below.
-- Next concrete step: re-upload PROGRESS.md and paste results/sp4_feature_audit.json into the chat
-  Project, then send "We're starting SP5. Read PROGRESS.md, docs/decisions.md and
-  results/sp4_feature_audit.json. MI features identify the model family on healthy runs (4a), and
+- Next concrete step: paste the "Proposed for SP5" section of the Project's specs/SP4-review.md
+  into Claude Code with "Record this verbatim in docs/decisions.md and PROGRESS.md (SP4 close-out
+  item 4), then /save". Then re-upload PROGRESS.md and paste results/sp4_feature_audit.json into the
+  chat Project, and send "We're starting SP5. Read PROGRESS.md, docs/decisions.md and
+  results/sp4_feature_audit.json. TL features identify the model family on healthy runs (4a), and
   tool_cascade/rate_limit/timeout are is_error injection artefacts (4b). Write the SP5 spec
   paste-ready for Claude Code: baseline = ESN matched-step A 0.646, decide the gate, whether
   tool_cascade moves to the API-class report, and whether features are normalised on the target
@@ -38,7 +43,7 @@
 | SP1 | E0 data audit → docs/data_card.md | done | sp01-audit |
 | SP2 | Data layer: per-step table + splits (teach-back: splits) | done (teach-back owner-marked passed) | sp02-data |
 | SP3 | E1 reproduce collapse — GATE (teach-back: metrics). Pass: on the same held-out llama3.1:8b episodes, the qwen-fitted monitor is >= 0.15 AUROC below the llama-fitted one, with non-overlapping episode-bootstrap 95% CIs. Reference: 0.527 vs 0.885, arXiv 2608.02464 §5 (transferred vs refitted, not before/after) | done — gate FAIL; diagnostics D-1..D-5 done (docs/sp3_e1_result.md); teach-back owner-marked passed | sp03-e1 |
-| SP4 | Feature sets + matched-step evaluation (teach-back: feature definitions) | done — audit in results/sp4_feature_audit.json; teach-backs owner-marked, not answered | sp04-features |
+| SP4 | Feature sets + matched-step evaluation (teach-back: feature definitions) | done — audit in results/sp4_feature_audit.json; split/metrics teach-backs owner-marked, feature-definitions teach-back not answered (owner override) | sp04-features, sp04-closeout |
 | SP5 | E2 ablation — GATE (spec to be rewritten after SP3) | not started | |
 | SP6 | E3 recalibration curve (teach-back: threshold logic) | not started | |
 | SP7 | E4 cost/latency vs LLM judges — GATE | not started | |
@@ -75,7 +80,7 @@
 - (resolved in SP4, 4c) SP3/D-1 twins: at matched steps 10-20% of llama positives (all
   context_corruption) and 2-3% of qwen positives have a tool-level prefix identical to a healthy run
   of the same task; no tool-level monitor can separate them.
-- SP4/4a: MI features predict family on healthy runs (booking 0.95-0.96: llama calls the calculator
+- SP4/4a: TL (ex-MI) features predict family on healthy runs (booking 0.95-0.96: llama calls the calculator
   with invented args {a, b, c, ..., op} and errs 38% of the time; research 0.92-0.96: gemini hit live
   APIs, 42% errors, median result 49 chars vs ~280). Does SP5 normalise features on the target
   family's healthy runs, and does the "model-independent" claim get rewritten?
@@ -85,6 +90,16 @@
 - SP6: healthy_subset has no D6 guard. Does setting a threshold on a few healthy gemini runs count as
   "training" under D6?
 - SP4: results/sp4_feature_audit.json not yet pasted into the chat Project (a SP4 done criterion).
+- SP4 close-out item 4 open: "Proposed for SP5" (TL rename, headline classes, standardisation arm,
+  gate) lives only in the Project's specs/SP4-review.md; must be recorded verbatim in
+  docs/decisions.md and PROGRESS.md before the SP5 spec is pasted.
+- (resolved in SP4 close-out) Looping: loops are exact (name, args) repeats, one step after tau, not
+  same-tool-new-args; exact repeat by t=3 0.11, t=4 0.32. A name-only same_tool_as_prev scores AUROC
+  0.54-0.58 on qwen looping at t=3,4 (healthy runs repeat the tool 70% of the time), so not added.
+- (resolved in SP4 close-out) context_corruption: the injector edits result content in place
+  (appends a spurious value, shuffles words, scrambles text) and keeps corrupting later results
+  (applied_count 1-13); it does not shrink results (median 1.45x the healthy size). Corrupting an
+  error message flips is_error True -> False. Data property, no feature bug.
 
 ## Decisions (after HANDOFF.md)
 - 2026-09-25: Python import package is `watchdog_agent` (see CLAUDE.md "Naming").
@@ -181,10 +196,17 @@
   why is the text hash its own TEXT group instead of MS, and what would the SP5 MS-vs-MI ablation
   wrongly conclude if it stayed in MS? Q3: surprisal is NaN on every gemini step; why is that a
   reason to keep it out of MI, and how does XGBoost turn missingness into a feature? · answers:
-  not yet given · PASSED (owner-marked 2026-09-29 against the SP4 spec's own "answered, not
-  owner-marked" criterion; not answered; owed before deploy).
+  not yet given · NOT ANSWERED, owner override twice (SP4 close; SP4 close-out, whose own spec said
+  "Do NOT owner-mark it"). Not graded, so not recorded as passed. Owed before deploy (SP9). Group
+  renamed MI -> TL in the close-out; Q1 reads "is_error is TL".
 
 ## Session log
+- 2026-09-29 · SP4 (close-out) · Looping and context_corruption checks (no feature added; findings
+  in Open questions); feature group MI renamed TL everywhere (fffba52, 390 tests unchanged); audit
+  JSON regenerated from clean fffba52, values identical after key mapping (e9f4179);
+  feature-definitions teach-back asked, owner overrode all questions: recorded NOT ANSWERED; item 4
+  (Proposed for SP5) not done, the source text is only in the Project. Tag sp04-closeout · tests:
+  pass (390, ruff clean) · next: paste "Proposed for SP5" to record it, then get the SP5 spec.
 - 2026-09-29 · SP4 (close) · Step 0 report (fields, rosters, checkpoints, injection artefacts; D8, D9,
   checkpoints 3/4 + 2, TEXT group, 4a matched pairs in docs/decisions.md); Step 1 D7 in load_episodes
   (787 dropped, exact) + D6 eval_only_families in splits, sp2 summary rerun (qwen groups 1,003 -> 216),
