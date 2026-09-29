@@ -80,6 +80,11 @@
 - 2026-09-27: Owner marked all four open teach-backs (SP2 splits, SP3 metrics, SP3 E1 split logic,
   SP3 diagnostic split logic) PASSED without answering them, for time. The questions stay logged
   below; answering all of them is a pre-deploy requirement (before SP9). They no longer block tags.
+- 2026-09-29: Owner override of the teach-back HARD RULE for the SP4 split-logic teach-back
+  (D7 + D6): deferred so Step 2 can start. Answers owed before deploy. The feature-definition
+  teach-back must still be answered, not owner-marked, before /save SP4 (SP4 spec).
+- 2026-09-29: Same override for the SP4 matched-step metrics teach-back (evaluation.py), so Step 3
+  can start. Six teach-backs now owed before deploy.
 - 2026-09-27 (SP3 close-out, full record in docs/decisions.md):
   - SP3 gate FAIL under rule (a) and rule (b): AUROC A 0.644 [0.554, 0.730], B 0.634 [0.547, 0.717],
     gap -0.009, paired CI [-0.046, 0.025] (results/e1_collapse.json: monitors.*.auroc, gate.*).
@@ -129,6 +134,28 @@
   dropped rather than sent to test? Q3: task-disjoint D-2 skipped 10 of 30 seeds; how could that skip
   rule bias the reported 0.623? · answers: not yet given · PASSED (owner-marked 2026-09-27, not
   answered; owner will answer all before deploy).
+- 2026-09-29 · SP4 · split logic, D7 + D6 (data.py: drop_runs_without_tool_calls; splits.py:
+  eval_only_families in leave_one_family_out and grouped_kfold) · Q1: D7 drops 787 runs from
+  load_episodes itself, not inside a split function; what would go wrong in the grouped folds and the
+  cluster bootstrap if they were kept? Q2: why is removing gemini from train NOT counted in
+  n_dropped, and why does grouped_kfold raise for gemini instead of returning folds? Q3: after D6,
+  held-out qwen trains on 21 llama runs; why can't we fix that by relaxing the task-overlap drop for
+  that one split? · answers: not yet given · DEFERRED (owner override 2026-09-29, not answered;
+  owed before deploy with the other four).
+- 2026-09-29 · SP4 · matched-step metrics (src/watchdog_agent/evaluation.py) · Q1: at a matched step
+  every run has the same prefix length; why does that remove the length confound, and what
+  length-related signal can still leak in through a per-step score? Q2: why is a failed run with
+  tau > t excluded rather than counted as healthy at t? Q3: why one task-group draw per replicate
+  shared by all checkpoints, and why does a one-class checkpoint skip the whole replicate? ·
+  answers: not yet given · DEFERRED (owner override 2026-09-29, not answered; owed before deploy).
+- 2026-09-29 · SP4 · feature definitions (src/watchdog_agent/features.py) · Q1: is_error is MI, but
+  healthy runs err at 0.03 (qwen), 0.38 (llama), 0.32 (gemini); in what sense is it still
+  "model-independent", and what will a qwen-fitted monitor do with it on healthy llama runs? Q2:
+  why is the text hash its own TEXT group instead of MS, and what would the SP5 MS-vs-MI ablation
+  wrongly conclude if it stayed in MS? Q3: surprisal is NaN on every gemini step; why is that a
+  reason to keep it out of MI, and how does XGBoost turn missingness into a feature? · answers:
+  not yet given · DEFERRED for Step 4 (owner override 2026-09-29). Still blocks /save SP4: the SP4
+  spec requires it answered, not owner-marked.
 
 ## Session log
 <!-- /save appends here, newest first: date · SP · what changed · tests · next step -->

@@ -2,7 +2,8 @@
 
 Convention everywhere: y = 1 for a failed run, 0 for a healthy run; higher
 score = more likely failed. Each metric is checked against scikit-learn in
-tests/test_metrics.py; scikit-learn is a test-only dependency.
+tests/test_metrics.py; metrics are not taken from scikit-learn so each one can be read and
+defended line by line.
 """
 
 from collections.abc import Callable
