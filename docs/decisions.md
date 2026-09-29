@@ -68,3 +68,33 @@ model-swap effect may remain.
 ### Reporting from SP4 on
 - The task-group cluster bootstrap is the primary CI; the run bootstrap is secondary.
 - Every headline number reports n_healthy.
+
+## 2026-09-29 — SP4 Step 0 decisions (owner "go" on the Step 0 report)
+
+### D8: labels at a matched checkpoint t
+A run is in the checkpoint-t set if it has a step t (T >= t + 1). Positive: failed with tau <= t.
+Negative: healthy. Excluded: failed with tau > t (its failure has not happened yet at t).
+
+### D9: fields no feature may read
+`failure_class`, `tau`, `T` / `n_steps` (future length), all of `metadata.*`, `corpus`, `model`,
+`family`, `uid` / `episode_id`, `task_group`, `has_logprobs`, `tool_events[].id`,
+`tool_events[].source` (present only in the `*_real` corpora), `steps[].schema` (constant 5).
+Features read step fields of steps 0..t only.
+
+### Checkpoints
+t = 3 and 4 primary, t = 2 secondary. At t >= 5 llama's healthy runs come from 2 (t = 5) and 1
+(t = 6) task groups, too few for a task-group cluster CI.
+
+### Feature groups: TEXT is its own group
+On tool steps `text` is `[name(args) -> result]`: the tool result is in the text for 100% of
+events, including injected strings. The char-3-gram hash (the ESN's input) is group TEXT, not MS.
+
+### Step 4a uses matched corpus pairs
+llama only runs booking tasks and gemini only research tasks, so a family-vs-family classifier on
+all runs mostly detects the task domain. 4a compares ollama7b vs ollama_llama8b (same framework and
+tools) and qwen research corpora vs real_gemini_long.
+
+### Consequence of D6 for held-out qwen
+With gemini out of every train set, `leave_one_family_out(test_family="qwen")` trains on 21 llama
+runs (172 dropped for task overlap) (`results/sp2_split_summary.json`,
+`leave_one_family_out_overlap_drops.qwen`). Holding out qwen is not a usable setting.

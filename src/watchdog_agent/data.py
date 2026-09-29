@@ -4,10 +4,13 @@ Nothing here trains a model or defines learned features (SP4).
 """
 
 import json
+import logging
 import re
 
 import pandas as pd
 from huggingface_hub import hf_hub_download
+
+logger = logging.getLogger(__name__)
 
 REPO_ID = "sunnydubey1111/agent-trajectory-sentinel"
 
@@ -111,11 +114,26 @@ def assign_task_groups(df: pd.DataFrame) -> pd.DataFrame:
     return df
 
 
+def drop_runs_without_tool_calls(df: pd.DataFrame) -> tuple[pd.DataFrame, dict[str, int]]:
+    """D7 (docs/decisions.md): drop runs with zero tool calls across all steps.
+
+    A tool-level monitor has nothing to read on such a run, and all of them sit in
+    corpora with no task identity, so they could never be placed in a task-disjoint split.
+    Returns (kept rows, dropped count per corpus).
+    """
+    n_calls = df["steps_parsed"].map(lambda steps: sum(len(s.get("tool_events") or []) for s in steps))
+    no_calls = n_calls == 0
+    dropped = {str(k): int(v) for k, v in df.loc[no_calls].groupby("corpus").size().items()}
+    return df.loc[~no_calls].reset_index(drop=True), dropped
+
+
 def load_episodes() -> pd.DataFrame:
-    """Load episodes.parquet, drop organic* corpora, add family and task_group.
+    """Load episodes.parquet, drop organic* corpora (D1) and no-tool-call runs (D7),
+    add family and task_group.
 
     Returns one row per episode (uid is the primary key) with the parsed
     metadata/steps still attached as *_parsed columns for to_step_table().
+    df.attrs["d7_dropped_per_corpus"] holds the D7 drop counts.
     """
     path = hf_hub_download(repo_id=REPO_ID, repo_type="dataset", filename="data/episodes.parquet")
     df = pd.read_parquet(path)
@@ -123,9 +141,14 @@ def load_episodes() -> pd.DataFrame:
     df["steps_parsed"] = df["steps"].map(json.loads)
 
     df = df[~df["corpus"].str.startswith(ORGANIC_PREFIX)].reset_index(drop=True)
+    df, d7_dropped = drop_runs_without_tool_calls(df)
+    logger.info("D7: dropped %d runs without tool calls: %s", sum(d7_dropped.values()), d7_dropped)
     df["family"] = df["model"].map(model_to_family)
     df = assign_task_groups(df)
 
+    # DataFrame.attrs: a metadata dict carried on the frame. Set last, because not every
+    # pandas operation propagates it; callers read it straight off the returned frame.
+    df.attrs["d7_dropped_per_corpus"] = d7_dropped
     return df
 
 

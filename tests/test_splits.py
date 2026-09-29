@@ -1,4 +1,5 @@
 import pandas as pd
+import pytest
 
 from watchdog_agent.splits import grouped_kfold, healthy_subset, leave_one_family_out
 
@@ -25,6 +26,52 @@ def test_leave_one_family_out_drops_overlapping_task_groups():
     assert set(train_uids) == {"q1", "q3"}
     assert n_dropped == 1
     assert "llama" not in df.loc[df["uid"].isin(train_uids), "family"].tolist()
+
+
+def _three_family_frame():
+    return _frame(
+        [
+            ("q1", "qwen", "g1", None),
+            ("q2", "qwen", "g2", "looping"),
+            ("l1", "llama", "g3", None),
+            ("l2", "llama", "g4", "looping"),
+            ("m1", "gemini", "g5", None),
+            ("m2", "gemini", "g6", "timeout"),
+        ]
+    )
+
+
+def test_leave_one_family_out_never_trains_on_eval_only_family():
+    df = _three_family_frame()
+    for test_family in ("qwen", "llama", "gemini"):
+        train_uids, test_uids, _ = leave_one_family_out(df, test_family=test_family)
+        train_families = set(df.loc[df["uid"].isin(train_uids), "family"])
+        assert "gemini" not in train_families
+        assert test_family not in train_families
+        assert set(df.loc[df["uid"].isin(test_uids), "family"]) == {test_family}
+
+    # gemini as the held-out family is still allowed: evaluation-only, per D6.
+    _, test_uids, _ = leave_one_family_out(df, test_family="gemini")
+    assert set(test_uids) == {"m1", "m2"}
+
+
+def test_leave_one_family_out_eval_only_exclusion_is_not_counted_as_overlap_drop():
+    df = _three_family_frame()
+    train_uids, _, n_dropped = leave_one_family_out(df, test_family="llama")
+    assert set(train_uids) == {"q1", "q2"}
+    assert n_dropped == 0
+
+
+def test_leave_one_family_out_eval_only_families_is_configurable():
+    df = _three_family_frame()
+    train_uids, _, _ = leave_one_family_out(df, test_family="llama", eval_only_families=())
+    assert set(train_uids) == {"q1", "q2", "m1", "m2"}
+
+
+def test_grouped_kfold_refuses_to_build_fit_sets_from_eval_only_family():
+    df = _three_family_frame()
+    with pytest.raises(ValueError, match="gemini"):
+        grouped_kfold(df, family="gemini", k=2, seed=0)
 
 
 def test_grouped_kfold_partitions_and_never_splits_a_task_group():

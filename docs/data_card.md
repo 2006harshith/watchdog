@@ -5,7 +5,9 @@ Source: Hugging Face `sunnydubey1111/agent-trajectory-sentinel` (repo_type="data
 All numbers below come from `results/e0_audit.json` (E0 audit, SP1, 2026-09-25) unless marked.
 
 ## Licence
-- Code and trace format: MIT.
+- Code and trace format: Apache-2.0, per the author repo's `LICENSE` and `NOTICE` at 1b3e07f
+  (vendored verbatim in `src/watchdog_agent/baselines/esn/_vendor/LICENSE`, `NOTICE`; SP3 Step 0).
+  The HF dataset card says MIT; the repo's own licence file is the one that governs the code.
 - Qwen episodes: Apache-2.0 (model outputs, no redistribution condition).
 - llama3.1:8b episodes: Llama 3.1 Community License + Acceptable Use Policy.
 - gemini-2.5-flash episodes: Google terms forbid using the Services "to develop models that compete
@@ -29,7 +31,8 @@ Step level (`steps[i]`): `text`, `token_logprobs`, `logprobs_available`, `action
 
 Metadata: `provenance` (collector, backend, model, episode_seed, task_name, task_sha256, tools,
 tool_roster_sha256, requested_class, requested_tau, injector_seed), `injection`, `trace_sha256`,
-`collected_at`, `framework`, `accepted_because`, `success` (always None).
+`collected_at`, `framework`, `accepted_because`, `success` (None on almost every row; True on 22
+rows after D1+D7: 17 healthy and 1 failed gemini, 4 healthy qwen; SP4 Step 0).
 
 Which step fields are model-specific is decided in SP4. Evidence from E0 already: `has_logprobs`
 identifies the family (gemini 0/143, llama 433/433, qwen mixed); healthy steps are slower
@@ -73,7 +76,8 @@ with onset_step). Decision D1: organic rows are excluded from SP2–SP6; organic
   under more than one model.
 - 1,592 rows have neither task_sha256 nor task text in the steps. After removing the 805 organic rows,
   about 787 qwen rows remain without a task id (inferred from counts: the 614 empty-metadata rows plus
-  demo7b/demo7b_scoped; SP2's loader reports the exact list).
+  demo7b/demo7b_scoped; SP2's loader reports the exact list). D7 (docs/decisions.md) drops exactly
+  these 787 runs, which have no tool calls, so after D7 every run has a task_group.
 - Hashing the task text gives 229 groups vs 311 task_sha256 groups on the same rows: the two do not
   group identically. SP2 resolves this (see SP2 spec).
 

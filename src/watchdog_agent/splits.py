@@ -8,16 +8,32 @@ import random
 
 import pandas as pd
 
+# D6 (docs/data_card.md): Google's terms forbid using Gemini output to develop competing
+# models, so gemini runs may be scored but never fitted on.
+EVAL_ONLY_FAMILIES = ("gemini",)
 
-def leave_one_family_out(episodes: pd.DataFrame, test_family: str) -> tuple[list[str], list[str], int]:
-    """Test = all runs of test_family. Train = other families minus every run
-    whose task_group also appears in test (no task leaks across the split).
 
-    Returns (train_uids, test_uids, n_dropped_for_overlap).
+def _check_not_eval_only(family: str, eval_only_families: tuple[str, ...]) -> None:
+    if family in eval_only_families:
+        raise ValueError(
+            f"family={family!r} is evaluation-only (D6, docs/data_card.md); no fit set may be built from it"
+        )
+
+
+def leave_one_family_out(
+    episodes: pd.DataFrame,
+    test_family: str,
+    eval_only_families: tuple[str, ...] = EVAL_ONLY_FAMILIES,
+) -> tuple[list[str], list[str], int]:
+    """Test = all runs of test_family. Train = other families, minus eval-only families (D6),
+    minus every run whose task_group also appears in test (no task leaks across the split).
+
+    Returns (train_uids, test_uids, n_dropped_for_overlap). Eval-only exclusions are not
+    counted in n_dropped: they are a licence rule, not a leakage fix.
     """
     test_mask = episodes["family"] == test_family
     test_df = episodes[test_mask]
-    train_df = episodes[~test_mask]
+    train_df = episodes[~test_mask & ~episodes["family"].isin(eval_only_families)]
 
     test_groups = set(test_df["task_group"])
     overlap_mask = train_df["task_group"].isin(test_groups)
@@ -28,11 +44,20 @@ def leave_one_family_out(episodes: pd.DataFrame, test_family: str) -> tuple[list
     return train_uids, test_uids, n_dropped
 
 
-def grouped_kfold(episodes: pd.DataFrame, family: str, k: int, seed: int) -> list[tuple[list[str], list[str]]]:
+def grouped_kfold(
+    episodes: pd.DataFrame,
+    family: str,
+    k: int,
+    seed: int,
+    eval_only_families: tuple[str, ...] = EVAL_ONLY_FAMILIES,
+) -> list[tuple[list[str], list[str]]]:
     """k folds over one family's task_groups, so every run in that family is
     scored out-of-fold exactly once (SP3 cross-fitting). Folds partition the
     family's uids; no task_group is split across two folds.
+
+    Raises for an eval-only family (D6): every fold's fit set would be built from it.
     """
+    _check_not_eval_only(family, eval_only_families)
     sub = episodes[episodes["family"] == family]
     groups = sorted(sub["task_group"].unique())
     rng = random.Random(seed)

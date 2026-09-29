@@ -1,10 +1,11 @@
-"""SP2 summary: rows/task-groups per family, unknown-task rows per corpus, and
-train-run drop counts for each leave-one-family-out split.
+"""SP2 summary: rows/task-groups per family, D7 drops and unknown-task rows per corpus,
+and train-run drop counts for each leave-one-family-out split (gemini never in train, D6).
 
 Run: uv run python scripts/sp2_summary.py
 """
 
 import json
+import logging
 from pathlib import Path
 
 from dotenv import load_dotenv
@@ -15,7 +16,9 @@ from watchdog_agent.splits import leave_one_family_out
 
 def main() -> None:
     load_dotenv()
+    logging.basicConfig(level=logging.INFO)
     df = load_episodes()
+    d7_dropped = df.attrs["d7_dropped_per_corpus"]
 
     rows_per_family = df["family"].value_counts().to_dict()
     task_groups_per_family = df.groupby("family")["task_group"].nunique().to_dict()
@@ -33,6 +36,8 @@ def main() -> None:
         }
 
     results = {
+        "d7_runs_without_tool_calls_dropped_per_corpus": d7_dropped,
+        "d7_runs_dropped_total": sum(d7_dropped.values()),
         "rows_per_family": rows_per_family,
         "task_groups_per_family": task_groups_per_family,
         "unknown_task_rows_per_corpus": unknown_rows_per_corpus,
