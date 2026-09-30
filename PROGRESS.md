@@ -1,9 +1,21 @@
 # PROGRESS
 
 ## Current
-- Save point: SP5 (E2 ablation, GATE) — in progress. Step 0 done: Decisions and GATE recorded
-  verbatim (docs/decisions.md, Decisions below) and pre-registered in configs/e2.yaml, committed
-  before any E2 model is trained. Date: 2026-09-29.
+- Save point: SP5 (E2 ablation, GATE) — in progress. Step 0 (pre-registration, ae18348), Step 1
+  (recalibration.py, 4733739), Step 2 (experiments/e2.py, 860249b) done. Step 3 run 2026-09-30 from
+  clean 860249b (results/e2_ablation.json, MLflow d3a8305364a64be29c2425b4a4449871): GATE FAIL.
+  llama TL-pct − ESN_best (ESN_i) = −0.197 [−0.302, −0.057]; TL-pct 0.648 [0.555, 0.768], ESN_i
+  0.846 [0.770, 0.896]. Both secondary expectations hold (TL-pct 0.648 > TL-raw 0.641; ≥ MS-pct
+  0.552). Not gated: gemini TL-pct 0.716 vs ESN_i 0.481, ALL-pct 0.780.
+- SP5 Step 3b diagnostics 2026-09-30 (results/e2_diagnostics.json, dirty tree; three rows reproduce
+  0.846 / 0.858 / 0.646 exactly). The ESN 0.646 (SP4) -> 0.846 (E2) gap is the FIT POOL, not the
+  class mix (SP4 headline-only 0.665) and not pooling or z-scoring (SP4 raw 0.661; per-fold mean
+  0.602). On SP4's own folds, per-fold: E2's single model 0.838 vs SP4's fold models 0.602. Pool size
+  (21 vs ~34 fit runs) and composition (E2 excludes every llama task group) are not separated.
+  Surprisal is NOT the source: ESN_i without u scores 0.905 (context_corruption 1.000); MS-raw
+  without surprisal 0.812, surprisal only 0.547. The ESN reads step-output content (e: text
+  embedding; x: cos drift, task similarity) plus latency and output length (m), which TL excludes by
+  design; context_corruption scrambles result text, so content catches it.
 - SP4 closed 2026-09-29 (tag sp04-features): D7/D6 data changes, matched-step evaluation, 118
   features (TL/MS/ENV/TEXT; TL was MI until the close-out), feature audit (results/sp4_feature_audit.json, clean commit e9ef64f).
   Headline: TL (ex-MI) is NOT model-independent in practice (healthy-run family AUROC 0.95-0.96 in the matched
@@ -20,9 +32,9 @@
   drafted, not posted: docs/drafts/github_issue_author.md.
 - SP2 closed 2026-09-27 (tag sp02-data; code from 64622a4, tag on the closing commit).
 - Teach-back answers are owed before deploy (SP9): see "Teach-backs" below.
-- Next concrete step: owner reviews the SP5 Step 0 diff (configs/e2.yaml, the six FILLED-IN
-  settings flagged in it). On approval, tell Claude Code "SP5 Step 1: go" (recalibration.py, tests
-  first, then the recalibration teach-back).
+- Next concrete step: /save, rerun scripts/run_e2_diagnostics.py from the clean commit, then paste
+  results/e2_ablation.json + results/e2_diagnostics.json into the chat Project for the negative-result
+  write-up spec (gate on_fail: SP6 becomes the main contribution).
 
 ## SP0 prompt (paste into Claude Code)
 > Set up SP0 for this repo. Plan first, wait for my "go". Target state: `pyproject.toml` managed by uv
@@ -95,6 +107,16 @@
   (appends a spurious value, shuffles words, scrambles text) and keeps corrupting later results
   (applied_count 1-13); it does not shrink results (median 1.45x the healthy size). Corrupting an
   error message flips is_error True -> False. Data property, no feature bug.
+- SP5/3b: the ESN baseline swings 0.60 -> 0.84 (per-fold, same folds) with its healthy fit pool.
+  Is that pool size (21 vs ~34 runs) or composition (E2's pool excludes every llama task group)? A
+  fragile baseline is itself evidence for SP6 (few healthy runs); separating the two needs a
+  size-matched subsample of SP4's pools.
+- SP5/3b: the ESN wins on llama through step-output content (e, x) and latency/length (m), which TL
+  excludes by design; ESN_i without u reaches context_corruption 1.000. Is context_corruption then a
+  content-injection artefact (scrambled text is trivially off-distribution) rather than a realistic
+  failure? Does the write-up add a content-aware arm, or state the TL design limit?
+- SP5/E2: MS-pct is below chance on llama context_corruption (0.361) while MS-raw scores 0.948. The
+  percentile transform may flip the MS signal's direction; not investigated.
 
 ## Decisions (after HANDOFF.md)
 - 2026-09-25: Python import package is `watchdog_agent` (see CLAUDE.md "Naming").
@@ -251,9 +273,20 @@ FAIL → the negative result is written up; SP6 (thresholds from few healthy run
   by run? Q3: the transform needs to know which target runs are healthy; in what sense is it still
   "label-free", what breaks if some reference runs are secretly failed, and what asymmetry does
   transforming the source corpora in-sample (not cross-fitted) create? · answers: not yet given ·
-  NOT ANSWERED, owner override 2026-09-29 (Step 2 started). SP5 done criteria require it answered.
+  NOT ANSWERED, owner override 2026-09-29 (Step 2 started); overridden again 2026-09-30 to run E2
+  (Step 3). Claude disagreed: it is the calibration logic the gate result rests on. SP5 done criteria
+  require it answered. Eight teach-backs owed before deploy (SP9).
 
 ## Session log
+- 2026-09-30 · SP5 (Step 3, 3b) · Recalibration teach-back overridden again (still NOT ANSWERED).
+  E2 run from clean 860249b: GATE FAIL, TL-pct − ESN_i = −0.197 [−0.302, −0.057]
+  (results/e2_ablation.json, e2_prefix_scores.csv). run_e2.py crashed at the MLflow step on "+" in
+  param keys: fixed, saved result logged to MLflow (d3a8305364a64be29c2425b4a4449871). Step 3b
+  diagnostics (experiments/e2_diagnostics.py, scripts/run_e2_diagnostics.py, 8 tests): the ESN
+  0.646 -> 0.846 gap is the fit pool, not class mix or pooling; surprisal is not the source
+  (ESN_i without u 0.905). results/e2_diagnostics.json is from a dirty tree · tests: pass (425, ruff
+  clean) · next: rerun `uv run python scripts/run_e2_diagnostics.py` from this commit, then paste
+  both E2 JSONs into the chat Project for the write-up spec.
 - 2026-09-29 · SP4 (close-out) · Looping and context_corruption checks (no feature added; findings
   in Open questions); feature group MI renamed TL everywhere (fffba52, 390 tests unchanged); audit
   JSON regenerated from clean fffba52, values identical after key mapping (e9f4179);

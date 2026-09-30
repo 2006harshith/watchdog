@@ -1,0 +1,633 @@
+{
+  "what": "SP5 Step 3b, interpretation only: one-factor swaps between SP4 4d's ESN (0.646) and E2's ESN_i (0.846) on llama, plus surprisal ablations of ESN_i and MS-raw. Mean matched-step AUROC over the primary checkpoints; pooled rows carry task-group cluster CIs (n_secondary), per-fold rows are the unweighted mean of within-fold AUROCs over SP4's E1 folds (no CI).",
+  "git": {
+    "commit": "860249bbf46e383e290e9063887b3756caec2fd8",
+    "dirty": true
+  },
+  "family": "llama",
+  "counts": {
+    "llama_runs": 193,
+    "sp4_folds": [
+      17,
+      108,
+      29,
+      23,
+      16
+    ],
+    "e2_ESN_i_pool": {
+      "channels": [
+        "e",
+        "u",
+        "m",
+        "x"
+      ],
+      "n_fit": 21,
+      "n_val": 7,
+      "corpora": [
+        "ollama7b"
+      ]
+    },
+    "e2_ESN_i_no_u_pool": {
+      "channels": [
+        "e",
+        "m",
+        "x"
+      ],
+      "n_fit": 21,
+      "n_val": 7,
+      "corpora": [
+        "ollama7b"
+      ]
+    }
+  },
+  "rows": {
+    "sp4_A_standardised": {
+      "headline": {
+        "point": 0.6653168905026362,
+        "lo": 0.5422674243157608,
+        "hi": 0.7461628430631708,
+        "n_skipped": 0
+      },
+      "all_classes": {
+        "point": 0.6463006690279418,
+        "lo": 0.5215183238546095,
+        "hi": 0.7359009388811798,
+        "n_skipped": 0
+      },
+      "per_fold_headline": {
+        "mean": 0.6015860086413969,
+        "n_folds_used": 4,
+        "per_fold": [
+          {
+            "fold": 0,
+            "n_runs": 16,
+            "auroc": 0.7685185185185186
+          },
+          {
+            "fold": 1,
+            "n_runs": 91,
+            "auroc": 0.6115236928702457
+          },
+          {
+            "fold": 2,
+            "n_runs": 27,
+            "auroc": 0.6609172077922079
+          },
+          {
+            "fold": 3,
+            "n_runs": 21,
+            "auroc": 0.3653846153846154
+          },
+          {
+            "fold": 4,
+            "n_runs": 15,
+            "skipped": "one-class checkpoint"
+          }
+        ]
+      },
+      "per_fold_all_classes": {
+        "mean": 0.6387434098806061,
+        "n_folds_used": 5,
+        "per_fold": [
+          {
+            "fold": 0,
+            "n_runs": 17,
+            "auroc": 0.7743055555555556
+          },
+          {
+            "fold": 1,
+            "n_runs": 108,
+            "auroc": 0.5764700602810411
+          },
+          {
+            "fold": 2,
+            "n_runs": 29,
+            "auroc": 0.6567234848484849
+          },
+          {
+            "fold": 3,
+            "n_runs": 23,
+            "auroc": 0.35288461538461535
+          },
+          {
+            "fold": 4,
+            "n_runs": 16,
+            "auroc": 0.8333333333333333
+          }
+        ]
+      },
+      "per_class": {
+        "looping": 0.8415225047408955,
+        "goal_drift": 0.5472813852813853,
+        "context_corruption": 0.6071096267332826,
+        "tool_cascade": 0.5642496392496392
+      }
+    },
+    "sp4_A_raw": {
+      "headline": {
+        "point": 0.6606367650877832,
+        "lo": 0.48221732776434734,
+        "hi": 0.7402923955952567,
+        "n_skipped": 0
+      },
+      "all_classes": {
+        "point": 0.6436212777121868,
+        "lo": 0.46822140114740357,
+        "hi": 0.7249233175542517,
+        "n_skipped": 0
+      },
+      "per_fold_headline": {
+        "mean": 0.6015860086413969,
+        "n_folds_used": 4,
+        "per_fold": [
+          {
+            "fold": 0,
+            "n_runs": 16,
+            "auroc": 0.7685185185185186
+          },
+          {
+            "fold": 1,
+            "n_runs": 91,
+            "auroc": 0.6115236928702457
+          },
+          {
+            "fold": 2,
+            "n_runs": 27,
+            "auroc": 0.6609172077922079
+          },
+          {
+            "fold": 3,
+            "n_runs": 21,
+            "auroc": 0.3653846153846154
+          },
+          {
+            "fold": 4,
+            "n_runs": 15,
+            "skipped": "one-class checkpoint"
+          }
+        ]
+      },
+      "per_fold_all_classes": {
+        "mean": 0.6387434098806061,
+        "n_folds_used": 5,
+        "per_fold": [
+          {
+            "fold": 0,
+            "n_runs": 17,
+            "auroc": 0.7743055555555556
+          },
+          {
+            "fold": 1,
+            "n_runs": 108,
+            "auroc": 0.5764700602810411
+          },
+          {
+            "fold": 2,
+            "n_runs": 29,
+            "auroc": 0.6567234848484849
+          },
+          {
+            "fold": 3,
+            "n_runs": 23,
+            "auroc": 0.35288461538461535
+          },
+          {
+            "fold": 4,
+            "n_runs": 16,
+            "auroc": 0.8333333333333333
+          }
+        ]
+      },
+      "per_class": {
+        "looping": 0.8124073244762899,
+        "goal_drift": 0.5609626623376623,
+        "context_corruption": 0.6094684686082537,
+        "tool_cascade": 0.5689754689754689
+      }
+    },
+    "e2_ESN_i": {
+      "headline": {
+        "point": 0.8455038334441196,
+        "lo": 0.7728664785727097,
+        "hi": 0.8995229031615408,
+        "n_skipped": 0
+      },
+      "all_classes": {
+        "point": 0.8103557217193581,
+        "lo": 0.743544231022863,
+        "hi": 0.8692799997283425,
+        "n_skipped": 0
+      },
+      "per_fold_headline": {
+        "mean": 0.8378238435922344,
+        "n_folds_used": 4,
+        "per_fold": [
+          {
+            "fold": 0,
+            "n_runs": 16,
+            "auroc": 0.9642857142857143
+          },
+          {
+            "fold": 1,
+            "n_runs": 91,
+            "auroc": 0.8807877569863201
+          },
+          {
+            "fold": 2,
+            "n_runs": 27,
+            "auroc": 0.8321834415584416
+          },
+          {
+            "fold": 3,
+            "n_runs": 21,
+            "auroc": 0.6740384615384616
+          },
+          {
+            "fold": 4,
+            "n_runs": 15,
+            "skipped": "one-class checkpoint"
+          }
+        ]
+      },
+      "per_fold_all_classes": {
+        "mean": 0.8231911318006416,
+        "n_folds_used": 5,
+        "per_fold": [
+          {
+            "fold": 0,
+            "n_runs": 17,
+            "auroc": 0.9375
+          },
+          {
+            "fold": 1,
+            "n_runs": 108,
+            "auroc": 0.8375332133932628
+          },
+          {
+            "fold": 2,
+            "n_runs": 29,
+            "auroc": 0.8244160353535354
+          },
+          {
+            "fold": 3,
+            "n_runs": 23,
+            "auroc": 0.5894230769230769
+          },
+          {
+            "fold": 4,
+            "n_runs": 16,
+            "auroc": 0.9270833333333333
+          }
+        ]
+      },
+      "per_class": {
+        "looping": 0.7387548169157364,
+        "goal_drift": 0.8115411255411256,
+        "context_corruption": 0.9777768726693459,
+        "tool_cascade": 0.6399873737373737
+      }
+    },
+    "e2_ESN_i_no_u": {
+      "headline": {
+        "point": 0.9053913317465876,
+        "lo": 0.8585784390978991,
+        "hi": 0.9459344369745003,
+        "n_skipped": 0
+      },
+      "all_classes": {
+        "point": 0.879675543311907,
+        "lo": 0.835758688164293,
+        "hi": 0.9187635807928434,
+        "n_skipped": 0
+      },
+      "per_fold_headline": {
+        "mean": 0.8995986100159894,
+        "n_folds_used": 4,
+        "per_fold": [
+          {
+            "fold": 0,
+            "n_runs": 16,
+            "auroc": 0.9682539682539683
+          },
+          {
+            "fold": 1,
+            "n_runs": 91,
+            "auroc": 0.9035295826991003
+          },
+          {
+            "fold": 2,
+            "n_runs": 27,
+            "auroc": 0.8506493506493507
+          },
+          {
+            "fold": 3,
+            "n_runs": 21,
+            "auroc": 0.8759615384615385
+          },
+          {
+            "fold": 4,
+            "n_runs": 15,
+            "skipped": "one-class checkpoint"
+          }
+        ]
+      },
+      "per_fold_all_classes": {
+        "mean": 0.8855851140551987,
+        "n_folds_used": 5,
+        "per_fold": [
+          {
+            "fold": 0,
+            "n_runs": 17,
+            "auroc": 0.9444444444444444
+          },
+          {
+            "fold": 1,
+            "n_runs": 108,
+            "auroc": 0.8718335719964951
+          },
+          {
+            "fold": 2,
+            "n_runs": 29,
+            "auroc": 0.8433554292929293
+          },
+          {
+            "fold": 3,
+            "n_runs": 23,
+            "auroc": 0.7787087912087912
+          },
+          {
+            "fold": 4,
+            "n_runs": 16,
+            "auroc": 0.9895833333333333
+          }
+        ]
+      },
+      "per_class": {
+        "looping": 0.8589004439579152,
+        "goal_drift": 0.8507754329004329,
+        "context_corruption": 1.0,
+        "tool_cascade": 0.756722582972583
+      }
+    },
+    "e2_MS_raw": {
+      "headline": {
+        "point": 0.8582860109070896,
+        "lo": 0.8070966605091328,
+        "hi": 0.9347932530036492,
+        "n_skipped": 0
+      },
+      "all_classes": {
+        "point": 0.8495517950063405,
+        "lo": 0.8053400299118623,
+        "hi": 0.9239101799133501,
+        "n_skipped": 0
+      },
+      "per_fold_headline": {
+        "mean": 0.8643282107976638,
+        "n_folds_used": 4,
+        "per_fold": [
+          {
+            "fold": 0,
+            "n_runs": 16,
+            "auroc": 0.9576719576719577
+          },
+          {
+            "fold": 1,
+            "n_runs": 91,
+            "auroc": 0.8549293470571591
+          },
+          {
+            "fold": 2,
+            "n_runs": 27,
+            "auroc": 0.78125
+          },
+          {
+            "fold": 3,
+            "n_runs": 21,
+            "auroc": 0.8634615384615385
+          },
+          {
+            "fold": 4,
+            "n_runs": 15,
+            "skipped": "one-class checkpoint"
+          }
+        ]
+      },
+      "per_fold_all_classes": {
+        "mean": 0.8817806012233262,
+        "n_folds_used": 5,
+        "per_fold": [
+          {
+            "fold": 0,
+            "n_runs": 17,
+            "auroc": 0.9583333333333333
+          },
+          {
+            "fold": 1,
+            "n_runs": 108,
+            "auroc": 0.835908292496917
+          },
+          {
+            "fold": 2,
+            "n_runs": 29,
+            "auroc": 0.7836174242424243
+          },
+          {
+            "fold": 3,
+            "n_runs": 23,
+            "auroc": 0.8310439560439561
+          },
+          {
+            "fold": 4,
+            "n_runs": 16,
+            "auroc": 1.0
+          }
+        ]
+      },
+      "per_class": {
+        "looping": 0.807847495203817,
+        "goal_drift": 0.813426948051948,
+        "context_corruption": 0.9477941214500354,
+        "tool_cascade": 0.800153318903319
+      }
+    },
+    "e2_MS_raw_no_surprisal": {
+      "headline": {
+        "point": 0.8120545020930272,
+        "lo": 0.7781792038819625,
+        "hi": 0.8801586744716721,
+        "n_skipped": 0
+      },
+      "all_classes": {
+        "point": 0.8112980453889544,
+        "lo": 0.7789611248519743,
+        "hi": 0.8661220156845156,
+        "n_skipped": 0
+      },
+      "per_fold_headline": {
+        "mean": 0.8028623025655661,
+        "n_folds_used": 4,
+        "per_fold": [
+          {
+            "fold": 0,
+            "n_runs": 16,
+            "auroc": 0.8306878306878307
+          },
+          {
+            "fold": 1,
+            "n_runs": 91,
+            "auroc": 0.7834555603936147
+          },
+          {
+            "fold": 2,
+            "n_runs": 27,
+            "auroc": 0.8492288961038961
+          },
+          {
+            "fold": 3,
+            "n_runs": 21,
+            "auroc": 0.7480769230769231
+          },
+          {
+            "fold": 4,
+            "n_runs": 15,
+            "skipped": "one-class checkpoint"
+          }
+        ]
+      },
+      "per_fold_all_classes": {
+        "mean": 0.838806273661595,
+        "n_folds_used": 5,
+        "per_fold": [
+          {
+            "fold": 0,
+            "n_runs": 17,
+            "auroc": 0.8402777777777778
+          },
+          {
+            "fold": 1,
+            "n_runs": 108,
+            "auroc": 0.7783369065197637
+          },
+          {
+            "fold": 2,
+            "n_runs": 29,
+            "auroc": 0.8482875631313131
+          },
+          {
+            "fold": 3,
+            "n_runs": 23,
+            "auroc": 0.7583791208791208
+          },
+          {
+            "fold": 4,
+            "n_runs": 16,
+            "auroc": 0.96875
+          }
+        ]
+      },
+      "per_class": {
+        "looping": 0.8069576443139661,
+        "goal_drift": 0.800498106060606,
+        "context_corruption": 0.8271060580200364,
+        "tool_cascade": 0.8003427128427129
+      }
+    },
+    "e2_MS_raw_surprisal_only": {
+      "headline": {
+        "point": 0.547478748091021,
+        "lo": 0.45694090522490965,
+        "hi": 0.6731421641050545,
+        "n_skipped": 0
+      },
+      "all_classes": {
+        "point": 0.5418579736761555,
+        "lo": 0.45529301958447227,
+        "hi": 0.6712350555972761,
+        "n_skipped": 0
+      },
+      "per_fold_headline": {
+        "mean": 0.5608925690737055,
+        "n_folds_used": 4,
+        "per_fold": [
+          {
+            "fold": 0,
+            "n_runs": 16,
+            "auroc": 0.6190476190476191
+          },
+          {
+            "fold": 1,
+            "n_runs": 91,
+            "auroc": 0.5830204094949554
+          },
+          {
+            "fold": 2,
+            "n_runs": 27,
+            "auroc": 0.6371753246753247
+          },
+          {
+            "fold": 3,
+            "n_runs": 21,
+            "auroc": 0.4043269230769231
+          },
+          {
+            "fold": 4,
+            "n_runs": 15,
+            "skipped": "one-class checkpoint"
+          }
+        ]
+      },
+      "per_fold_all_classes": {
+        "mean": 0.6006029148201739,
+        "n_folds_used": 5,
+        "per_fold": [
+          {
+            "fold": 0,
+            "n_runs": 17,
+            "auroc": 0.5972222222222222
+          },
+          {
+            "fold": 1,
+            "n_runs": 108,
+            "auroc": 0.5659099252774713
+          },
+          {
+            "fold": 2,
+            "n_runs": 29,
+            "auroc": 0.6356928661616161
+          },
+          {
+            "fold": 3,
+            "n_runs": 23,
+            "auroc": 0.4229395604395604
+          },
+          {
+            "fold": 4,
+            "n_runs": 16,
+            "auroc": 0.78125
+          }
+        ]
+      },
+      "per_class": {
+        "looping": 0.48698582707203397,
+        "goal_drift": 0.626745670995671,
+        "context_corruption": 0.5278709392956704,
+        "tool_cascade": 0.522224025974026
+      }
+    }
+  },
+  "reproduction": {
+    "e2_ESN_i": {
+      "diagnostic": 0.8455038334441196,
+      "published": 0.8455038334441196
+    },
+    "e2_MS_raw": {
+      "diagnostic": 0.8582860109070896,
+      "published": 0.8582860109070896
+    },
+    "sp4_A_standardised": {
+      "diagnostic": 0.6463006690279418,
+      "published": 0.6463006690279418
+    }
+  }
+}

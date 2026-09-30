@@ -56,7 +56,9 @@ def log_to_mlflow(cfg: dict, result: dict, paths: list[Path]) -> str:
     )
     gate = result["gate"]
     with mlflow.start_run(experiment_id=experiment_id, run_name="e2-ablation") as run:
-        params = {k: str(v)[:500] for k, v in _flatten(cfg).items() if k != "mlflow.tracking_dir"}
+        # MLflow rejects "+" in names; arm names like TL+MS appear in param keys as well as metrics.
+        params = {k.replace("+", "_plus_"): str(v)[:500] for k, v in _flatten(cfg).items()
+                  if k != "mlflow.tracking_dir"}
         mlflow.log_params(params)
         mlflow.set_tags({"git_commit": result["git"]["commit"], "git_dirty": result["git"]["dirty"],
                          "gate_outcome": gate["outcome"]})
