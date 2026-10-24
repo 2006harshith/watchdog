@@ -13,9 +13,22 @@
   0.602). On SP4's own folds, per-fold: E2's single model 0.838 vs SP4's fold models 0.602. Pool size
   (21 vs ~34 fit runs) and composition (E2 excludes every llama task group) are not separated.
   Surprisal is NOT the source: ESN_i without u scores 0.905 (context_corruption 1.000); MS-raw
-  without surprisal 0.812, surprisal only 0.547. The ESN reads step-output content (e: text
-  embedding; x: cos drift, task similarity) plus latency and output length (m), which TL excludes by
-  design; context_corruption scrambles result text, so content catches it.
+  without surprisal 0.812, surprisal only 0.547. CORRECTED 2026-10-24 by the close-out: the Step 3b
+  reading "the ESN reads step-output content (e, x); content catches context_corruption" is WRONG on
+  llama. The m channel (action, latency, output length, error flag) sets the score, not e or x.
+- SP5 close-out 2026-10-24 (interpretation only; the gate is final). results/e2_closeout.json (clean
+  ecadcfb) and results/e2_channel_attribution.json (clean e33db31); every re-run E2 number reproduces
+  exactly. D-6: ESN_i on 30 random 21-of-28 fit subsets of its own pool: median 0.770 [min 0.566, max
+  0.857]; E2's split (0.846) is beaten or matched by only 3% of draws. SP4 fold pools cut to 21 fit
+  runs: per-fold mean median 0.788 [0.664, 0.877]. SP4's structure with E2's pool = 0.846 (structure
+  adds nothing). D-7b, step tau carried from tau-1: ESN_i 0.846 -> 0.761 (−0.085 [−0.147, −0.014]),
+  context_corruption 0.978 -> 0.831; MS-raw 0.858 -> 0.781. D-7c, every run's tool results replaced
+  by same-length filler: ESN_i@llama 0.846 -> 0.846 (diff exactly 0), no-u 0.905 -> 0.906,
+  context_corruption 1.000 -> 1.000; ESN_i@gemini 0.481 -> 0.577 (+0.096 [−0.108, 0.281]);
+  TEXT-raw@llama 0.656 -> 0.562. Attribution (t=3,4): m holds the running max in nearly every failed
+  llama run for both ESN variants, before and after blinding; e holds it in every gemini run. No
+  single m input explains it: context_corruption latency-at-t AUROC 0.720, looping error-so-far
+  0.792, goal_drift lower output tokens (0.298) and fewer errors (0.292).
 - SP4 closed 2026-09-29 (tag sp04-features): D7/D6 data changes, matched-step evaluation, 118
   features (TL/MS/ENV/TEXT; TL was MI until the close-out), feature audit (results/sp4_feature_audit.json, clean commit e9ef64f).
   Headline: TL (ex-MI) is NOT model-independent in practice (healthy-run family AUROC 0.95-0.96 in the matched
@@ -32,8 +45,10 @@
   drafted, not posted: docs/drafts/github_issue_author.md.
 - SP2 closed 2026-09-27 (tag sp02-data; code from 64622a4, tag on the closing commit).
 - Teach-back answers are owed before deploy (SP9): see "Teach-backs" below.
-- Next concrete step: paste results/e2_ablation.json + results/e2_diagnostics.json into the chat
-  Project for the negative-result write-up spec (gate on_fail: SP6 becomes the main contribution).
+- Next concrete step (2026-10-24): paste results/e2_ablation.json, e2_diagnostics.json,
+  e2_closeout.json and e2_channel_attribution.json plus this PROGRESS.md into the chat Project for the
+  negative-result write-up spec (gate on_fail: SP6 becomes the main contribution). SP5 cannot close
+  until the recalibration teach-back is answered (overridden three times; owner: "at last").
 
 ## SP0 prompt (paste into Claude Code)
 > Set up SP0 for this repo. Plan first, wait for my "go". Target state: `pyproject.toml` managed by uv
@@ -50,7 +65,7 @@
 | SP2 | Data layer: per-step table + splits (teach-back: splits) | done (teach-back owner-marked passed) | sp02-data |
 | SP3 | E1 reproduce collapse — GATE (teach-back: metrics). Pass: on the same held-out llama3.1:8b episodes, the qwen-fitted monitor is >= 0.15 AUROC below the llama-fitted one, with non-overlapping episode-bootstrap 95% CIs. Reference: 0.527 vs 0.885, arXiv 2608.02464 §5 (transferred vs refitted, not before/after) | done — gate FAIL; diagnostics D-1..D-5 done (docs/sp3_e1_result.md); teach-back owner-marked passed | sp03-e1 |
 | SP4 | Feature sets + matched-step evaluation (teach-back: feature definitions) | done — audit in results/sp4_feature_audit.json; split/metrics teach-backs owner-marked, feature-definitions teach-back not answered (owner override) | sp04-features, sp04-closeout |
-| SP5 | E2 ablation — GATE (spec to be rewritten after SP3) | not started | |
+| SP5 | E2 ablation — GATE (spec to be rewritten after SP3) | in progress — gate FAIL; close-out diagnostics done; write-up pending; recalibration teach-back NOT ANSWERED | |
 | SP6 | E3 recalibration curve (teach-back: threshold logic) | not started | |
 | SP7 | E4 cost/latency vs LLM judges — GATE | not started | |
 | SP8 | E5 organic runs on AgentDojo — GATE | not started | |
@@ -106,14 +121,25 @@
   (appends a spurious value, shuffles words, scrambles text) and keeps corrupting later results
   (applied_count 1-13); it does not shrink results (median 1.45x the healthy size). Corrupting an
   error message flips is_error True -> False. Data property, no feature bug.
-- SP5/3b: the ESN baseline swings 0.60 -> 0.84 (per-fold, same folds) with its healthy fit pool.
-  Is that pool size (21 vs ~34 runs) or composition (E2's pool excludes every llama task group)? A
-  fragile baseline is itself evidence for SP6 (few healthy runs); separating the two needs a
-  size-matched subsample of SP4's pools.
-- SP5/3b: the ESN wins on llama through step-output content (e, x) and latency/length (m), which TL
-  excludes by design; ESN_i without u reaches context_corruption 1.000. Is context_corruption then a
-  content-injection artefact (scrambled text is trivially off-distribution) rather than a realistic
-  failure? Does the write-up add a content-aware arm, or state the TL design limit?
+- (partly resolved in the SP5 close-out, D-6) SP5/3b: the ESN baseline swings 0.60 -> 0.84 with its
+  healthy fit pool. Neither size nor composition explains it: 21-run subsets of E2's pool give median
+  0.770, of SP4's fold pools 0.788; the spread (0.566-0.857, 0.664-0.877) is the fit-set draw. Still
+  open: SP4's FULL fold pools (34-49 fit runs) score 0.602, below every one of 30 size-21 subsamples
+  (min 0.664), so more healthy fit runs scored worse. Not investigated. Either way the ESN is a
+  fragile baseline, which is evidence for SP6 (few healthy runs).
+- (resolved in the SP5 close-out, D-7c + attribution) SP5/3b: the ESN does NOT win on llama through
+  step-output content. With result content blinded in every run, ESN_i is unchanged (0.846, diff 0)
+  and the no-u variant too (0.905 -> 0.906, context_corruption 1.000); the m channel holds the
+  running max in nearly every failed llama run. The write-up's point becomes model-side reaction
+  signals (m, u) vs TL, not a content arm.
+- SP5 close-out: what in m gives context_corruption 1.000? No single m input does (best:
+  latency-at-t 0.720). Candidates: a combination or the step-to-step dynamics of m. Is it a size
+  artefact? Corrupted results are ~1.45x the healthy size, D-7c kept sizes, and longer input
+  plausibly slows llama's steps. Untested: needs a size-changing transform or per-input ablation of m
+  inside the vendored ESN. Matters for whether context_corruption is a realistic failure.
+- SP5 close-out: ESN_i@gemini moves +0.096 under blinding (CI [−0.108, 0.281]): its e channel sets
+  every gemini score and reads gemini's live-API result text, which is off-distribution for a qwen
+  pool. Gemini's ESN number is then mostly content shift, not failure detection.
 - SP5/E2: MS-pct is below chance on llama context_corruption (0.361) while MS-raw scores 0.948. The
   percentile transform may flip the MS signal's direction; not investigated.
 
@@ -279,6 +305,18 @@ FAIL → the negative result is written up; SP6 (thresholds from few healthy run
   close on it.
 
 ## Session log
+- 2026-10-24 · SP5 (close-out) · D-6/D-7 code committed (ecadcfb) plus D-7c result-blind transform
+  (blind_results/blind_episodes: every tool result -> same-length filler in tool_events and step
+  text, label-free, all runs); results/e2_closeout.json from clean ecadcfb. Channel attribution
+  (ESNBaseline.channel_streams, channel_attribution, m_input_contrast;
+  scripts/run_e2_channel_attribution.py) -> results/e2_channel_attribution.json from clean e33db31.
+  All re-run E2 numbers reproduce exactly. Findings: D-6 median 0.770 [0.566, 0.857], E2's split in
+  the top 3%; blinding leaves ESN_i@llama unchanged; m sets llama ESN scores; Step 3b content
+  reading corrected. Recalibration teach-back re-asked, overridden a third time (NOT ANSWERED).
+  Background-task notices in this session were false (runs reported done while still running; one
+  duplicate pair stopped) · tests: pass (445, ruff clean) · next: paste the four E2 JSONs +
+  PROGRESS.md into the chat Project for the write-up spec; answer the recalibration teach-back
+  before SP5 closes.
 - 2026-09-30 · SP5 (Step 3, 3b) · Recalibration teach-back overridden again (still NOT ANSWERED).
   E2 run from clean 860249b: GATE FAIL, TL-pct − ESN_i = −0.197 [−0.302, −0.057]
   (results/e2_ablation.json, e2_prefix_scores.csv). run_e2.py crashed at the MLflow step on "+" in
