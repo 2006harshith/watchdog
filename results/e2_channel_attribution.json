@@ -1,0 +1,1105 @@
+{
+  "what": "SP5 close-out, interpretation only: which ESN channel sets each matched-step score (ESN_i with and without u, before and after the D-7c result-blind transform; llama, gemini), and single-input AUROCs of the m channel's inputs on llama. Attribution is over the matched-step evaluation set at the primary checkpoints.",
+  "git": {
+    "commit": "e33db310f12e4653ea78671b76abc076afa06903",
+    "dirty": false
+  },
+  "blinded": {
+    "qwen": {
+      "tool_steps_blinded": 10520,
+      "text_chars_changed": 651665
+    },
+    "llama": {
+      "tool_steps_blinded": 1139,
+      "text_chars_changed": 29288
+    },
+    "gemini": {
+      "tool_steps_blinded": 1050,
+      "text_chars_changed": 74919
+    }
+  },
+  "esn": {
+    "ESN_i@llama": {
+      "channels": [
+        "e",
+        "u",
+        "m",
+        "x"
+      ],
+      "auroc": {
+        "per_class": {
+          "looping": {
+            "before": {
+              "point": 0.7387548169157364,
+              "lo": 0.6240106429631334,
+              "hi": 0.8236828148299424,
+              "n_skipped": 1
+            },
+            "after": {
+              "point": 0.7387548169157364,
+              "lo": 0.6240106429631334,
+              "hi": 0.8236828148299424,
+              "n_skipped": 1
+            },
+            "after_minus_before": {
+              "point": 0.0,
+              "lo": 0.0,
+              "hi": 0.0,
+              "n_skipped": 1
+            }
+          },
+          "goal_drift": {
+            "before": {
+              "point": 0.8115411255411256,
+              "lo": 0.6743570069280355,
+              "hi": 0.9090287514618146,
+              "n_skipped": 1
+            },
+            "after": {
+              "point": 0.8115411255411256,
+              "lo": 0.6743570069280355,
+              "hi": 0.9090287514618146,
+              "n_skipped": 1
+            },
+            "after_minus_before": {
+              "point": 0.0,
+              "lo": 0.0,
+              "hi": 0.0,
+              "n_skipped": 1
+            }
+          },
+          "context_corruption": {
+            "before": {
+              "point": 0.9777768726693459,
+              "lo": 0.9413953151882222,
+              "hi": 0.9977940261947753,
+              "n_skipped": 1
+            },
+            "after": {
+              "point": 0.9777768726693459,
+              "lo": 0.9413953151882222,
+              "hi": 0.9977940261947753,
+              "n_skipped": 1
+            },
+            "after_minus_before": {
+              "point": 0.0,
+              "lo": 0.0,
+              "hi": 0.0,
+              "n_skipped": 1
+            }
+          },
+          "tool_cascade": {
+            "before": {
+              "point": 0.6399873737373737,
+              "lo": 0.4976467535524739,
+              "hi": 0.7570330227581749,
+              "n_skipped": 0
+            },
+            "after": {
+              "point": 0.6399873737373737,
+              "lo": 0.4976467535524739,
+              "hi": 0.7570330227581749,
+              "n_skipped": 0
+            },
+            "after_minus_before": {
+              "point": 0.0,
+              "lo": 0.0,
+              "hi": 0.0,
+              "n_skipped": 0
+            }
+          }
+        },
+        "headline": {
+          "before": {
+            "point": 0.8455038334441196,
+            "lo": 0.7728664785727097,
+            "hi": 0.8995229031615408,
+            "n_skipped": 0
+          },
+          "after": {
+            "point": 0.8455038334441196,
+            "lo": 0.7728664785727097,
+            "hi": 0.8995229031615408,
+            "n_skipped": 0
+          },
+          "after_minus_before": {
+            "point": 0.0,
+            "lo": 0.0,
+            "hi": 0.0,
+            "n_skipped": 0
+          }
+        }
+      },
+      "attribution": {
+        "before": {
+          "3": {
+            "healthy": {
+              "u": 46,
+              "m": 31
+            },
+            "tool_cascade": {
+              "m": 11,
+              "u": 7
+            },
+            "looping": {
+              "m": 23,
+              "u": 6
+            },
+            "goal_drift": {
+              "m": 26,
+              "u": 6
+            },
+            "context_corruption": {
+              "m": 30,
+              "u": 1
+            }
+          },
+          "4": {
+            "healthy": {
+              "m": 44,
+              "u": 16
+            },
+            "tool_cascade": {
+              "m": 20
+            },
+            "looping": {
+              "m": 27
+            },
+            "goal_drift": {
+              "m": 22,
+              "u": 3
+            },
+            "context_corruption": {
+              "m": 27
+            }
+          }
+        },
+        "after_blind": {
+          "3": {
+            "healthy": {
+              "u": 46,
+              "m": 31
+            },
+            "tool_cascade": {
+              "m": 11,
+              "u": 7
+            },
+            "looping": {
+              "m": 23,
+              "u": 6
+            },
+            "goal_drift": {
+              "m": 26,
+              "u": 6
+            },
+            "context_corruption": {
+              "m": 30,
+              "u": 1
+            }
+          },
+          "4": {
+            "healthy": {
+              "m": 44,
+              "u": 16
+            },
+            "tool_cascade": {
+              "m": 20
+            },
+            "looping": {
+              "m": 27
+            },
+            "goal_drift": {
+              "m": 22,
+              "u": 3
+            },
+            "context_corruption": {
+              "m": 27
+            }
+          }
+        }
+      }
+    },
+    "ESN_i_no_u@llama": {
+      "channels": [
+        "e",
+        "m",
+        "x"
+      ],
+      "auroc": {
+        "per_class": {
+          "looping": {
+            "before": {
+              "point": 0.8589004439579152,
+              "lo": 0.7988440850447793,
+              "hi": 0.9109224542926145,
+              "n_skipped": 1
+            },
+            "after": {
+              "point": 0.8611395841280899,
+              "lo": 0.8041578476451358,
+              "hi": 0.9127344819991878,
+              "n_skipped": 1
+            },
+            "after_minus_before": {
+              "point": 0.0022391401701746805,
+              "lo": 0.0,
+              "hi": 0.017483391608391623,
+              "n_skipped": 1
+            }
+          },
+          "goal_drift": {
+            "before": {
+              "point": 0.8507754329004329,
+              "lo": 0.7217466127622378,
+              "hi": 0.9705999375877672,
+              "n_skipped": 1
+            },
+            "after": {
+              "point": 0.8499637445887447,
+              "lo": 0.7217213602369853,
+              "hi": 0.9705999375877672,
+              "n_skipped": 1
+            },
+            "after_minus_before": {
+              "point": -0.0008116883116882634,
+              "lo": -0.006533051637150541,
+              "hi": 0.0,
+              "n_skipped": 1
+            }
+          },
+          "context_corruption": {
+            "before": {
+              "point": 1.0,
+              "lo": 1.0,
+              "hi": 1.0,
+              "n_skipped": 1
+            },
+            "after": {
+              "point": 1.0,
+              "lo": 1.0,
+              "hi": 1.0,
+              "n_skipped": 1
+            },
+            "after_minus_before": {
+              "point": 0.0,
+              "lo": 0.0,
+              "hi": 0.0,
+              "n_skipped": 1
+            }
+          },
+          "tool_cascade": {
+            "before": {
+              "point": 0.756722582972583,
+              "lo": 0.640415167940688,
+              "hi": 0.8419962993421052,
+              "n_skipped": 0
+            },
+            "after": {
+              "point": 0.7603300865800866,
+              "lo": 0.6463318761883868,
+              "hi": 0.8481303474202748,
+              "n_skipped": 0
+            },
+            "after_minus_before": {
+              "point": 0.003607503607503615,
+              "lo": 0.0,
+              "hi": 0.02778590944574548,
+              "n_skipped": 0
+            }
+          }
+        },
+        "headline": {
+          "before": {
+            "point": 0.9053913317465876,
+            "lo": 0.8585784390978991,
+            "hi": 0.9459344369745003,
+            "n_skipped": 0
+          },
+          "after": {
+            "point": 0.9058148213005119,
+            "lo": 0.859397022496794,
+            "hi": 0.9477146243669755,
+            "n_skipped": 0
+          },
+          "after_minus_before": {
+            "point": 0.00042348955392434995,
+            "lo": -0.0006173605367153668,
+            "hi": 0.004718041267972414,
+            "n_skipped": 0
+          }
+        }
+      },
+      "attribution": {
+        "before": {
+          "3": {
+            "healthy": {
+              "m": 65,
+              "x": 2,
+              "e": 10
+            },
+            "tool_cascade": {
+              "m": 17,
+              "e": 1
+            },
+            "looping": {
+              "m": 28,
+              "e": 1
+            },
+            "goal_drift": {
+              "m": 32
+            },
+            "context_corruption": {
+              "m": 31
+            }
+          },
+          "4": {
+            "healthy": {
+              "m": 57,
+              "e": 3
+            },
+            "tool_cascade": {
+              "m": 20
+            },
+            "looping": {
+              "m": 27
+            },
+            "goal_drift": {
+              "m": 25
+            },
+            "context_corruption": {
+              "m": 27
+            }
+          }
+        },
+        "after_blind": {
+          "3": {
+            "healthy": {
+              "m": 63,
+              "x": 2,
+              "e": 12
+            },
+            "tool_cascade": {
+              "m": 17,
+              "e": 1
+            },
+            "looping": {
+              "m": 28,
+              "e": 1
+            },
+            "goal_drift": {
+              "m": 32
+            },
+            "context_corruption": {
+              "m": 31
+            }
+          },
+          "4": {
+            "healthy": {
+              "m": 57,
+              "e": 3
+            },
+            "tool_cascade": {
+              "m": 20
+            },
+            "looping": {
+              "m": 27
+            },
+            "goal_drift": {
+              "m": 25
+            },
+            "context_corruption": {
+              "m": 27
+            }
+          }
+        }
+      }
+    },
+    "ESN_i@gemini": {
+      "channels": [
+        "e",
+        "m",
+        "x"
+      ],
+      "auroc": {
+        "per_class": {
+          "looping": {
+            "before": {
+              "point": 0.46951659451659455,
+              "lo": 0.31273870514209,
+              "hi": 0.6337769901846565,
+              "n_skipped": 0
+            },
+            "after": {
+              "point": 0.617965367965368,
+              "lo": 0.46312139226116145,
+              "hi": 0.7571769568151147,
+              "n_skipped": 0
+            },
+            "after_minus_before": {
+              "point": 0.14844877344877347,
+              "lo": -0.1263729268146845,
+              "hi": 0.38306181073500306,
+              "n_skipped": 0
+            }
+          },
+          "context_corruption": {
+            "before": {
+              "point": 0.49607984607984607,
+              "lo": 0.3256352070016704,
+              "hi": 0.6419631357626558,
+              "n_skipped": 0
+            },
+            "after": {
+              "point": 0.5226551226551226,
+              "lo": 0.3683827799925546,
+              "hi": 0.6759870595091183,
+              "n_skipped": 0
+            },
+            "after_minus_before": {
+              "point": 0.026575276575276585,
+              "lo": -0.15928523709773706,
+              "hi": 0.22346064779314465,
+              "n_skipped": 0
+            }
+          },
+          "tool_cascade": {
+            "before": {
+              "point": 0.5203463203463203,
+              "lo": 0.33759738726082605,
+              "hi": 0.7260722788120048,
+              "n_skipped": 15
+            },
+            "after": {
+              "point": 0.5435064935064935,
+              "lo": 0.3228683868873742,
+              "hi": 0.7625322150508713,
+              "n_skipped": 15
+            },
+            "after_minus_before": {
+              "point": 0.02316017316017316,
+              "lo": -0.15222842889788357,
+              "hi": 0.23215727775575118,
+              "n_skipped": 15
+            }
+          },
+          "rate_limit": {
+            "before": {
+              "point": 0.5774969078540507,
+              "lo": 0.3987173731143375,
+              "hi": 0.7456385309925657,
+              "n_skipped": 1
+            },
+            "after": {
+              "point": 0.48090599876314166,
+              "lo": 0.33887901242825563,
+              "hi": 0.6372695984863707,
+              "n_skipped": 1
+            },
+            "after_minus_before": {
+              "point": -0.09659090909090909,
+              "lo": -0.2800879128744943,
+              "hi": 0.08996781098293488,
+              "n_skipped": 1
+            }
+          },
+          "timeout": {
+            "before": {
+              "point": 0.4622113997113997,
+              "lo": 0.25855785608068577,
+              "hi": 0.6678116490506804,
+              "n_skipped": 0
+            },
+            "after": {
+              "point": 0.43691378066378067,
+              "lo": 0.2905426532155924,
+              "hi": 0.5992688904405453,
+              "n_skipped": 0
+            },
+            "after_minus_before": {
+              "point": -0.02529761904761904,
+              "lo": -0.20532864018977193,
+              "hi": 0.15386927596594877,
+              "n_skipped": 0
+            }
+          },
+          "malformed_json": {
+            "before": {
+              "point": 0.39242424242424245,
+              "lo": 0.21402010965416762,
+              "hi": 0.5759932893800501,
+              "n_skipped": 0
+            },
+            "after": {
+              "point": 0.599793388429752,
+              "lo": 0.45725295732797694,
+              "hi": 0.7419661366723866,
+              "n_skipped": 0
+            },
+            "after_minus_before": {
+              "point": 0.20736914600550962,
+              "lo": -0.025442759479270598,
+              "hi": 0.44845764126091114,
+              "n_skipped": 0
+            }
+          },
+          "wrong_document": {
+            "before": {
+              "point": 0.5963203463203464,
+              "lo": 0.38382078009012993,
+              "hi": 0.7779591185495789,
+              "n_skipped": 0
+            },
+            "after": {
+              "point": 0.4884199134199134,
+              "lo": 0.3362731466886036,
+              "hi": 0.6379476734592854,
+              "n_skipped": 0
+            },
+            "after_minus_before": {
+              "point": -0.10790043290043294,
+              "lo": -0.26867169071575997,
+              "hi": 0.07611268035593957,
+              "n_skipped": 0
+            }
+          }
+        },
+        "headline": {
+          "before": {
+            "point": 0.48084743539288993,
+            "lo": 0.3524706264173353,
+            "hi": 0.6133096600041007,
+            "n_skipped": 0
+          },
+          "after": {
+            "point": 0.5770365997638724,
+            "lo": 0.43120728133250197,
+            "hi": 0.7089712025339672,
+            "n_skipped": 0
+          },
+          "after_minus_before": {
+            "point": 0.09618916437098257,
+            "lo": -0.10829692379200197,
+            "hi": 0.2808713241188731,
+            "n_skipped": 0
+          }
+        }
+      },
+      "attribution": {
+        "before": {
+          "3": {
+            "healthy": {
+              "e": 77
+            },
+            "rate_limit": {
+              "e": 7
+            },
+            "looping": {
+              "e": 12
+            },
+            "tool_cascade": {
+              "e": 5
+            },
+            "timeout": {
+              "e": 9
+            },
+            "wrong_document": {
+              "e": 10
+            },
+            "malformed_json": {
+              "e": 11
+            },
+            "context_corruption": {
+              "e": 10
+            }
+          },
+          "4": {
+            "healthy": {
+              "e": 66
+            },
+            "rate_limit": {
+              "e": 8
+            },
+            "looping": {
+              "e": 12
+            },
+            "tool_cascade": {
+              "e": 5
+            },
+            "timeout": {
+              "e": 8
+            },
+            "wrong_document": {
+              "e": 10
+            },
+            "malformed_json": {
+              "e": 10
+            },
+            "context_corruption": {
+              "e": 9
+            }
+          }
+        },
+        "after_blind": {
+          "3": {
+            "healthy": {
+              "e": 77
+            },
+            "rate_limit": {
+              "e": 7
+            },
+            "looping": {
+              "e": 12
+            },
+            "tool_cascade": {
+              "e": 5
+            },
+            "timeout": {
+              "e": 9
+            },
+            "wrong_document": {
+              "e": 10
+            },
+            "malformed_json": {
+              "e": 11
+            },
+            "context_corruption": {
+              "e": 10
+            }
+          },
+          "4": {
+            "healthy": {
+              "e": 66
+            },
+            "rate_limit": {
+              "e": 8
+            },
+            "looping": {
+              "e": 12
+            },
+            "tool_cascade": {
+              "e": 5
+            },
+            "timeout": {
+              "e": 8
+            },
+            "wrong_document": {
+              "e": 10
+            },
+            "malformed_json": {
+              "e": 10
+            },
+            "context_corruption": {
+              "e": 9
+            }
+          }
+        }
+      }
+    }
+  },
+  "m_inputs": {
+    "family": "llama",
+    "inputs": [
+      "action_plan",
+      "action_tool_call",
+      "action_tool_result",
+      "action_synthesis",
+      "log_latency",
+      "log_output_tokens",
+      "error"
+    ],
+    "contrast": {
+      "action_plan": {
+        "at_t": {
+          "headline": {
+            "point": 0.5,
+            "lo": 0.5,
+            "hi": 0.5,
+            "n_skipped": 0
+          },
+          "looping": {
+            "point": 0.5,
+            "lo": 0.5,
+            "hi": 0.5,
+            "n_skipped": 1
+          },
+          "goal_drift": {
+            "point": 0.5,
+            "lo": 0.5,
+            "hi": 0.5,
+            "n_skipped": 1
+          },
+          "context_corruption": {
+            "point": 0.5,
+            "lo": 0.5,
+            "hi": 0.5,
+            "n_skipped": 1
+          }
+        },
+        "max_to_t": {
+          "headline": {
+            "point": 0.5,
+            "lo": 0.5,
+            "hi": 0.5,
+            "n_skipped": 0
+          },
+          "looping": {
+            "point": 0.5,
+            "lo": 0.5,
+            "hi": 0.5,
+            "n_skipped": 1
+          },
+          "goal_drift": {
+            "point": 0.5,
+            "lo": 0.5,
+            "hi": 0.5,
+            "n_skipped": 1
+          },
+          "context_corruption": {
+            "point": 0.5,
+            "lo": 0.5,
+            "hi": 0.5,
+            "n_skipped": 1
+          }
+        }
+      },
+      "action_tool_call": {
+        "at_t": {
+          "headline": {
+            "point": 0.5720563902250748,
+            "lo": 0.4934057595424495,
+            "hi": 0.6297242388758781,
+            "n_skipped": 0
+          },
+          "looping": {
+            "point": 0.58008305551409,
+            "lo": 0.5124629669926046,
+            "hi": 0.6496619185951892,
+            "n_skipped": 1
+          },
+          "goal_drift": {
+            "point": 0.5630073051948052,
+            "lo": 0.47954098891927377,
+            "hi": 0.7152922213372777,
+            "n_skipped": 1
+          },
+          "context_corruption": {
+            "point": 0.5755203726977921,
+            "lo": 0.4330253901799955,
+            "hi": 0.638717903033936,
+            "n_skipped": 1
+          }
+        },
+        "max_to_t": {
+          "headline": {
+            "point": 0.5,
+            "lo": 0.5,
+            "hi": 0.5,
+            "n_skipped": 0
+          },
+          "looping": {
+            "point": 0.5,
+            "lo": 0.5,
+            "hi": 0.5,
+            "n_skipped": 1
+          },
+          "goal_drift": {
+            "point": 0.5,
+            "lo": 0.5,
+            "hi": 0.5,
+            "n_skipped": 1
+          },
+          "context_corruption": {
+            "point": 0.5,
+            "lo": 0.5,
+            "hi": 0.5,
+            "n_skipped": 1
+          }
+        }
+      },
+      "action_tool_result": {
+        "at_t": {
+          "headline": {
+            "point": 0.5,
+            "lo": 0.5,
+            "hi": 0.5,
+            "n_skipped": 0
+          },
+          "looping": {
+            "point": 0.5,
+            "lo": 0.5,
+            "hi": 0.5,
+            "n_skipped": 1
+          },
+          "goal_drift": {
+            "point": 0.5,
+            "lo": 0.5,
+            "hi": 0.5,
+            "n_skipped": 1
+          },
+          "context_corruption": {
+            "point": 0.5,
+            "lo": 0.5,
+            "hi": 0.5,
+            "n_skipped": 1
+          }
+        },
+        "max_to_t": {
+          "headline": {
+            "point": 0.5,
+            "lo": 0.5,
+            "hi": 0.5,
+            "n_skipped": 0
+          },
+          "looping": {
+            "point": 0.5,
+            "lo": 0.5,
+            "hi": 0.5,
+            "n_skipped": 1
+          },
+          "goal_drift": {
+            "point": 0.5,
+            "lo": 0.5,
+            "hi": 0.5,
+            "n_skipped": 1
+          },
+          "context_corruption": {
+            "point": 0.5,
+            "lo": 0.5,
+            "hi": 0.5,
+            "n_skipped": 1
+          }
+        }
+      },
+      "action_synthesis": {
+        "at_t": {
+          "headline": {
+            "point": 0.4279436097749252,
+            "lo": 0.3702757611241218,
+            "hi": 0.5065942404575505,
+            "n_skipped": 0
+          },
+          "looping": {
+            "point": 0.41991694448591,
+            "lo": 0.3503380814048107,
+            "hi": 0.4875370330073953,
+            "n_skipped": 1
+          },
+          "goal_drift": {
+            "point": 0.4369926948051948,
+            "lo": 0.28470777866272234,
+            "hi": 0.5204590110807262,
+            "n_skipped": 1
+          },
+          "context_corruption": {
+            "point": 0.42447962730220795,
+            "lo": 0.3612820969660639,
+            "hi": 0.5669746098200046,
+            "n_skipped": 1
+          }
+        },
+        "max_to_t": {
+          "headline": {
+            "point": 0.4279436097749252,
+            "lo": 0.3702757611241218,
+            "hi": 0.5065942404575505,
+            "n_skipped": 0
+          },
+          "looping": {
+            "point": 0.41991694448591,
+            "lo": 0.3503380814048107,
+            "hi": 0.4875370330073953,
+            "n_skipped": 1
+          },
+          "goal_drift": {
+            "point": 0.4369926948051948,
+            "lo": 0.28470777866272234,
+            "hi": 0.5204590110807262,
+            "n_skipped": 1
+          },
+          "context_corruption": {
+            "point": 0.42447962730220795,
+            "lo": 0.3612820969660639,
+            "hi": 0.5669746098200046,
+            "n_skipped": 1
+          }
+        }
+      },
+      "log_latency": {
+        "at_t": {
+          "headline": {
+            "point": 0.5823766996166555,
+            "lo": 0.5469543131157085,
+            "hi": 0.6606265848695001,
+            "n_skipped": 0
+          },
+          "looping": {
+            "point": 0.46060329623548013,
+            "lo": 0.39733285582588695,
+            "hi": 0.5387361762110172,
+            "n_skipped": 1
+          },
+          "goal_drift": {
+            "point": 0.559584145021645,
+            "lo": 0.5105122591082322,
+            "hi": 0.6669252782629975,
+            "n_skipped": 1
+          },
+          "context_corruption": {
+            "point": 0.7202539992862573,
+            "lo": 0.6878934824120999,
+            "hi": 0.7941861627129485,
+            "n_skipped": 1
+          }
+        },
+        "max_to_t": {
+          "headline": {
+            "point": 0.48757186218661175,
+            "lo": 0.441347567033216,
+            "hi": 0.5410325227570617,
+            "n_skipped": 0
+          },
+          "looping": {
+            "point": 0.39339246322004945,
+            "lo": 0.3225133222924116,
+            "hi": 0.45458987253168287,
+            "n_skipped": 1
+          },
+          "goal_drift": {
+            "point": 0.47290367965367963,
+            "lo": 0.40986726475999147,
+            "hi": 0.5390186053426184,
+            "n_skipped": 1
+          },
+          "context_corruption": {
+            "point": 0.5909843442101507,
+            "lo": 0.5448543494404531,
+            "hi": 0.6515863159178611,
+            "n_skipped": 1
+          }
+        }
+      },
+      "log_output_tokens": {
+        "at_t": {
+          "headline": {
+            "point": 0.36886961644116295,
+            "lo": 0.30476949711633333,
+            "hi": 0.5223028815563664,
+            "n_skipped": 0
+          },
+          "looping": {
+            "point": 0.3555593565651037,
+            "lo": 0.2657252697550783,
+            "hi": 0.5697555276961014,
+            "n_skipped": 1
+          },
+          "goal_drift": {
+            "point": 0.2977654220779221,
+            "lo": 0.22160640060188475,
+            "hi": 0.48101167440660475,
+            "n_skipped": 1
+          },
+          "context_corruption": {
+            "point": 0.4518567006470232,
+            "lo": 0.362684380656424,
+            "hi": 0.5768081006008025,
+            "n_skipped": 1
+          }
+        },
+        "max_to_t": {
+          "headline": {
+            "point": 0.46650733691184987,
+            "lo": 0.35762144218897873,
+            "hi": 0.700876509018161,
+            "n_skipped": 0
+          },
+          "looping": {
+            "point": 0.48650150934633696,
+            "lo": 0.3640981066394128,
+            "hi": 0.7667608454015725,
+            "n_skipped": 1
+          },
+          "goal_drift": {
+            "point": 0.4399326298701298,
+            "lo": 0.3223813805069156,
+            "hi": 0.6584292900726724,
+            "n_skipped": 1
+          },
+          "context_corruption": {
+            "point": 0.47237563810144456,
+            "lo": 0.3590102699950134,
+            "hi": 0.6982290817768674,
+            "n_skipped": 1
+          }
+        }
+      },
+      "error": {
+        "at_t": {
+          "headline": {
+            "point": 0.5372761044679042,
+            "lo": 0.463663139583935,
+            "hi": 0.5877803603227092,
+            "n_skipped": 0
+          },
+          "looping": {
+            "point": 0.6964791594101939,
+            "lo": 0.6087410598659687,
+            "hi": 0.7994074625276069,
+            "n_skipped": 1
+          },
+          "goal_drift": {
+            "point": 0.3340909090909091,
+            "lo": 0.1980911970924879,
+            "hi": 0.5,
+            "n_skipped": 1
+          },
+          "context_corruption": {
+            "point": 0.5858830237862496,
+            "lo": 0.45255305039787797,
+            "hi": 0.6686151493563546,
+            "n_skipped": 1
+          }
+        },
+        "max_to_t": {
+          "headline": {
+            "point": 0.5503356348293058,
+            "lo": 0.444940088365327,
+            "hi": 0.6805425661643967,
+            "n_skipped": 0
+          },
+          "looping": {
+            "point": 0.7924242424242425,
+            "lo": 0.6440514357021682,
+            "hi": 1.0,
+            "n_skipped": 1
+          },
+          "goal_drift": {
+            "point": 0.2924242424242424,
+            "lo": 0.1423950240473548,
+            "hi": 0.5,
+            "n_skipped": 1
+          },
+          "context_corruption": {
+            "point": 0.5684099055066797,
+            "lo": 0.4205923837196202,
+            "hi": 0.6528175914171345,
+            "n_skipped": 1
+          }
+        }
+      }
+    }
+  },
+  "reproduction": {
+    "ESN_i@llama": {
+      "attribution": 0.8455038334441196,
+      "published": 0.8455038334441196
+    },
+    "ESN_i@gemini": {
+      "attribution": 0.48084743539288993,
+      "published": 0.48084743539288993
+    },
+    "ESN_i_no_u@llama": {
+      "attribution": 0.9053913317465876,
+      "published": 0.9053913317465876
+    }
+  }
+}
