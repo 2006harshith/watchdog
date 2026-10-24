@@ -121,3 +121,15 @@ def test_carry_forward_replaces_exactly_one_step_input(baseline, monkeypatch):
 def test_carry_forward_needs_a_previous_step_inside_the_run(baseline, step):
     with pytest.raises(ValueError, match="carry_forward_step"):
         baseline.score(_run(305), carry_forward_step=step)
+
+
+def test_channel_streams_max_is_the_score(baseline):
+    for run in (_run(7), _run(8, broken=True, failure_class="looping")):
+        streams = baseline.channel_streams(run)
+        assert list(streams) == list(baseline.channels)
+        assert np.array_equal(np.max(np.stack(list(streams.values())), axis=0), baseline.score(run).per_step)
+
+
+def test_channel_streams_before_fit_raises():
+    with pytest.raises(RuntimeError):
+        ESNBaseline().channel_streams(_run(0))

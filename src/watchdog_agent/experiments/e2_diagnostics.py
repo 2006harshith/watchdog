@@ -15,7 +15,10 @@ from collections.abc import Callable, Sequence
 import numpy as np
 import pandas as pd
 
-from watchdog_agent.baselines.esn.monitor import Run
+# _to_episode is the ESN wrapper's private trace -> feature view: the m-input contrast must read the
+# exact inputs the m sub-monitor sees, not a re-derivation from the step dicts.
+from watchdog_agent.baselines.esn._vendor.common import ACTION_TYPES, CHANNEL_SLICES
+from watchdog_agent.baselines.esn.monitor import Run, _to_episode
 from watchdog_agent.evaluation import matched_step_auroc, paired_matched_step_diff, prefix_eval_set
 from watchdog_agent.experiments.e1 import (
     FoldPlan,
@@ -533,19 +536,23 @@ def blind_episodes(episodes: pd.DataFrame) -> tuple[pd.DataFrame, dict]:
     return out, counts
 
 
+def _fit_esn_i(eps: pd.DataFrame, family: str, cfg: dict, make_esn: Callable):
+    """E2's ESN_i for this family (its pool, whole-task-group split, channels), fitted on eps."""
+    runs, to_run, esn = eps[eps["family"] == family], run_getter(eps), cfg["esn"]
+    pool = e2_healthy_pool(eps, family, cfg, "i")
+    fit, val = split_by_task_group(pool, esn["val_fraction"], esn["val_seed"])
+    return _fit_esn(make_esn, esn_channels(pool, runs, cfg), fit, val, to_run), runs, to_run
+
+
 def d7_result_blind(table: pd.DataFrame, episodes: pd.DataFrame, cfg: dict, make_esn: Callable) -> dict:
     """ESN_i (llama, gemini) and TEXT-raw (llama), refitted and rescored with result content blinded
     in every run. Same pools, splits, channels and training rows as E2: only the steps differ."""
     blind, counts = blind_episodes(episodes)
     out: dict = {"counts": counts}
-    esn = cfg["esn"]
     for family in (FAMILY, "gemini"):
         scored = []
         for eps in (episodes, blind):
-            runs, to_run = eps[eps["family"] == family], run_getter(eps)
-            pool = e2_healthy_pool(eps, family, cfg, "i")
-            fit, val = split_by_task_group(pool, esn["val_fraction"], esn["val_seed"])
-            monitor = _fit_esn(make_esn, esn_channels(pool, runs, cfg), fit, val, to_run)
+            monitor, runs, to_run = _fit_esn_i(eps, family, cfg, make_esn)
             scored.append(_esn_running_max(monitor, runs, to_run))
         out[f"ESN_i@{family}"] = _before_after(*scored, episodes[episodes["family"] == family], cfg)
 
@@ -622,4 +629,117 @@ def check_closeout_reproduction(result: dict, e2: dict, tol: float = 1e-9) -> di
     bad = {k: v for k, v in pairs.items() if not abs(v[0] - v[1]) <= tol}
     if bad:
         raise AssertionError(f"close-out does not reproduce E2: {bad}")
+    return pairs
+
+
+# ---------------------------------------------------------------- SP5 close-out: channel attribution
+# D-7c left ESN_i@llama bit-identical after blinding: its llama score is set by channels the
+# transform does not touch. Which channel sets each score, and which m input separates the classes.
+
+ATTRIBUTION_KEYS = {"what", "git", "blinded", "esn", "m_inputs"}
+M_INPUTS = [f"action_{a}" for a in ACTION_TYPES] + ["log_latency", "log_output_tokens", "error"]
+
+
+def channel_attribution(monitor, runs: pd.DataFrame, to_run: Callable[[str], Run], checkpoints: Sequence[int]) -> dict:
+    """Per checkpoint and class, over the matched-step evaluation set (failed runs with tau > t are
+    excluded, as in the AUROC): which channel's running max equals the ESN's running max at t.
+    Several channels at the max (e.g. all 0 in washout) count as "tie", never as the first by position."""
+    out: dict = {}
+    label = dict(zip(runs["uid"], runs["failure_class"]))
+    for t in checkpoints:
+        counts: dict = {}
+        for uid in prefix_eval_set(runs, t).uids:
+            run = to_run(uid)
+            total = np.maximum.accumulate(np.asarray(monitor.score(run).per_step, dtype=float))[t]
+            at_max = [c for c, s in monitor.channel_streams(run).items() if np.maximum.accumulate(s)[t] == total]
+            if not at_max:
+                raise AssertionError(f"{uid}: no channel stream reaches the ESN score at t={t}")
+            row = counts.setdefault("healthy" if pd.isna(label[uid]) else label[uid], {})
+            key = at_max[0] if len(at_max) == 1 else "tie"
+            row[key] = row.get(key, 0) + 1
+        out[str(t)] = counts
+    return out
+
+
+def m_input_scores(runs: pd.DataFrame, to_run: Callable[[str], Run]) -> dict[str, Scores]:
+    """Each m-channel input as a per-step score, read from the ESN's own feature view (so it is
+    exactly what the m sub-monitor sees, before standardisation)."""
+    m = CHANNEL_SLICES["m"]
+    if m.stop - m.start != len(M_INPUTS):
+        raise ValueError(f"m channel has {m.stop - m.start} dims, M_INPUTS names {len(M_INPUTS)}")
+    out: dict[str, Scores] = {n: {} for n in M_INPUTS}
+    for uid in runs["uid"]:
+        meta = _to_episode(to_run(uid)).X[:, m]
+        for j, n in enumerate(M_INPUTS):
+            out[n][uid] = meta[:, j]
+    return out
+
+
+def m_input_contrast(runs: pd.DataFrame, to_run: Callable[[str], Run], cfg: dict) -> dict:
+    """Single-input matched-step AUROC (no model) of every m input, at step t and as the running max
+    over 0..t, headline and per headline class. Below 0.5 = lower in failed runs."""
+    n, head = cfg["bootstrap"]["n_secondary"], cfg["classes"]["headline"]
+    out = {}
+    for name, scores in m_input_scores(runs, to_run).items():
+        # np.maximum.accumulate: "any step so far" for the 0/1 inputs, the largest value for the rest.
+        views = {"at_t": scores, "max_to_t": {u: np.maximum.accumulate(s) for u, s in scores.items()}}
+        out[name] = {
+            view: {c: evaluate(s, runs, classes, cfg, n).get("mean_primary")
+                   for c, classes in {"headline": head, **{k: [k] for k in head}}.items()}
+            for view, s in views.items()
+        }
+    return out
+
+
+def run_channel_attribution(
+    episodes: pd.DataFrame, cfg: dict, make_esn: Callable | None = None, git: dict | None = None
+) -> dict:
+    make_esn = make_esn or default_esn_factory(cfg)
+    blind, counts = blind_episodes(episodes)
+    primary = cfg["checkpoints"]["primary"]
+    variants = {"ESN_i": cfg, "ESN_i_no_u": without_channel(cfg, "u")}
+    esn: dict = {}
+    for family in (FAMILY, "gemini"):
+        for name, vcfg in variants.items():
+            if family == "gemini" and name == "ESN_i_no_u":
+                continue  # gemini has no logprobs, so u is already dropped: the same model as ESN_i
+            scored, attribution, channels = [], {}, None
+            for key, eps in (("before", episodes), ("after_blind", blind)):
+                monitor, runs, to_run = _fit_esn_i(eps, family, vcfg, make_esn)
+                channels = list(monitor.channels)
+                scored.append(_esn_running_max(monitor, runs, to_run))
+                attribution[key] = channel_attribution(monitor, runs, to_run, primary)
+            fam_runs = episodes[episodes["family"] == family]
+            esn[f"{name}@{family}"] = {
+                "channels": channels,
+                "auroc": _before_after(*scored, fam_runs, cfg),
+                "attribution": attribution,
+            }
+    llama = episodes[episodes["family"] == FAMILY]
+    return {
+        "what": "SP5 close-out, interpretation only: which ESN channel sets each matched-step score "
+        "(ESN_i with and without u, before and after the D-7c result-blind transform; llama, gemini), "
+        "and single-input AUROCs of the m channel's inputs on llama. Attribution is over the "
+        "matched-step evaluation set at the primary checkpoints.",
+        "git": git if git is not None else git_state(),
+        "blinded": counts,
+        "esn": esn,
+        "m_inputs": {"family": FAMILY, "inputs": M_INPUTS, "contrast": m_input_contrast(llama, run_getter(episodes), cfg)},
+    }
+
+
+def check_attribution_reproduction(result: dict, e2: dict, diag: dict, tol: float = 1e-9) -> dict[str, tuple[float, float]]:
+    """The 'before' ESNs must be E2's ESN_i (llama, gemini) and Step 3b's ESN_i without u."""
+    fam = e2["families"]
+    pairs = {
+        "ESN_i@llama": (result["esn"]["ESN_i@llama"]["auroc"]["headline"]["before"]["point"],
+                        fam[FAMILY]["arms"]["ESN_i"]["headline"]["mean_primary"]["point"]),
+        "ESN_i@gemini": (result["esn"]["ESN_i@gemini"]["auroc"]["headline"]["before"]["point"],
+                         fam["gemini"]["arms"]["ESN_i"]["headline"]["mean_primary"]["point"]),
+        "ESN_i_no_u@llama": (result["esn"]["ESN_i_no_u@llama"]["auroc"]["headline"]["before"]["point"],
+                             diag["rows"]["e2_ESN_i_no_u"]["headline"]["point"]),
+    }
+    bad = {k: v for k, v in pairs.items() if not abs(v[0] - v[1]) <= tol}
+    if bad:
+        raise AssertionError(f"channel attribution does not reproduce the published ESNs: {bad}")
     return pairs

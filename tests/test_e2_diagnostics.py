@@ -11,15 +11,20 @@ from test_e2 import _cfg, _episodes, _fake_esn
 
 from watchdog_agent.baselines.esn.monitor import RunScore
 from watchdog_agent.experiments.e2_diagnostics import (
+    ATTRIBUTION_KEYS,
     CLOSEOUT_KEYS,
+    M_INPUTS,
     REQUIRED_KEYS,
     blind_episodes,
     blind_results,
+    channel_attribution,
     check_reproduction,
+    m_input_scores,
     mask_rows,
     masked_prefix_table,
     per_fold_mean_auroc,
     restrict_classes,
+    run_channel_attribution,
     run_e2_closeout,
     run_e2_diagnostics,
     sp4_fold_scores,
@@ -303,3 +308,95 @@ def test_blind_episodes_changes_no_label_and_only_steps():
     pd.testing.assert_frame_equal(blind[other], episodes[other])
     assert (blind["T"] == blind["steps_parsed"].map(len)).all()
     assert counts["llama"]["tool_steps_blinded"] > 0
+
+
+# ---------------------------------------------------------------- channel attribution
+
+
+class StreamMonitor:
+    """Fixed per-run channel streams; the score is their step-wise max, as in ChannelMaxESNMonitor."""
+
+    def __init__(self, streams):
+        self.streams, self.channels = streams, tuple(next(iter(streams.values())))
+
+    def channel_streams(self, run):
+        return {c: np.asarray(s, dtype=float) for c, s in self.streams[run.uid].items()}
+
+    def score(self, run):
+        per_step = np.max(np.stack(list(self.channel_streams(run).values())), axis=0)
+        return RunScore(per_step, None, float(per_step.max()))
+
+
+def _attr_runs():
+    runs = _runs([None, None, "looping", "looping"], [np.nan, np.nan, 2, 4], list("abcd"))
+    return runs.assign(T=6)
+
+
+def test_attribution_names_the_winning_channel_and_marks_ties():
+    from watchdog_agent.baselines.esn.monitor import Run
+
+    streams = {
+        "r0": {"a": [0, 0, 0, 0, 0, 0], "b": [0, 0, 0, 0, 0, 0]},  # all 0: tie, not "a"
+        "r1": {"a": [0, 0, 1, 0, 0, 0], "b": [0, 0, 0, 0.5, 0, 0]},  # running max: a at t=3,4
+        "r2": {"a": [0, 0, 0, 0, 0, 0], "b": [0, 0, 2, 3, 1, 0]},
+        "r3": {"a": [9, 9, 9, 9, 9, 9], "b": [0] * 6},  # tau=4: excluded at t=3, counted at t=4
+    }
+    out = channel_attribution(StreamMonitor(streams), _attr_runs(), lambda u: Run(u, []), [3, 4])
+    assert out["3"] == {"healthy": {"tie": 1, "a": 1}, "looping": {"b": 1}}
+    assert out["4"] == {"healthy": {"tie": 1, "a": 1}, "looping": {"b": 1, "a": 1}}
+
+
+def test_attribution_counts_equal_the_matched_step_evaluation_set():
+    from watchdog_agent.baselines.esn.monitor import Run
+    from watchdog_agent.evaluation import prefix_eval_set
+
+    rng = np.random.default_rng(0)
+    runs = _attr_runs()
+    streams = {u: {"a": rng.random(6), "b": rng.random(6)} for u in runs["uid"]}
+    out = channel_attribution(StreamMonitor(streams), runs, lambda u: Run(u, []), [3, 4])
+    for t in (3, 4):
+        assert sum(n for row in out[str(t)].values() for n in row.values()) == len(prefix_eval_set(runs, t).uids)
+
+
+def test_m_input_scores_are_the_esn_m_channel_inputs():
+    from watchdog_agent.baselines.esn._vendor.common import CHANNEL_SLICES
+    from watchdog_agent.baselines.esn.monitor import _to_episode
+    from watchdog_agent.experiments.e2_diagnostics import run_getter
+
+    episodes = _episodes()
+    runs, to_run = episodes[episodes["family"] == "llama"].head(3), run_getter(episodes)
+    scores = m_input_scores(runs, to_run)
+    assert list(scores) == M_INPUTS
+    for uid in runs["uid"]:
+        meta = _to_episode(to_run(uid)).X[:, CHANNEL_SLICES["m"]]
+        assert np.array_equal(np.column_stack([scores[n][uid] for n in M_INPUTS]), meta)
+    # error is the step's error flag, latency its log latency
+    steps = to_run(runs["uid"].iloc[0]).steps
+    assert scores["error"][runs["uid"].iloc[0]].tolist() == [float(s["error"]) for s in steps]
+
+
+class ChannelFakeESN:
+    def __init__(self, channels):
+        self.channels = tuple(channels)
+
+    def fit(self, fit_runs, val_runs):
+        pass
+
+    def channel_streams(self, run):
+        return {c: np.cumsum([float(s["error"]) * (i + 1) + 0.01 * k for k, s in enumerate(run.steps)])
+                for i, c in enumerate(self.channels)}
+
+    def score(self, run):
+        per_step = np.max(np.stack(list(self.channel_streams(run).values())), axis=0)
+        return RunScore(per_step, None, float(per_step.max()))
+
+
+def test_channel_attribution_end_to_end_produces_every_key():
+    result = run_channel_attribution(_episodes(), _cfg(), make_esn=ChannelFakeESN, git={"commit": "test", "dirty": False})
+    assert ATTRIBUTION_KEYS <= set(result)
+    assert set(result["esn"]) == {"ESN_i@llama", "ESN_i_no_u@llama", "ESN_i@gemini"}
+    assert "u" not in result["esn"]["ESN_i_no_u@llama"]["channels"]
+    for block in result["esn"].values():
+        assert set(block["attribution"]) == {"before", "after_blind"}
+        assert {"before", "after", "after_minus_before"} <= set(block["auroc"]["headline"])
+    assert set(result["m_inputs"]["contrast"]) == set(M_INPUTS)

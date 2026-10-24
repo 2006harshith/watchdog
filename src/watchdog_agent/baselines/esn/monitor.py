@@ -94,3 +94,11 @@ class ESNBaseline:
             episode.X[s] = episode.X[s - 1]
         per_step = self._monitor.score_episode(episode)
         return RunScore(per_step, first_alarm(per_step, self.theta), float(per_step.max()))
+
+    def channel_streams(self, run: Run) -> dict[str, np.ndarray]:
+        """Diagnostics only: each channel's own sub-monitor stream. score(run).per_step is their
+        step-wise max (ChannelMaxESNMonitor.score_step), so this says which channel set a score."""
+        if self._monitor is None:
+            raise RuntimeError("ESNBaseline.channel_streams called before fit")
+        episode = _to_episode(run)
+        return {c: np.asarray(sub.score_episode(episode), dtype=float) for c, sub in zip(self.channels, self._monitor.subs)}

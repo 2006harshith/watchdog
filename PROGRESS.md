@@ -274,7 +274,9 @@ FAIL → the negative result is written up; SP6 (thresholds from few healthy run
   transforming the source corpora in-sample (not cross-fitted) create? · answers: not yet given ·
   NOT ANSWERED, owner override 2026-09-29 (Step 2 started); overridden again 2026-09-30 to run E2
   (Step 3). Claude disagreed: it is the calibration logic the gate result rests on. SP5 done criteria
-  require it answered. Eight teach-backs owed before deploy (SP9).
+  require it answered. Eight teach-backs owed before deploy (SP9). Re-asked 2026-10-24 after the
+  close-out run; overridden a third time ("I'll do them at last"). Still NOT ANSWERED; SP5 cannot
+  close on it.
 
 ## Session log
 - 2026-09-30 · SP5 (Step 3, 3b) · Recalibration teach-back overridden again (still NOT ANSWERED).
