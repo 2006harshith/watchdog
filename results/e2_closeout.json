@@ -1,0 +1,3281 @@
+{
+  "what": "SP5 close-out diagnostics, interpretation only (the E2 gate is final). D-6: ESN_i instability over random fit subsets; (a) SP4 structure with E2's pool; (b') SP4 fold pools size-matched to E2's fit size. D-7: what MS and the ESN read on a tool step; MS-raw, ESN_i (llama) and TL-pct (gemini) rescored with step tau's inputs masked; (c) ESN_i (llama, gemini) and TEXT-raw (llama) refitted and rescored with every run's tool results replaced by same-length filler (label-free, all runs). Mean matched-step AUROC over the primary checkpoints, headline classes unless per class.",
+  "git": {
+    "commit": "ecadcfba948622abe54ae19b898fdf9d477949f3",
+    "dirty": false
+  },
+  "config": {
+    "n_subsets": 30,
+    "fit_size": 21,
+    "seed": 0,
+    "size_matched_draws": 30
+  },
+  "d6": {
+    "subsets": {
+      "pool_runs": 28,
+      "fit_size": 21,
+      "channels": [
+        "e",
+        "u",
+        "m",
+        "x"
+      ],
+      "seed": 0,
+      "e2_split_auroc": 0.8455038334441196,
+      "aurocs": [
+        0.7810975050449459,
+        0.857134309920496,
+        0.6134833772904769,
+        0.7633263704741415,
+        0.8058364722784095,
+        0.7566909264831665,
+        0.6799753470708342,
+        0.7683861772056599,
+        0.8267562308357574,
+        0.6224818155610671,
+        0.8135938657746583,
+        0.8290947151362671,
+        0.8198387880693879,
+        0.8230727651544933,
+        0.8411355178485063,
+        0.6052656548184892,
+        0.7708592430317802,
+        0.8110498311998038,
+        0.8361738403771977,
+        0.6668075618199449,
+        0.6735896487478765,
+        0.5971790294643899,
+        0.611307081745992,
+        0.8338477450819223,
+        0.6791485000964913,
+        0.5658603687635058,
+        0.7616017673392467,
+        0.7884182456692088,
+        0.676327618904669,
+        0.806194026116976
+      ],
+      "median": 0.7696227101187201,
+      "min": 0.5658603687635058,
+      "max": 0.857134309920496,
+      "share_of_draws_at_or_above_e2_split": 0.03333333333333333,
+      "e2_split_is_one_of_the_draws": false
+    },
+    "a_fit_pool_only": {
+      "sp4_structure_e2_pool_standardised": 0.8455038334441196,
+      "sp4_structure_e2_pool_raw": 0.8455038334441196,
+      "per_fold_headline": {
+        "mean": 0.8378238435922344,
+        "n_folds_used": 4,
+        "per_fold": [
+          {
+            "fold": 0,
+            "n_runs": 16,
+            "auroc": 0.9642857142857143
+          },
+          {
+            "fold": 1,
+            "n_runs": 91,
+            "auroc": 0.8807877569863201
+          },
+          {
+            "fold": 2,
+            "n_runs": 27,
+            "auroc": 0.8321834415584416
+          },
+          {
+            "fold": 3,
+            "n_runs": 21,
+            "auroc": 0.6740384615384616
+          },
+          {
+            "fold": 4,
+            "n_runs": 15,
+            "skipped": "one-class checkpoint"
+          }
+        ]
+      }
+    },
+    "b_size_matched": {
+      "fit_size": 21,
+      "draws": [
+        {
+          "draw": 0,
+          "per_fold_headline": {
+            "mean": 0.785759269365643,
+            "n_folds_used": 4,
+            "per_fold": [
+              {
+                "fold": 0,
+                "n_runs": 16,
+                "auroc": 0.9404761904761905
+              },
+              {
+                "fold": 1,
+                "n_runs": 91,
+                "auroc": 0.8492111117616065
+              },
+              {
+                "fold": 2,
+                "n_runs": 27,
+                "auroc": 0.7331574675324675
+              },
+              {
+                "fold": 3,
+                "n_runs": 21,
+                "auroc": 0.6201923076923077
+              },
+              {
+                "fold": 4,
+                "n_runs": 15,
+                "skipped": "one-class checkpoint"
+              }
+            ]
+          },
+          "folds": [
+            {
+              "fold": 0,
+              "n_fit": 21,
+              "n_fold_pool": 34,
+              "fit_inside_fold_pool": true,
+              "n_fit_on_llama_task_groups": 10
+            },
+            {
+              "fold": 1,
+              "n_fit": 21,
+              "n_fold_pool": 33,
+              "fit_inside_fold_pool": true,
+              "n_fit_on_llama_task_groups": 7
+            },
+            {
+              "fold": 2,
+              "n_fit": 21,
+              "n_fold_pool": 45,
+              "fit_inside_fold_pool": true,
+              "n_fit_on_llama_task_groups": 13
+            },
+            {
+              "fold": 3,
+              "n_fit": 21,
+              "n_fold_pool": 49,
+              "fit_inside_fold_pool": true,
+              "n_fit_on_llama_task_groups": 17
+            },
+            {
+              "fold": 4,
+              "n_fit": 21,
+              "n_fold_pool": 47,
+              "fit_inside_fold_pool": true,
+              "n_fit_on_llama_task_groups": 7
+            }
+          ]
+        },
+        {
+          "draw": 1,
+          "per_fold_headline": {
+            "mean": 0.8200518530405243,
+            "n_folds_used": 4,
+            "per_fold": [
+              {
+                "fold": 0,
+                "n_runs": 16,
+                "auroc": 0.9880952380952381
+              },
+              {
+                "fold": 1,
+                "n_runs": 91,
+                "auroc": 0.8860807055353902
+              },
+              {
+                "fold": 2,
+                "n_runs": 27,
+                "auroc": 0.7954545454545454
+              },
+              {
+                "fold": 3,
+                "n_runs": 21,
+                "auroc": 0.6105769230769231
+              },
+              {
+                "fold": 4,
+                "n_runs": 15,
+                "skipped": "one-class checkpoint"
+              }
+            ]
+          },
+          "folds": [
+            {
+              "fold": 0,
+              "n_fit": 21,
+              "n_fold_pool": 34,
+              "fit_inside_fold_pool": true,
+              "n_fit_on_llama_task_groups": 10
+            },
+            {
+              "fold": 1,
+              "n_fit": 21,
+              "n_fold_pool": 33,
+              "fit_inside_fold_pool": true,
+              "n_fit_on_llama_task_groups": 7
+            },
+            {
+              "fold": 2,
+              "n_fit": 21,
+              "n_fold_pool": 45,
+              "fit_inside_fold_pool": true,
+              "n_fit_on_llama_task_groups": 15
+            },
+            {
+              "fold": 3,
+              "n_fit": 21,
+              "n_fold_pool": 49,
+              "fit_inside_fold_pool": true,
+              "n_fit_on_llama_task_groups": 16
+            },
+            {
+              "fold": 4,
+              "n_fit": 21,
+              "n_fold_pool": 47,
+              "fit_inside_fold_pool": true,
+              "n_fit_on_llama_task_groups": 8
+            }
+          ]
+        },
+        {
+          "draw": 2,
+          "per_fold_headline": {
+            "mean": 0.7635696022951164,
+            "n_folds_used": 4,
+            "per_fold": [
+              {
+                "fold": 0,
+                "n_runs": 16,
+                "auroc": 0.9166666666666667
+              },
+              {
+                "fold": 1,
+                "n_runs": 91,
+                "auroc": 0.8960252040522607
+              },
+              {
+                "fold": 2,
+                "n_runs": 27,
+                "auroc": 0.828125
+              },
+              {
+                "fold": 3,
+                "n_runs": 21,
+                "auroc": 0.41346153846153844
+              },
+              {
+                "fold": 4,
+                "n_runs": 15,
+                "skipped": "one-class checkpoint"
+              }
+            ]
+          },
+          "folds": [
+            {
+              "fold": 0,
+              "n_fit": 21,
+              "n_fold_pool": 34,
+              "fit_inside_fold_pool": true,
+              "n_fit_on_llama_task_groups": 11
+            },
+            {
+              "fold": 1,
+              "n_fit": 21,
+              "n_fold_pool": 33,
+              "fit_inside_fold_pool": true,
+              "n_fit_on_llama_task_groups": 5
+            },
+            {
+              "fold": 2,
+              "n_fit": 21,
+              "n_fold_pool": 45,
+              "fit_inside_fold_pool": true,
+              "n_fit_on_llama_task_groups": 14
+            },
+            {
+              "fold": 3,
+              "n_fit": 21,
+              "n_fold_pool": 49,
+              "fit_inside_fold_pool": true,
+              "n_fit_on_llama_task_groups": 12
+            },
+            {
+              "fold": 4,
+              "n_fit": 21,
+              "n_fold_pool": 47,
+              "fit_inside_fold_pool": true,
+              "n_fit_on_llama_task_groups": 8
+            }
+          ]
+        },
+        {
+          "draw": 3,
+          "per_fold_headline": {
+            "mean": 0.8385101823639045,
+            "n_folds_used": 4,
+            "per_fold": [
+              {
+                "fold": 0,
+                "n_runs": 16,
+                "auroc": 0.9880952380952381
+              },
+              {
+                "fold": 1,
+                "n_runs": 91,
+                "auroc": 0.8626643974542865
+              },
+              {
+                "fold": 2,
+                "n_runs": 27,
+                "auroc": 0.8090503246753247
+              },
+              {
+                "fold": 3,
+                "n_runs": 21,
+                "auroc": 0.6942307692307692
+              },
+              {
+                "fold": 4,
+                "n_runs": 15,
+                "skipped": "one-class checkpoint"
+              }
+            ]
+          },
+          "folds": [
+            {
+              "fold": 0,
+              "n_fit": 21,
+              "n_fold_pool": 34,
+              "fit_inside_fold_pool": true,
+              "n_fit_on_llama_task_groups": 12
+            },
+            {
+              "fold": 1,
+              "n_fit": 21,
+              "n_fold_pool": 33,
+              "fit_inside_fold_pool": true,
+              "n_fit_on_llama_task_groups": 6
+            },
+            {
+              "fold": 2,
+              "n_fit": 21,
+              "n_fold_pool": 45,
+              "fit_inside_fold_pool": true,
+              "n_fit_on_llama_task_groups": 14
+            },
+            {
+              "fold": 3,
+              "n_fit": 21,
+              "n_fold_pool": 49,
+              "fit_inside_fold_pool": true,
+              "n_fit_on_llama_task_groups": 15
+            },
+            {
+              "fold": 4,
+              "n_fit": 21,
+              "n_fold_pool": 47,
+              "fit_inside_fold_pool": true,
+              "n_fit_on_llama_task_groups": 11
+            }
+          ]
+        },
+        {
+          "draw": 4,
+          "per_fold_headline": {
+            "mean": 0.8765712417187946,
+            "n_folds_used": 4,
+            "per_fold": [
+              {
+                "fold": 0,
+                "n_runs": 16,
+                "auroc": 0.8981481481481481
+              },
+              {
+                "fold": 1,
+                "n_runs": 91,
+                "auroc": 0.8947033771685888
+              },
+              {
+                "fold": 2,
+                "n_runs": 27,
+                "auroc": 0.8009334415584416
+              },
+              {
+                "fold": 3,
+                "n_runs": 21,
+                "auroc": 0.9125
+              },
+              {
+                "fold": 4,
+                "n_runs": 15,
+                "skipped": "one-class checkpoint"
+              }
+            ]
+          },
+          "folds": [
+            {
+              "fold": 0,
+              "n_fit": 21,
+              "n_fold_pool": 34,
+              "fit_inside_fold_pool": true,
+              "n_fit_on_llama_task_groups": 10
+            },
+            {
+              "fold": 1,
+              "n_fit": 21,
+              "n_fold_pool": 33,
+              "fit_inside_fold_pool": true,
+              "n_fit_on_llama_task_groups": 6
+            },
+            {
+              "fold": 2,
+              "n_fit": 21,
+              "n_fold_pool": 45,
+              "fit_inside_fold_pool": true,
+              "n_fit_on_llama_task_groups": 15
+            },
+            {
+              "fold": 3,
+              "n_fit": 21,
+              "n_fold_pool": 49,
+              "fit_inside_fold_pool": true,
+              "n_fit_on_llama_task_groups": 17
+            },
+            {
+              "fold": 4,
+              "n_fit": 21,
+              "n_fold_pool": 47,
+              "fit_inside_fold_pool": true,
+              "n_fit_on_llama_task_groups": 7
+            }
+          ]
+        },
+        {
+          "draw": 5,
+          "per_fold_headline": {
+            "mean": 0.6638748783720718,
+            "n_folds_used": 4,
+            "per_fold": [
+              {
+                "fold": 0,
+                "n_runs": 16,
+                "auroc": 0.8928571428571428
+              },
+              {
+                "fold": 1,
+                "n_runs": 91,
+                "auroc": 0.8644561818199559
+              },
+              {
+                "fold": 2,
+                "n_runs": 27,
+                "auroc": 0.4616477272727273
+              },
+              {
+                "fold": 3,
+                "n_runs": 21,
+                "auroc": 0.43653846153846154
+              },
+              {
+                "fold": 4,
+                "n_runs": 15,
+                "skipped": "one-class checkpoint"
+              }
+            ]
+          },
+          "folds": [
+            {
+              "fold": 0,
+              "n_fit": 21,
+              "n_fold_pool": 34,
+              "fit_inside_fold_pool": true,
+              "n_fit_on_llama_task_groups": 7
+            },
+            {
+              "fold": 1,
+              "n_fit": 21,
+              "n_fold_pool": 33,
+              "fit_inside_fold_pool": true,
+              "n_fit_on_llama_task_groups": 6
+            },
+            {
+              "fold": 2,
+              "n_fit": 21,
+              "n_fold_pool": 45,
+              "fit_inside_fold_pool": true,
+              "n_fit_on_llama_task_groups": 16
+            },
+            {
+              "fold": 3,
+              "n_fit": 21,
+              "n_fold_pool": 49,
+              "fit_inside_fold_pool": true,
+              "n_fit_on_llama_task_groups": 14
+            },
+            {
+              "fold": 4,
+              "n_fit": 21,
+              "n_fold_pool": 47,
+              "fit_inside_fold_pool": true,
+              "n_fit_on_llama_task_groups": 10
+            }
+          ]
+        },
+        {
+          "draw": 6,
+          "per_fold_headline": {
+            "mean": 0.8621618831858257,
+            "n_folds_used": 4,
+            "per_fold": [
+              {
+                "fold": 0,
+                "n_runs": 16,
+                "auroc": 0.9246031746031746
+              },
+              {
+                "fold": 1,
+                "n_runs": 91,
+                "auroc": 0.8926663611371308
+              },
+              {
+                "fold": 2,
+                "n_runs": 27,
+                "auroc": 0.8756087662337663
+              },
+              {
+                "fold": 3,
+                "n_runs": 21,
+                "auroc": 0.7557692307692307
+              },
+              {
+                "fold": 4,
+                "n_runs": 15,
+                "skipped": "one-class checkpoint"
+              }
+            ]
+          },
+          "folds": [
+            {
+              "fold": 0,
+              "n_fit": 21,
+              "n_fold_pool": 34,
+              "fit_inside_fold_pool": true,
+              "n_fit_on_llama_task_groups": 11
+            },
+            {
+              "fold": 1,
+              "n_fit": 21,
+              "n_fold_pool": 33,
+              "fit_inside_fold_pool": true,
+              "n_fit_on_llama_task_groups": 5
+            },
+            {
+              "fold": 2,
+              "n_fit": 21,
+              "n_fold_pool": 45,
+              "fit_inside_fold_pool": true,
+              "n_fit_on_llama_task_groups": 15
+            },
+            {
+              "fold": 3,
+              "n_fit": 21,
+              "n_fold_pool": 49,
+              "fit_inside_fold_pool": true,
+              "n_fit_on_llama_task_groups": 13
+            },
+            {
+              "fold": 4,
+              "n_fit": 21,
+              "n_fold_pool": 47,
+              "fit_inside_fold_pool": true,
+              "n_fit_on_llama_task_groups": 9
+            }
+          ]
+        },
+        {
+          "draw": 7,
+          "per_fold_headline": {
+            "mean": 0.8179751694556842,
+            "n_folds_used": 4,
+            "per_fold": [
+              {
+                "fold": 0,
+                "n_runs": 16,
+                "auroc": 0.9246031746031746
+              },
+              {
+                "fold": 1,
+                "n_runs": 91,
+                "auroc": 0.8734432324902913
+              },
+              {
+                "fold": 2,
+                "n_runs": 27,
+                "auroc": 0.7575081168831169
+              },
+              {
+                "fold": 3,
+                "n_runs": 21,
+                "auroc": 0.7163461538461539
+              },
+              {
+                "fold": 4,
+                "n_runs": 15,
+                "skipped": "one-class checkpoint"
+              }
+            ]
+          },
+          "folds": [
+            {
+              "fold": 0,
+              "n_fit": 21,
+              "n_fold_pool": 34,
+              "fit_inside_fold_pool": true,
+              "n_fit_on_llama_task_groups": 9
+            },
+            {
+              "fold": 1,
+              "n_fit": 21,
+              "n_fold_pool": 33,
+              "fit_inside_fold_pool": true,
+              "n_fit_on_llama_task_groups": 6
+            },
+            {
+              "fold": 2,
+              "n_fit": 21,
+              "n_fold_pool": 45,
+              "fit_inside_fold_pool": true,
+              "n_fit_on_llama_task_groups": 15
+            },
+            {
+              "fold": 3,
+              "n_fit": 21,
+              "n_fold_pool": 49,
+              "fit_inside_fold_pool": true,
+              "n_fit_on_llama_task_groups": 12
+            },
+            {
+              "fold": 4,
+              "n_fit": 21,
+              "n_fold_pool": 47,
+              "fit_inside_fold_pool": true,
+              "n_fit_on_llama_task_groups": 7
+            }
+          ]
+        },
+        {
+          "draw": 8,
+          "per_fold_headline": {
+            "mean": 0.7406396914749466,
+            "n_folds_used": 4,
+            "per_fold": [
+              {
+                "fold": 0,
+                "n_runs": 16,
+                "auroc": 0.9404761904761905
+              },
+              {
+                "fold": 1,
+                "n_runs": 91,
+                "auroc": 0.8695757072917276
+              },
+              {
+                "fold": 2,
+                "n_runs": 27,
+                "auroc": 0.8236607142857143
+              },
+              {
+                "fold": 3,
+                "n_runs": 21,
+                "auroc": 0.32884615384615384
+              },
+              {
+                "fold": 4,
+                "n_runs": 15,
+                "skipped": "one-class checkpoint"
+              }
+            ]
+          },
+          "folds": [
+            {
+              "fold": 0,
+              "n_fit": 21,
+              "n_fold_pool": 34,
+              "fit_inside_fold_pool": true,
+              "n_fit_on_llama_task_groups": 10
+            },
+            {
+              "fold": 1,
+              "n_fit": 21,
+              "n_fold_pool": 33,
+              "fit_inside_fold_pool": true,
+              "n_fit_on_llama_task_groups": 6
+            },
+            {
+              "fold": 2,
+              "n_fit": 21,
+              "n_fold_pool": 45,
+              "fit_inside_fold_pool": true,
+              "n_fit_on_llama_task_groups": 11
+            },
+            {
+              "fold": 3,
+              "n_fit": 21,
+              "n_fold_pool": 49,
+              "fit_inside_fold_pool": true,
+              "n_fit_on_llama_task_groups": 15
+            },
+            {
+              "fold": 4,
+              "n_fit": 21,
+              "n_fold_pool": 47,
+              "fit_inside_fold_pool": true,
+              "n_fit_on_llama_task_groups": 10
+            }
+          ]
+        },
+        {
+          "draw": 9,
+          "per_fold_headline": {
+            "mean": 0.7590869021612838,
+            "n_folds_used": 4,
+            "per_fold": [
+              {
+                "fold": 0,
+                "n_runs": 16,
+                "auroc": 0.9642857142857143
+              },
+              {
+                "fold": 1,
+                "n_runs": 91,
+                "auroc": 0.8472710601935873
+              },
+              {
+                "fold": 2,
+                "n_runs": 27,
+                "auroc": 0.8305600649350648
+              },
+              {
+                "fold": 3,
+                "n_runs": 21,
+                "auroc": 0.3942307692307692
+              },
+              {
+                "fold": 4,
+                "n_runs": 15,
+                "skipped": "one-class checkpoint"
+              }
+            ]
+          },
+          "folds": [
+            {
+              "fold": 0,
+              "n_fit": 21,
+              "n_fold_pool": 34,
+              "fit_inside_fold_pool": true,
+              "n_fit_on_llama_task_groups": 12
+            },
+            {
+              "fold": 1,
+              "n_fit": 21,
+              "n_fold_pool": 33,
+              "fit_inside_fold_pool": true,
+              "n_fit_on_llama_task_groups": 6
+            },
+            {
+              "fold": 2,
+              "n_fit": 21,
+              "n_fold_pool": 45,
+              "fit_inside_fold_pool": true,
+              "n_fit_on_llama_task_groups": 16
+            },
+            {
+              "fold": 3,
+              "n_fit": 21,
+              "n_fold_pool": 49,
+              "fit_inside_fold_pool": true,
+              "n_fit_on_llama_task_groups": 15
+            },
+            {
+              "fold": 4,
+              "n_fit": 21,
+              "n_fold_pool": 47,
+              "fit_inside_fold_pool": true,
+              "n_fit_on_llama_task_groups": 8
+            }
+          ]
+        },
+        {
+          "draw": 10,
+          "per_fold_headline": {
+            "mean": 0.8630139430210028,
+            "n_folds_used": 4,
+            "per_fold": [
+              {
+                "fold": 0,
+                "n_runs": 16,
+                "auroc": 0.9219576719576719
+              },
+              {
+                "fold": 1,
+                "n_runs": 91,
+                "auroc": 0.8580982250014637
+              },
+              {
+                "fold": 2,
+                "n_runs": 27,
+                "auroc": 0.8691152597402598
+              },
+              {
+                "fold": 3,
+                "n_runs": 21,
+                "auroc": 0.8028846153846154
+              },
+              {
+                "fold": 4,
+                "n_runs": 15,
+                "skipped": "one-class checkpoint"
+              }
+            ]
+          },
+          "folds": [
+            {
+              "fold": 0,
+              "n_fit": 21,
+              "n_fold_pool": 34,
+              "fit_inside_fold_pool": true,
+              "n_fit_on_llama_task_groups": 10
+            },
+            {
+              "fold": 1,
+              "n_fit": 21,
+              "n_fold_pool": 33,
+              "fit_inside_fold_pool": true,
+              "n_fit_on_llama_task_groups": 4
+            },
+            {
+              "fold": 2,
+              "n_fit": 21,
+              "n_fold_pool": 45,
+              "fit_inside_fold_pool": true,
+              "n_fit_on_llama_task_groups": 14
+            },
+            {
+              "fold": 3,
+              "n_fit": 21,
+              "n_fold_pool": 49,
+              "fit_inside_fold_pool": true,
+              "n_fit_on_llama_task_groups": 16
+            },
+            {
+              "fold": 4,
+              "n_fit": 21,
+              "n_fold_pool": 47,
+              "fit_inside_fold_pool": true,
+              "n_fit_on_llama_task_groups": 6
+            }
+          ]
+        },
+        {
+          "draw": 11,
+          "per_fold_headline": {
+            "mean": 0.7081076569615324,
+            "n_folds_used": 4,
+            "per_fold": [
+              {
+                "fold": 0,
+                "n_runs": 16,
+                "auroc": 0.8425925925925926
+              },
+              {
+                "fold": 1,
+                "n_runs": 91,
+                "auroc": 0.8961036446441465
+              },
+              {
+                "fold": 2,
+                "n_runs": 27,
+                "auroc": 0.6706574675324675
+              },
+              {
+                "fold": 3,
+                "n_runs": 21,
+                "auroc": 0.4230769230769231
+              },
+              {
+                "fold": 4,
+                "n_runs": 15,
+                "skipped": "one-class checkpoint"
+              }
+            ]
+          },
+          "folds": [
+            {
+              "fold": 0,
+              "n_fit": 21,
+              "n_fold_pool": 34,
+              "fit_inside_fold_pool": true,
+              "n_fit_on_llama_task_groups": 9
+            },
+            {
+              "fold": 1,
+              "n_fit": 21,
+              "n_fold_pool": 33,
+              "fit_inside_fold_pool": true,
+              "n_fit_on_llama_task_groups": 5
+            },
+            {
+              "fold": 2,
+              "n_fit": 21,
+              "n_fold_pool": 45,
+              "fit_inside_fold_pool": true,
+              "n_fit_on_llama_task_groups": 13
+            },
+            {
+              "fold": 3,
+              "n_fit": 21,
+              "n_fold_pool": 49,
+              "fit_inside_fold_pool": true,
+              "n_fit_on_llama_task_groups": 15
+            },
+            {
+              "fold": 4,
+              "n_fit": 21,
+              "n_fold_pool": 47,
+              "fit_inside_fold_pool": true,
+              "n_fit_on_llama_task_groups": 7
+            }
+          ]
+        },
+        {
+          "draw": 12,
+          "per_fold_headline": {
+            "mean": 0.7882185114499392,
+            "n_folds_used": 4,
+            "per_fold": [
+              {
+                "fold": 0,
+                "n_runs": 16,
+                "auroc": 0.9801587301587302
+              },
+              {
+                "fold": 1,
+                "n_runs": 91,
+                "auroc": 0.8649387172394278
+              },
+              {
+                "fold": 2,
+                "n_runs": 27,
+                "auroc": 0.7221996753246753
+              },
+              {
+                "fold": 3,
+                "n_runs": 21,
+                "auroc": 0.585576923076923
+              },
+              {
+                "fold": 4,
+                "n_runs": 15,
+                "skipped": "one-class checkpoint"
+              }
+            ]
+          },
+          "folds": [
+            {
+              "fold": 0,
+              "n_fit": 21,
+              "n_fold_pool": 34,
+              "fit_inside_fold_pool": true,
+              "n_fit_on_llama_task_groups": 10
+            },
+            {
+              "fold": 1,
+              "n_fit": 21,
+              "n_fold_pool": 33,
+              "fit_inside_fold_pool": true,
+              "n_fit_on_llama_task_groups": 3
+            },
+            {
+              "fold": 2,
+              "n_fit": 21,
+              "n_fold_pool": 45,
+              "fit_inside_fold_pool": true,
+              "n_fit_on_llama_task_groups": 13
+            },
+            {
+              "fold": 3,
+              "n_fit": 21,
+              "n_fold_pool": 49,
+              "fit_inside_fold_pool": true,
+              "n_fit_on_llama_task_groups": 15
+            },
+            {
+              "fold": 4,
+              "n_fit": 21,
+              "n_fold_pool": 47,
+              "fit_inside_fold_pool": true,
+              "n_fit_on_llama_task_groups": 8
+            }
+          ]
+        },
+        {
+          "draw": 13,
+          "per_fold_headline": {
+            "mean": 0.7833131433264394,
+            "n_folds_used": 4,
+            "per_fold": [
+              {
+                "fold": 0,
+                "n_runs": 16,
+                "auroc": 0.9087301587301587
+              },
+              {
+                "fold": 1,
+                "n_runs": 91,
+                "auroc": 0.8974526093807935
+              },
+              {
+                "fold": 2,
+                "n_runs": 27,
+                "auroc": 0.8520698051948052
+              },
+              {
+                "fold": 3,
+                "n_runs": 21,
+                "auroc": 0.475
+              },
+              {
+                "fold": 4,
+                "n_runs": 15,
+                "skipped": "one-class checkpoint"
+              }
+            ]
+          },
+          "folds": [
+            {
+              "fold": 0,
+              "n_fit": 21,
+              "n_fold_pool": 34,
+              "fit_inside_fold_pool": true,
+              "n_fit_on_llama_task_groups": 8
+            },
+            {
+              "fold": 1,
+              "n_fit": 21,
+              "n_fold_pool": 33,
+              "fit_inside_fold_pool": true,
+              "n_fit_on_llama_task_groups": 6
+            },
+            {
+              "fold": 2,
+              "n_fit": 21,
+              "n_fold_pool": 45,
+              "fit_inside_fold_pool": true,
+              "n_fit_on_llama_task_groups": 14
+            },
+            {
+              "fold": 3,
+              "n_fit": 21,
+              "n_fold_pool": 49,
+              "fit_inside_fold_pool": true,
+              "n_fit_on_llama_task_groups": 17
+            },
+            {
+              "fold": 4,
+              "n_fit": 21,
+              "n_fold_pool": 47,
+              "fit_inside_fold_pool": true,
+              "n_fit_on_llama_task_groups": 11
+            }
+          ]
+        },
+        {
+          "draw": 14,
+          "per_fold_headline": {
+            "mean": 0.8198650994818086,
+            "n_folds_used": 4,
+            "per_fold": [
+              {
+                "fold": 0,
+                "n_runs": 16,
+                "auroc": 0.9880952380952381
+              },
+              {
+                "fold": 1,
+                "n_runs": 91,
+                "auroc": 0.8975058940977305
+              },
+              {
+                "fold": 2,
+                "n_runs": 27,
+                "auroc": 0.8053977272727273
+              },
+              {
+                "fold": 3,
+                "n_runs": 21,
+                "auroc": 0.5884615384615384
+              },
+              {
+                "fold": 4,
+                "n_runs": 15,
+                "skipped": "one-class checkpoint"
+              }
+            ]
+          },
+          "folds": [
+            {
+              "fold": 0,
+              "n_fit": 21,
+              "n_fold_pool": 34,
+              "fit_inside_fold_pool": true,
+              "n_fit_on_llama_task_groups": 8
+            },
+            {
+              "fold": 1,
+              "n_fit": 21,
+              "n_fold_pool": 33,
+              "fit_inside_fold_pool": true,
+              "n_fit_on_llama_task_groups": 7
+            },
+            {
+              "fold": 2,
+              "n_fit": 21,
+              "n_fold_pool": 45,
+              "fit_inside_fold_pool": true,
+              "n_fit_on_llama_task_groups": 15
+            },
+            {
+              "fold": 3,
+              "n_fit": 21,
+              "n_fold_pool": 49,
+              "fit_inside_fold_pool": true,
+              "n_fit_on_llama_task_groups": 16
+            },
+            {
+              "fold": 4,
+              "n_fit": 21,
+              "n_fold_pool": 47,
+              "fit_inside_fold_pool": true,
+              "n_fit_on_llama_task_groups": 11
+            }
+          ]
+        },
+        {
+          "draw": 15,
+          "per_fold_headline": {
+            "mean": 0.8094577694425363,
+            "n_folds_used": 4,
+            "per_fold": [
+              {
+                "fold": 0,
+                "n_runs": 16,
+                "auroc": 0.8452380952380952
+              },
+              {
+                "fold": 1,
+                "n_runs": 91,
+                "auroc": 0.8845728776369455
+              },
+              {
+                "fold": 2,
+                "n_runs": 27,
+                "auroc": 0.7599431818181819
+              },
+              {
+                "fold": 3,
+                "n_runs": 21,
+                "auroc": 0.7480769230769231
+              },
+              {
+                "fold": 4,
+                "n_runs": 15,
+                "skipped": "one-class checkpoint"
+              }
+            ]
+          },
+          "folds": [
+            {
+              "fold": 0,
+              "n_fit": 21,
+              "n_fold_pool": 34,
+              "fit_inside_fold_pool": true,
+              "n_fit_on_llama_task_groups": 10
+            },
+            {
+              "fold": 1,
+              "n_fit": 21,
+              "n_fold_pool": 33,
+              "fit_inside_fold_pool": true,
+              "n_fit_on_llama_task_groups": 6
+            },
+            {
+              "fold": 2,
+              "n_fit": 21,
+              "n_fold_pool": 45,
+              "fit_inside_fold_pool": true,
+              "n_fit_on_llama_task_groups": 16
+            },
+            {
+              "fold": 3,
+              "n_fit": 21,
+              "n_fold_pool": 49,
+              "fit_inside_fold_pool": true,
+              "n_fit_on_llama_task_groups": 15
+            },
+            {
+              "fold": 4,
+              "n_fit": 21,
+              "n_fold_pool": 47,
+              "fit_inside_fold_pool": true,
+              "n_fit_on_llama_task_groups": 9
+            }
+          ]
+        },
+        {
+          "draw": 16,
+          "per_fold_headline": {
+            "mean": 0.8494871404550722,
+            "n_folds_used": 4,
+            "per_fold": [
+              {
+                "fold": 0,
+                "n_runs": 16,
+                "auroc": 0.9484126984126984
+              },
+              {
+                "fold": 1,
+                "n_runs": 91,
+                "auroc": 0.8857590152557422
+              },
+              {
+                "fold": 2,
+                "n_runs": 27,
+                "auroc": 0.7339691558441559
+              },
+              {
+                "fold": 3,
+                "n_runs": 21,
+                "auroc": 0.8298076923076922
+              },
+              {
+                "fold": 4,
+                "n_runs": 15,
+                "skipped": "one-class checkpoint"
+              }
+            ]
+          },
+          "folds": [
+            {
+              "fold": 0,
+              "n_fit": 21,
+              "n_fold_pool": 34,
+              "fit_inside_fold_pool": true,
+              "n_fit_on_llama_task_groups": 12
+            },
+            {
+              "fold": 1,
+              "n_fit": 21,
+              "n_fold_pool": 33,
+              "fit_inside_fold_pool": true,
+              "n_fit_on_llama_task_groups": 5
+            },
+            {
+              "fold": 2,
+              "n_fit": 21,
+              "n_fold_pool": 45,
+              "fit_inside_fold_pool": true,
+              "n_fit_on_llama_task_groups": 14
+            },
+            {
+              "fold": 3,
+              "n_fit": 21,
+              "n_fold_pool": 49,
+              "fit_inside_fold_pool": true,
+              "n_fit_on_llama_task_groups": 16
+            },
+            {
+              "fold": 4,
+              "n_fit": 21,
+              "n_fold_pool": 47,
+              "fit_inside_fold_pool": true,
+              "n_fit_on_llama_task_groups": 10
+            }
+          ]
+        },
+        {
+          "draw": 17,
+          "per_fold_headline": {
+            "mean": 0.7514796688183327,
+            "n_folds_used": 4,
+            "per_fold": [
+              {
+                "fold": 0,
+                "n_runs": 16,
+                "auroc": 0.9087301587301587
+              },
+              {
+                "fold": 1,
+                "n_runs": 91,
+                "auroc": 0.8741584216380773
+              },
+              {
+                "fold": 2,
+                "n_runs": 27,
+                "auroc": 0.7932224025974026
+              },
+              {
+                "fold": 3,
+                "n_runs": 21,
+                "auroc": 0.42980769230769234
+              },
+              {
+                "fold": 4,
+                "n_runs": 15,
+                "skipped": "one-class checkpoint"
+              }
+            ]
+          },
+          "folds": [
+            {
+              "fold": 0,
+              "n_fit": 21,
+              "n_fold_pool": 34,
+              "fit_inside_fold_pool": true,
+              "n_fit_on_llama_task_groups": 9
+            },
+            {
+              "fold": 1,
+              "n_fit": 21,
+              "n_fold_pool": 33,
+              "fit_inside_fold_pool": true,
+              "n_fit_on_llama_task_groups": 4
+            },
+            {
+              "fold": 2,
+              "n_fit": 21,
+              "n_fold_pool": 45,
+              "fit_inside_fold_pool": true,
+              "n_fit_on_llama_task_groups": 14
+            },
+            {
+              "fold": 3,
+              "n_fit": 21,
+              "n_fold_pool": 49,
+              "fit_inside_fold_pool": true,
+              "n_fit_on_llama_task_groups": 17
+            },
+            {
+              "fold": 4,
+              "n_fit": 21,
+              "n_fold_pool": 47,
+              "fit_inside_fold_pool": true,
+              "n_fit_on_llama_task_groups": 9
+            }
+          ]
+        },
+        {
+          "draw": 18,
+          "per_fold_headline": {
+            "mean": 0.8115644928035386,
+            "n_folds_used": 4,
+            "per_fold": [
+              {
+                "fold": 0,
+                "n_runs": 16,
+                "auroc": 0.9801587301587302
+              },
+              {
+                "fold": 1,
+                "n_runs": 91,
+                "auroc": 0.8030622780184611
+              },
+              {
+                "fold": 2,
+                "n_runs": 27,
+                "auroc": 0.8668831168831169
+              },
+              {
+                "fold": 3,
+                "n_runs": 21,
+                "auroc": 0.5961538461538461
+              },
+              {
+                "fold": 4,
+                "n_runs": 15,
+                "skipped": "one-class checkpoint"
+              }
+            ]
+          },
+          "folds": [
+            {
+              "fold": 0,
+              "n_fit": 21,
+              "n_fold_pool": 34,
+              "fit_inside_fold_pool": true,
+              "n_fit_on_llama_task_groups": 11
+            },
+            {
+              "fold": 1,
+              "n_fit": 21,
+              "n_fold_pool": 33,
+              "fit_inside_fold_pool": true,
+              "n_fit_on_llama_task_groups": 5
+            },
+            {
+              "fold": 2,
+              "n_fit": 21,
+              "n_fold_pool": 45,
+              "fit_inside_fold_pool": true,
+              "n_fit_on_llama_task_groups": 14
+            },
+            {
+              "fold": 3,
+              "n_fit": 21,
+              "n_fold_pool": 49,
+              "fit_inside_fold_pool": true,
+              "n_fit_on_llama_task_groups": 14
+            },
+            {
+              "fold": 4,
+              "n_fit": 21,
+              "n_fold_pool": 47,
+              "fit_inside_fold_pool": true,
+              "n_fit_on_llama_task_groups": 8
+            }
+          ]
+        },
+        {
+          "draw": 19,
+          "per_fold_headline": {
+            "mean": 0.7697440109698933,
+            "n_folds_used": 4,
+            "per_fold": [
+              {
+                "fold": 0,
+                "n_runs": 16,
+                "auroc": 0.9404761904761905
+              },
+              {
+                "fold": 1,
+                "n_runs": 91,
+                "auroc": 0.8017834448119743
+              },
+              {
+                "fold": 2,
+                "n_runs": 27,
+                "auroc": 0.8232548701298701
+              },
+              {
+                "fold": 3,
+                "n_runs": 21,
+                "auroc": 0.5134615384615384
+              },
+              {
+                "fold": 4,
+                "n_runs": 15,
+                "skipped": "one-class checkpoint"
+              }
+            ]
+          },
+          "folds": [
+            {
+              "fold": 0,
+              "n_fit": 21,
+              "n_fold_pool": 34,
+              "fit_inside_fold_pool": true,
+              "n_fit_on_llama_task_groups": 10
+            },
+            {
+              "fold": 1,
+              "n_fit": 21,
+              "n_fold_pool": 33,
+              "fit_inside_fold_pool": true,
+              "n_fit_on_llama_task_groups": 7
+            },
+            {
+              "fold": 2,
+              "n_fit": 21,
+              "n_fold_pool": 45,
+              "fit_inside_fold_pool": true,
+              "n_fit_on_llama_task_groups": 15
+            },
+            {
+              "fold": 3,
+              "n_fit": 21,
+              "n_fold_pool": 49,
+              "fit_inside_fold_pool": true,
+              "n_fit_on_llama_task_groups": 15
+            },
+            {
+              "fold": 4,
+              "n_fit": 21,
+              "n_fold_pool": 47,
+              "fit_inside_fold_pool": true,
+              "n_fit_on_llama_task_groups": 9
+            }
+          ]
+        },
+        {
+          "draw": 20,
+          "per_fold_headline": {
+            "mean": 0.73708698107507,
+            "n_folds_used": 4,
+            "per_fold": [
+              {
+                "fold": 0,
+                "n_runs": 16,
+                "auroc": 0.9484126984126984
+              },
+              {
+                "fold": 1,
+                "n_runs": 91,
+                "auroc": 0.8663032328805886
+              },
+              {
+                "fold": 2,
+                "n_runs": 27,
+                "auroc": 0.8451704545454546
+              },
+              {
+                "fold": 3,
+                "n_runs": 21,
+                "auroc": 0.28846153846153844
+              },
+              {
+                "fold": 4,
+                "n_runs": 15,
+                "skipped": "one-class checkpoint"
+              }
+            ]
+          },
+          "folds": [
+            {
+              "fold": 0,
+              "n_fit": 21,
+              "n_fold_pool": 34,
+              "fit_inside_fold_pool": true,
+              "n_fit_on_llama_task_groups": 7
+            },
+            {
+              "fold": 1,
+              "n_fit": 21,
+              "n_fold_pool": 33,
+              "fit_inside_fold_pool": true,
+              "n_fit_on_llama_task_groups": 6
+            },
+            {
+              "fold": 2,
+              "n_fit": 21,
+              "n_fold_pool": 45,
+              "fit_inside_fold_pool": true,
+              "n_fit_on_llama_task_groups": 13
+            },
+            {
+              "fold": 3,
+              "n_fit": 21,
+              "n_fold_pool": 49,
+              "fit_inside_fold_pool": true,
+              "n_fit_on_llama_task_groups": 14
+            },
+            {
+              "fold": 4,
+              "n_fit": 21,
+              "n_fold_pool": 47,
+              "fit_inside_fold_pool": true,
+              "n_fit_on_llama_task_groups": 8
+            }
+          ]
+        },
+        {
+          "draw": 21,
+          "per_fold_headline": {
+            "mean": 0.7939927499286445,
+            "n_folds_used": 4,
+            "per_fold": [
+              {
+                "fold": 0,
+                "n_runs": 16,
+                "auroc": 0.9880952380952381
+              },
+              {
+                "fold": 1,
+                "n_runs": 91,
+                "auroc": 0.8193349274535058
+              },
+              {
+                "fold": 2,
+                "n_runs": 27,
+                "auroc": 0.7993100649350648
+              },
+              {
+                "fold": 3,
+                "n_runs": 21,
+                "auroc": 0.5692307692307692
+              },
+              {
+                "fold": 4,
+                "n_runs": 15,
+                "skipped": "one-class checkpoint"
+              }
+            ]
+          },
+          "folds": [
+            {
+              "fold": 0,
+              "n_fit": 21,
+              "n_fold_pool": 34,
+              "fit_inside_fold_pool": true,
+              "n_fit_on_llama_task_groups": 7
+            },
+            {
+              "fold": 1,
+              "n_fit": 21,
+              "n_fold_pool": 33,
+              "fit_inside_fold_pool": true,
+              "n_fit_on_llama_task_groups": 7
+            },
+            {
+              "fold": 2,
+              "n_fit": 21,
+              "n_fold_pool": 45,
+              "fit_inside_fold_pool": true,
+              "n_fit_on_llama_task_groups": 14
+            },
+            {
+              "fold": 3,
+              "n_fit": 21,
+              "n_fold_pool": 49,
+              "fit_inside_fold_pool": true,
+              "n_fit_on_llama_task_groups": 14
+            },
+            {
+              "fold": 4,
+              "n_fit": 21,
+              "n_fold_pool": 47,
+              "fit_inside_fold_pool": true,
+              "n_fit_on_llama_task_groups": 11
+            }
+          ]
+        },
+        {
+          "draw": 22,
+          "per_fold_headline": {
+            "mean": 0.7948830074838598,
+            "n_folds_used": 4,
+            "per_fold": [
+              {
+                "fold": 0,
+                "n_runs": 16,
+                "auroc": 0.9246031746031746
+              },
+              {
+                "fold": 1,
+                "n_runs": 91,
+                "auroc": 0.8664329762113849
+              },
+              {
+                "fold": 2,
+                "n_runs": 27,
+                "auroc": 0.8058035714285714
+              },
+              {
+                "fold": 3,
+                "n_runs": 21,
+                "auroc": 0.5826923076923077
+              },
+              {
+                "fold": 4,
+                "n_runs": 15,
+                "skipped": "one-class checkpoint"
+              }
+            ]
+          },
+          "folds": [
+            {
+              "fold": 0,
+              "n_fit": 21,
+              "n_fold_pool": 34,
+              "fit_inside_fold_pool": true,
+              "n_fit_on_llama_task_groups": 8
+            },
+            {
+              "fold": 1,
+              "n_fit": 21,
+              "n_fold_pool": 33,
+              "fit_inside_fold_pool": true,
+              "n_fit_on_llama_task_groups": 6
+            },
+            {
+              "fold": 2,
+              "n_fit": 21,
+              "n_fold_pool": 45,
+              "fit_inside_fold_pool": true,
+              "n_fit_on_llama_task_groups": 15
+            },
+            {
+              "fold": 3,
+              "n_fit": 21,
+              "n_fold_pool": 49,
+              "fit_inside_fold_pool": true,
+              "n_fit_on_llama_task_groups": 14
+            },
+            {
+              "fold": 4,
+              "n_fit": 21,
+              "n_fold_pool": 47,
+              "fit_inside_fold_pool": true,
+              "n_fit_on_llama_task_groups": 9
+            }
+          ]
+        },
+        {
+          "draw": 23,
+          "per_fold_headline": {
+            "mean": 0.8168549526296256,
+            "n_folds_used": 4,
+            "per_fold": [
+              {
+                "fold": 0,
+                "n_runs": 16,
+                "auroc": 0.9880952380952381
+              },
+              {
+                "fold": 1,
+                "n_runs": 91,
+                "auroc": 0.88721355843725
+              },
+              {
+                "fold": 2,
+                "n_runs": 27,
+                "auroc": 0.7940340909090908
+              },
+              {
+                "fold": 3,
+                "n_runs": 21,
+                "auroc": 0.5980769230769231
+              },
+              {
+                "fold": 4,
+                "n_runs": 15,
+                "skipped": "one-class checkpoint"
+              }
+            ]
+          },
+          "folds": [
+            {
+              "fold": 0,
+              "n_fit": 21,
+              "n_fold_pool": 34,
+              "fit_inside_fold_pool": true,
+              "n_fit_on_llama_task_groups": 10
+            },
+            {
+              "fold": 1,
+              "n_fit": 21,
+              "n_fold_pool": 33,
+              "fit_inside_fold_pool": true,
+              "n_fit_on_llama_task_groups": 8
+            },
+            {
+              "fold": 2,
+              "n_fit": 21,
+              "n_fold_pool": 45,
+              "fit_inside_fold_pool": true,
+              "n_fit_on_llama_task_groups": 14
+            },
+            {
+              "fold": 3,
+              "n_fit": 21,
+              "n_fold_pool": 49,
+              "fit_inside_fold_pool": true,
+              "n_fit_on_llama_task_groups": 12
+            },
+            {
+              "fold": 4,
+              "n_fit": 21,
+              "n_fold_pool": 47,
+              "fit_inside_fold_pool": true,
+              "n_fit_on_llama_task_groups": 9
+            }
+          ]
+        },
+        {
+          "draw": 24,
+          "per_fold_headline": {
+            "mean": 0.835468952163637,
+            "n_folds_used": 4,
+            "per_fold": [
+              {
+                "fold": 0,
+                "n_runs": 16,
+                "auroc": 0.9484126984126984
+              },
+              {
+                "fold": 1,
+                "n_runs": 91,
+                "auroc": 0.8649572411109809
+              },
+              {
+                "fold": 2,
+                "n_runs": 27,
+                "auroc": 0.8390827922077921
+              },
+              {
+                "fold": 3,
+                "n_runs": 21,
+                "auroc": 0.6894230769230769
+              },
+              {
+                "fold": 4,
+                "n_runs": 15,
+                "skipped": "one-class checkpoint"
+              }
+            ]
+          },
+          "folds": [
+            {
+              "fold": 0,
+              "n_fit": 21,
+              "n_fold_pool": 34,
+              "fit_inside_fold_pool": true,
+              "n_fit_on_llama_task_groups": 6
+            },
+            {
+              "fold": 1,
+              "n_fit": 21,
+              "n_fold_pool": 33,
+              "fit_inside_fold_pool": true,
+              "n_fit_on_llama_task_groups": 7
+            },
+            {
+              "fold": 2,
+              "n_fit": 21,
+              "n_fold_pool": 45,
+              "fit_inside_fold_pool": true,
+              "n_fit_on_llama_task_groups": 12
+            },
+            {
+              "fold": 3,
+              "n_fit": 21,
+              "n_fold_pool": 49,
+              "fit_inside_fold_pool": true,
+              "n_fit_on_llama_task_groups": 14
+            },
+            {
+              "fold": 4,
+              "n_fit": 21,
+              "n_fold_pool": 47,
+              "fit_inside_fold_pool": true,
+              "n_fit_on_llama_task_groups": 9
+            }
+          ]
+        },
+        {
+          "draw": 25,
+          "per_fold_headline": {
+            "mean": 0.7494038733578007,
+            "n_folds_used": 4,
+            "per_fold": [
+              {
+                "fold": 0,
+                "n_runs": 16,
+                "auroc": 0.9404761904761905
+              },
+              {
+                "fold": 1,
+                "n_runs": 91,
+                "auroc": 0.8960784887691977
+              },
+              {
+                "fold": 2,
+                "n_runs": 27,
+                "auroc": 0.6783685064935066
+              },
+              {
+                "fold": 3,
+                "n_runs": 21,
+                "auroc": 0.48269230769230764
+              },
+              {
+                "fold": 4,
+                "n_runs": 15,
+                "skipped": "one-class checkpoint"
+              }
+            ]
+          },
+          "folds": [
+            {
+              "fold": 0,
+              "n_fit": 21,
+              "n_fold_pool": 34,
+              "fit_inside_fold_pool": true,
+              "n_fit_on_llama_task_groups": 10
+            },
+            {
+              "fold": 1,
+              "n_fit": 21,
+              "n_fold_pool": 33,
+              "fit_inside_fold_pool": true,
+              "n_fit_on_llama_task_groups": 3
+            },
+            {
+              "fold": 2,
+              "n_fit": 21,
+              "n_fold_pool": 45,
+              "fit_inside_fold_pool": true,
+              "n_fit_on_llama_task_groups": 13
+            },
+            {
+              "fold": 3,
+              "n_fit": 21,
+              "n_fold_pool": 49,
+              "fit_inside_fold_pool": true,
+              "n_fit_on_llama_task_groups": 16
+            },
+            {
+              "fold": 4,
+              "n_fit": 21,
+              "n_fold_pool": 47,
+              "fit_inside_fold_pool": true,
+              "n_fit_on_llama_task_groups": 11
+            }
+          ]
+        },
+        {
+          "draw": 26,
+          "per_fold_headline": {
+            "mean": 0.7875115454675026,
+            "n_folds_used": 4,
+            "per_fold": [
+              {
+                "fold": 0,
+                "n_runs": 16,
+                "auroc": 0.9880952380952381
+              },
+              {
+                "fold": 1,
+                "n_runs": 91,
+                "auroc": 0.8913746450734734
+              },
+              {
+                "fold": 2,
+                "n_runs": 27,
+                "auroc": 0.7830762987012987
+              },
+              {
+                "fold": 3,
+                "n_runs": 21,
+                "auroc": 0.4875
+              },
+              {
+                "fold": 4,
+                "n_runs": 15,
+                "skipped": "one-class checkpoint"
+              }
+            ]
+          },
+          "folds": [
+            {
+              "fold": 0,
+              "n_fit": 21,
+              "n_fold_pool": 34,
+              "fit_inside_fold_pool": true,
+              "n_fit_on_llama_task_groups": 7
+            },
+            {
+              "fold": 1,
+              "n_fit": 21,
+              "n_fold_pool": 33,
+              "fit_inside_fold_pool": true,
+              "n_fit_on_llama_task_groups": 8
+            },
+            {
+              "fold": 2,
+              "n_fit": 21,
+              "n_fold_pool": 45,
+              "fit_inside_fold_pool": true,
+              "n_fit_on_llama_task_groups": 15
+            },
+            {
+              "fold": 3,
+              "n_fit": 21,
+              "n_fold_pool": 49,
+              "fit_inside_fold_pool": true,
+              "n_fit_on_llama_task_groups": 14
+            },
+            {
+              "fold": 4,
+              "n_fit": 21,
+              "n_fold_pool": 47,
+              "fit_inside_fold_pool": true,
+              "n_fit_on_llama_task_groups": 12
+            }
+          ]
+        },
+        {
+          "draw": 27,
+          "per_fold_headline": {
+            "mean": 0.7314808081099596,
+            "n_folds_used": 4,
+            "per_fold": [
+              {
+                "fold": 0,
+                "n_runs": 16,
+                "auroc": 0.8849206349206349
+              },
+              {
+                "fold": 1,
+                "n_runs": 91,
+                "auroc": 0.717947527589134
+              },
+              {
+                "fold": 2,
+                "n_runs": 27,
+                "auroc": 0.7826704545454546
+              },
+              {
+                "fold": 3,
+                "n_runs": 21,
+                "auroc": 0.5403846153846154
+              },
+              {
+                "fold": 4,
+                "n_runs": 15,
+                "skipped": "one-class checkpoint"
+              }
+            ]
+          },
+          "folds": [
+            {
+              "fold": 0,
+              "n_fit": 21,
+              "n_fold_pool": 34,
+              "fit_inside_fold_pool": true,
+              "n_fit_on_llama_task_groups": 9
+            },
+            {
+              "fold": 1,
+              "n_fit": 21,
+              "n_fold_pool": 33,
+              "fit_inside_fold_pool": true,
+              "n_fit_on_llama_task_groups": 8
+            },
+            {
+              "fold": 2,
+              "n_fit": 21,
+              "n_fold_pool": 45,
+              "fit_inside_fold_pool": true,
+              "n_fit_on_llama_task_groups": 13
+            },
+            {
+              "fold": 3,
+              "n_fit": 21,
+              "n_fold_pool": 49,
+              "fit_inside_fold_pool": true,
+              "n_fit_on_llama_task_groups": 15
+            },
+            {
+              "fold": 4,
+              "n_fit": 21,
+              "n_fold_pool": 47,
+              "fit_inside_fold_pool": true,
+              "n_fit_on_llama_task_groups": 10
+            }
+          ]
+        },
+        {
+          "draw": 28,
+          "per_fold_headline": {
+            "mean": 0.7731275242149556,
+            "n_folds_used": 4,
+            "per_fold": [
+              {
+                "fold": 0,
+                "n_runs": 16,
+                "auroc": 0.9404761904761905
+              },
+              {
+                "fold": 1,
+                "n_runs": 91,
+                "auroc": 0.8178337315584567
+              },
+              {
+                "fold": 2,
+                "n_runs": 27,
+                "auroc": 0.8082386363636364
+              },
+              {
+                "fold": 3,
+                "n_runs": 21,
+                "auroc": 0.5259615384615385
+              },
+              {
+                "fold": 4,
+                "n_runs": 15,
+                "skipped": "one-class checkpoint"
+              }
+            ]
+          },
+          "folds": [
+            {
+              "fold": 0,
+              "n_fit": 21,
+              "n_fold_pool": 34,
+              "fit_inside_fold_pool": true,
+              "n_fit_on_llama_task_groups": 9
+            },
+            {
+              "fold": 1,
+              "n_fit": 21,
+              "n_fold_pool": 33,
+              "fit_inside_fold_pool": true,
+              "n_fit_on_llama_task_groups": 5
+            },
+            {
+              "fold": 2,
+              "n_fit": 21,
+              "n_fold_pool": 45,
+              "fit_inside_fold_pool": true,
+              "n_fit_on_llama_task_groups": 12
+            },
+            {
+              "fold": 3,
+              "n_fit": 21,
+              "n_fold_pool": 49,
+              "fit_inside_fold_pool": true,
+              "n_fit_on_llama_task_groups": 11
+            },
+            {
+              "fold": 4,
+              "n_fit": 21,
+              "n_fold_pool": 47,
+              "fit_inside_fold_pool": true,
+              "n_fit_on_llama_task_groups": 9
+            }
+          ]
+        },
+        {
+          "draw": 29,
+          "per_fold_headline": {
+            "mean": 0.7050982876321521,
+            "n_folds_used": 4,
+            "per_fold": [
+              {
+                "fold": 0,
+                "n_runs": 16,
+                "auroc": 0.9880952380952381
+              },
+              {
+                "fold": 1,
+                "n_runs": 91,
+                "auroc": 0.908218866479324
+              },
+              {
+                "fold": 2,
+                "n_runs": 27,
+                "auroc": 0.5375405844155845
+              },
+              {
+                "fold": 3,
+                "n_runs": 21,
+                "auroc": 0.38653846153846155
+              },
+              {
+                "fold": 4,
+                "n_runs": 15,
+                "skipped": "one-class checkpoint"
+              }
+            ]
+          },
+          "folds": [
+            {
+              "fold": 0,
+              "n_fit": 21,
+              "n_fold_pool": 34,
+              "fit_inside_fold_pool": true,
+              "n_fit_on_llama_task_groups": 7
+            },
+            {
+              "fold": 1,
+              "n_fit": 21,
+              "n_fold_pool": 33,
+              "fit_inside_fold_pool": true,
+              "n_fit_on_llama_task_groups": 4
+            },
+            {
+              "fold": 2,
+              "n_fit": 21,
+              "n_fold_pool": 45,
+              "fit_inside_fold_pool": true,
+              "n_fit_on_llama_task_groups": 13
+            },
+            {
+              "fold": 3,
+              "n_fit": 21,
+              "n_fold_pool": 49,
+              "fit_inside_fold_pool": true,
+              "n_fit_on_llama_task_groups": 15
+            },
+            {
+              "fold": 4,
+              "n_fit": 21,
+              "n_fold_pool": 47,
+              "fit_inside_fold_pool": true,
+              "n_fit_on_llama_task_groups": 8
+            }
+          ]
+        }
+      ],
+      "per_fold_mean": {
+        "median": 0.7878650284587209,
+        "min": 0.6638748783720718,
+        "max": 0.8765712417187946
+      }
+    }
+  },
+  "d7": {
+    "a_evidence": {
+      "gemini": {
+        "tool_steps": 1050,
+        "tool_steps_with_both_latencies": 1050,
+        "share_step_latency_ge_tool_latency": 0.8419047619047619,
+        "share_step_text_contains_tool_result": 1.0
+      },
+      "llama": {
+        "tool_steps": 1139,
+        "tool_steps_with_both_latencies": 1139,
+        "share_step_latency_ge_tool_latency": 1.0,
+        "share_step_text_contains_tool_result": 1.0
+      },
+      "qwen": {
+        "tool_steps": 10520,
+        "tool_steps_with_both_latencies": 8168,
+        "share_step_latency_ge_tool_latency": 0.8251714005876591,
+        "share_step_text_contains_tool_result": 1.0
+      }
+    },
+    "b_masking": {
+      "MS-raw@llama:nan": {
+        "per_class": {
+          "looping": {
+            "before": {
+              "point": 0.807847495203817,
+              "lo": 0.7221266404528462,
+              "hi": 0.924807042280018,
+              "n_skipped": 1
+            },
+            "after": {
+              "point": 0.8167827702310462,
+              "lo": 0.7286115938597632,
+              "hi": 0.9690980472230473,
+              "n_skipped": 1
+            },
+            "after_minus_before": {
+              "point": 0.008935275027229073,
+              "lo": -0.02096230694073988,
+              "hi": 0.07005603193925564,
+              "n_skipped": 1
+            }
+          },
+          "goal_drift": {
+            "before": {
+              "point": 0.813426948051948,
+              "lo": 0.7653767919875426,
+              "hi": 0.9566516252965832,
+              "n_skipped": 1
+            },
+            "after": {
+              "point": 0.792612012987013,
+              "lo": 0.7290519386935586,
+              "hi": 0.9491713869561775,
+              "n_skipped": 1
+            },
+            "after_minus_before": {
+              "point": -0.020814935064935036,
+              "lo": -0.041263529614794854,
+              "hi": -0.0011406250000000164,
+              "n_skipped": 1
+            }
+          },
+          "context_corruption": {
+            "before": {
+              "point": 0.9477941214500354,
+              "lo": 0.8662223027454663,
+              "hi": 0.9844905048039171,
+              "n_skipped": 1
+            },
+            "after": {
+              "point": 0.8993847848686558,
+              "lo": 0.8497924766730641,
+              "hi": 0.9381327161737633,
+              "n_skipped": 1
+            },
+            "after_minus_before": {
+              "point": -0.048409336581379525,
+              "lo": -0.08744429915976434,
+              "hi": 0.010458815869417753,
+              "n_skipped": 1
+            }
+          },
+          "tool_cascade": {
+            "before": {
+              "point": 0.800153318903319,
+              "lo": 0.7398552813927364,
+              "hi": 0.8947651836158191,
+              "n_skipped": 0
+            },
+            "after": {
+              "point": 0.8385119047619047,
+              "lo": 0.7728502645447198,
+              "hi": 0.9471393745895488,
+              "n_skipped": 0
+            },
+            "after_minus_before": {
+              "point": 0.03835858585858587,
+              "lo": -0.017674553884236763,
+              "hi": 0.13580949003053272,
+              "n_skipped": 0
+            }
+          }
+        },
+        "headline": {
+          "before": {
+            "point": 0.8582860109070896,
+            "lo": 0.8070966605091328,
+            "hi": 0.9347932530036492,
+            "n_skipped": 0
+          },
+          "after": {
+            "point": 0.8370762424147125,
+            "lo": 0.7855803097935427,
+            "hi": 0.9437134648914868,
+            "n_skipped": 0
+          },
+          "after_minus_before": {
+            "point": -0.021209768492377157,
+            "lo": -0.0482486170476186,
+            "hi": 0.020801269935989585,
+            "n_skipped": 0
+          }
+        }
+      },
+      "MS-raw@llama:carry": {
+        "per_class": {
+          "looping": {
+            "before": {
+              "point": 0.807847495203817,
+              "lo": 0.7221266404528462,
+              "hi": 0.924807042280018,
+              "n_skipped": 1
+            },
+            "after": {
+              "point": 0.7645201329109375,
+              "lo": 0.6991818067803356,
+              "hi": 0.9260470715408805,
+              "n_skipped": 1
+            },
+            "after_minus_before": {
+              "point": -0.043327362292879534,
+              "lo": -0.0775261602371875,
+              "hi": 0.007779513888888882,
+              "n_skipped": 1
+            }
+          },
+          "goal_drift": {
+            "before": {
+              "point": 0.813426948051948,
+              "lo": 0.7653767919875426,
+              "hi": 0.9566516252965832,
+              "n_skipped": 1
+            },
+            "after": {
+              "point": 0.7466920995670996,
+              "lo": 0.6742635212894642,
+              "hi": 0.9490058034708136,
+              "n_skipped": 1
+            },
+            "after_minus_before": {
+              "point": -0.06673484848484851,
+              "lo": -0.09893254285533129,
+              "hi": 0.028458286639126484,
+              "n_skipped": 1
+            }
+          },
+          "context_corruption": {
+            "before": {
+              "point": 0.9477941214500354,
+              "lo": 0.8662223027454663,
+              "hi": 0.9844905048039171,
+              "n_skipped": 1
+            },
+            "after": {
+              "point": 0.8301816164719391,
+              "lo": 0.7893217482960008,
+              "hi": 0.9210489619651111,
+              "n_skipped": 1
+            },
+            "after_minus_before": {
+              "point": -0.11761250497809633,
+              "lo": -0.17877472983254872,
+              "hi": -5.273559366969746e-17,
+              "n_skipped": 1
+            }
+          },
+          "tool_cascade": {
+            "before": {
+              "point": 0.800153318903319,
+              "lo": 0.7398552813927364,
+              "hi": 0.8947651836158191,
+              "n_skipped": 0
+            },
+            "after": {
+              "point": 0.7214718614718615,
+              "lo": 0.6504253634038735,
+              "hi": 0.9095628898814875,
+              "n_skipped": 0
+            },
+            "after_minus_before": {
+              "point": -0.07868145743145744,
+              "lo": -0.13665830748494448,
+              "hi": 0.0288461538461538,
+              "n_skipped": 0
+            }
+          }
+        },
+        "headline": {
+          "before": {
+            "point": 0.8582860109070896,
+            "lo": 0.8070966605091328,
+            "hi": 0.9347932530036492,
+            "n_skipped": 0
+          },
+          "after": {
+            "point": 0.7811718092950894,
+            "lo": 0.7279760772801901,
+            "hi": 0.9324507113643281,
+            "n_skipped": 0
+          },
+          "after_minus_before": {
+            "point": -0.07711420161200022,
+            "lo": -0.11556510616167474,
+            "hi": 0.003770791564522839,
+            "n_skipped": 0
+          }
+        }
+      },
+      "ESN_i@llama:carry": {
+        "per_class": {
+          "looping": {
+            "before": {
+              "point": 0.7387548169157364,
+              "lo": 0.6240106429631334,
+              "hi": 0.8236828148299424,
+              "n_skipped": 1
+            },
+            "after": {
+              "point": 0.6996756011123828,
+              "lo": 0.5155702494788362,
+              "hi": 0.8054460427478235,
+              "n_skipped": 1
+            },
+            "after_minus_before": {
+              "point": -0.03907921580335366,
+              "lo": -0.15363681456858821,
+              "hi": 0.01905344308469302,
+              "n_skipped": 1
+            }
+          },
+          "goal_drift": {
+            "before": {
+              "point": 0.8115411255411256,
+              "lo": 0.6743570069280355,
+              "hi": 0.9090287514618146,
+              "n_skipped": 1
+            },
+            "after": {
+              "point": 0.7474453463203463,
+              "lo": 0.6157006314058275,
+              "hi": 0.9341343767792554,
+              "n_skipped": 1
+            },
+            "after_minus_before": {
+              "point": -0.06409577922077919,
+              "lo": -0.10850684542585709,
+              "hi": 0.054951698942083536,
+              "n_skipped": 1
+            }
+          },
+          "context_corruption": {
+            "before": {
+              "point": 0.9777768726693459,
+              "lo": 0.9413953151882222,
+              "hi": 0.9977940261947753,
+              "n_skipped": 1
+            },
+            "after": {
+              "point": 0.8314681634574108,
+              "lo": 0.770378798858977,
+              "hi": 0.9047851377018044,
+              "n_skipped": 1
+            },
+            "after_minus_before": {
+              "point": -0.14630870921193506,
+              "lo": -0.20904810035185,
+              "hi": -0.05403461841902334,
+              "n_skipped": 1
+            }
+          },
+          "tool_cascade": {
+            "before": {
+              "point": 0.6399873737373737,
+              "lo": 0.4976467535524739,
+              "hi": 0.7570330227581749,
+              "n_skipped": 0
+            },
+            "after": {
+              "point": 0.637012987012987,
+              "lo": 0.481976461038961,
+              "hi": 0.7648463233202533,
+              "n_skipped": 0
+            },
+            "after_minus_before": {
+              "point": -0.002974386724386685,
+              "lo": -0.03278897237401337,
+              "hi": 0.027155883121273598,
+              "n_skipped": 0
+            }
+          }
+        },
+        "headline": {
+          "before": {
+            "point": 0.8455038334441196,
+            "lo": 0.7728664785727097,
+            "hi": 0.8995229031615408,
+            "n_skipped": 0
+          },
+          "after": {
+            "point": 0.7608730198438509,
+            "lo": 0.6506309222498959,
+            "hi": 0.8679277341035334,
+            "n_skipped": 0
+          },
+          "after_minus_before": {
+            "point": -0.0846308136002687,
+            "lo": -0.14709157267567408,
+            "hi": -0.013631805836094184,
+            "n_skipped": 0
+          }
+        }
+      },
+      "TL-pct@gemini:carry": {
+        "per_class": {
+          "looping": {
+            "before": {
+              "point": 0.7379148629148629,
+              "lo": 0.5928358801231935,
+              "hi": 0.872122094110169,
+              "n_skipped": 0
+            },
+            "after": {
+              "point": 0.7467532467532467,
+              "lo": 0.6150329116034807,
+              "hi": 0.8759515102978928,
+              "n_skipped": 0
+            },
+            "after_minus_before": {
+              "point": 0.008838383838383812,
+              "lo": -0.019728939920592246,
+              "hi": 0.046335544563575096,
+              "n_skipped": 0
+            }
+          },
+          "context_corruption": {
+            "before": {
+              "point": 0.6871572871572871,
+              "lo": 0.5454352889611612,
+              "hi": 0.824989772841222,
+              "n_skipped": 0
+            },
+            "after": {
+              "point": 0.7473544973544974,
+              "lo": 0.6083043981481482,
+              "hi": 0.8700710546009705,
+              "n_skipped": 0
+            },
+            "after_minus_before": {
+              "point": 0.06019721019721025,
+              "lo": 0.012556230462296957,
+              "hi": 0.13229970321301177,
+              "n_skipped": 0
+            }
+          },
+          "tool_cascade": {
+            "before": {
+              "point": 0.685930735930736,
+              "lo": 0.5359774935615271,
+              "hi": 0.8221254801536492,
+              "n_skipped": 15
+            },
+            "after": {
+              "point": 0.6976190476190476,
+              "lo": 0.549512432012432,
+              "hi": 0.835913855031502,
+              "n_skipped": 15
+            },
+            "after_minus_before": {
+              "point": 0.011688311688311692,
+              "lo": 0.0,
+              "hi": 0.031676056338028176,
+              "n_skipped": 15
+            }
+          },
+          "rate_limit": {
+            "before": {
+              "point": 0.6955395794681509,
+              "lo": 0.5503191421699767,
+              "hi": 0.8356775074120996,
+              "n_skipped": 1
+            },
+            "after": {
+              "point": 0.7142084106369821,
+              "lo": 0.5698412396414679,
+              "hi": 0.8542296753555011,
+              "n_skipped": 1
+            },
+            "after_minus_before": {
+              "point": 0.018668831168831168,
+              "lo": -0.016390821894606854,
+              "hi": 0.0636284606172014,
+              "n_skipped": 1
+            }
+          },
+          "timeout": {
+            "before": {
+              "point": 0.6524621212121212,
+              "lo": 0.519742407128514,
+              "hi": 0.7876987891930965,
+              "n_skipped": 0
+            },
+            "after": {
+              "point": 0.7083333333333334,
+              "lo": 0.5630250484292013,
+              "hi": 0.8455381424131423,
+              "n_skipped": 0
+            },
+            "after_minus_before": {
+              "point": 0.055871212121212155,
+              "lo": 0.007777762992926931,
+              "hi": 0.10181383396868475,
+              "n_skipped": 0
+            }
+          },
+          "malformed_json": {
+            "before": {
+              "point": 0.6745523415977961,
+              "lo": 0.5354958865582631,
+              "hi": 0.8050446508272028,
+              "n_skipped": 0
+            },
+            "after": {
+              "point": 0.6973829201101929,
+              "lo": 0.5506585453349258,
+              "hi": 0.8338309732188156,
+              "n_skipped": 0
+            },
+            "after_minus_before": {
+              "point": 0.022830578512396726,
+              "lo": -0.009179931121138737,
+              "hi": 0.058115551608198666,
+              "n_skipped": 0
+            }
+          },
+          "wrong_document": {
+            "before": {
+              "point": 0.6667748917748917,
+              "lo": 0.5251297023335695,
+              "hi": 0.8049280117741185,
+              "n_skipped": 0
+            },
+            "after": {
+              "point": 0.6888528138528138,
+              "lo": 0.5433192949843964,
+              "hi": 0.8306032801241366,
+              "n_skipped": 0
+            },
+            "after_minus_before": {
+              "point": 0.022077922077922085,
+              "lo": -0.012934190637919752,
+              "hi": 0.06034603498628933,
+              "n_skipped": 0
+            }
+          }
+        },
+        "headline": {
+          "before": {
+            "point": 0.7164174209628755,
+            "lo": 0.5747126011087149,
+            "hi": 0.8553782379199893,
+            "n_skipped": 0
+          },
+          "after": {
+            "point": 0.7477699068608159,
+            "lo": 0.6157246226079172,
+            "hi": 0.8736942870486192,
+            "n_skipped": 0
+          },
+          "after_minus_before": {
+            "point": 0.031352485897940485,
+            "lo": 0.00535102998482411,
+            "hi": 0.06656295263795012,
+            "n_skipped": 0
+          }
+        }
+      }
+    },
+    "c_result_blind": {
+      "counts": {
+        "qwen": {
+          "tool_steps_blinded": 10520,
+          "text_chars_changed": 651665
+        },
+        "llama": {
+          "tool_steps_blinded": 1139,
+          "text_chars_changed": 29288
+        },
+        "gemini": {
+          "tool_steps_blinded": 1050,
+          "text_chars_changed": 74919
+        }
+      },
+      "ESN_i@llama": {
+        "per_class": {
+          "looping": {
+            "before": {
+              "point": 0.7387548169157364,
+              "lo": 0.6240106429631334,
+              "hi": 0.8236828148299424,
+              "n_skipped": 1
+            },
+            "after": {
+              "point": 0.7387548169157364,
+              "lo": 0.6240106429631334,
+              "hi": 0.8236828148299424,
+              "n_skipped": 1
+            },
+            "after_minus_before": {
+              "point": 0.0,
+              "lo": 0.0,
+              "hi": 0.0,
+              "n_skipped": 1
+            }
+          },
+          "goal_drift": {
+            "before": {
+              "point": 0.8115411255411256,
+              "lo": 0.6743570069280355,
+              "hi": 0.9090287514618146,
+              "n_skipped": 1
+            },
+            "after": {
+              "point": 0.8115411255411256,
+              "lo": 0.6743570069280355,
+              "hi": 0.9090287514618146,
+              "n_skipped": 1
+            },
+            "after_minus_before": {
+              "point": 0.0,
+              "lo": 0.0,
+              "hi": 0.0,
+              "n_skipped": 1
+            }
+          },
+          "context_corruption": {
+            "before": {
+              "point": 0.9777768726693459,
+              "lo": 0.9413953151882222,
+              "hi": 0.9977940261947753,
+              "n_skipped": 1
+            },
+            "after": {
+              "point": 0.9777768726693459,
+              "lo": 0.9413953151882222,
+              "hi": 0.9977940261947753,
+              "n_skipped": 1
+            },
+            "after_minus_before": {
+              "point": 0.0,
+              "lo": 0.0,
+              "hi": 0.0,
+              "n_skipped": 1
+            }
+          },
+          "tool_cascade": {
+            "before": {
+              "point": 0.6399873737373737,
+              "lo": 0.4976467535524739,
+              "hi": 0.7570330227581749,
+              "n_skipped": 0
+            },
+            "after": {
+              "point": 0.6399873737373737,
+              "lo": 0.4976467535524739,
+              "hi": 0.7570330227581749,
+              "n_skipped": 0
+            },
+            "after_minus_before": {
+              "point": 0.0,
+              "lo": 0.0,
+              "hi": 0.0,
+              "n_skipped": 0
+            }
+          }
+        },
+        "headline": {
+          "before": {
+            "point": 0.8455038334441196,
+            "lo": 0.7728664785727097,
+            "hi": 0.8995229031615408,
+            "n_skipped": 0
+          },
+          "after": {
+            "point": 0.8455038334441196,
+            "lo": 0.7728664785727097,
+            "hi": 0.8995229031615408,
+            "n_skipped": 0
+          },
+          "after_minus_before": {
+            "point": 0.0,
+            "lo": 0.0,
+            "hi": 0.0,
+            "n_skipped": 0
+          }
+        }
+      },
+      "ESN_i@gemini": {
+        "per_class": {
+          "looping": {
+            "before": {
+              "point": 0.46951659451659455,
+              "lo": 0.31273870514209,
+              "hi": 0.6337769901846565,
+              "n_skipped": 0
+            },
+            "after": {
+              "point": 0.617965367965368,
+              "lo": 0.46312139226116145,
+              "hi": 0.7571769568151147,
+              "n_skipped": 0
+            },
+            "after_minus_before": {
+              "point": 0.14844877344877347,
+              "lo": -0.1263729268146845,
+              "hi": 0.38306181073500306,
+              "n_skipped": 0
+            }
+          },
+          "context_corruption": {
+            "before": {
+              "point": 0.49607984607984607,
+              "lo": 0.3256352070016704,
+              "hi": 0.6419631357626558,
+              "n_skipped": 0
+            },
+            "after": {
+              "point": 0.5226551226551226,
+              "lo": 0.3683827799925546,
+              "hi": 0.6759870595091183,
+              "n_skipped": 0
+            },
+            "after_minus_before": {
+              "point": 0.026575276575276585,
+              "lo": -0.15928523709773706,
+              "hi": 0.22346064779314465,
+              "n_skipped": 0
+            }
+          },
+          "tool_cascade": {
+            "before": {
+              "point": 0.5203463203463203,
+              "lo": 0.33759738726082605,
+              "hi": 0.7260722788120048,
+              "n_skipped": 15
+            },
+            "after": {
+              "point": 0.5435064935064935,
+              "lo": 0.3228683868873742,
+              "hi": 0.7625322150508713,
+              "n_skipped": 15
+            },
+            "after_minus_before": {
+              "point": 0.02316017316017316,
+              "lo": -0.15222842889788357,
+              "hi": 0.23215727775575118,
+              "n_skipped": 15
+            }
+          },
+          "rate_limit": {
+            "before": {
+              "point": 0.5774969078540507,
+              "lo": 0.3987173731143375,
+              "hi": 0.7456385309925657,
+              "n_skipped": 1
+            },
+            "after": {
+              "point": 0.48090599876314166,
+              "lo": 0.33887901242825563,
+              "hi": 0.6372695984863707,
+              "n_skipped": 1
+            },
+            "after_minus_before": {
+              "point": -0.09659090909090909,
+              "lo": -0.2800879128744943,
+              "hi": 0.08996781098293488,
+              "n_skipped": 1
+            }
+          },
+          "timeout": {
+            "before": {
+              "point": 0.4622113997113997,
+              "lo": 0.25855785608068577,
+              "hi": 0.6678116490506804,
+              "n_skipped": 0
+            },
+            "after": {
+              "point": 0.43691378066378067,
+              "lo": 0.2905426532155924,
+              "hi": 0.5992688904405453,
+              "n_skipped": 0
+            },
+            "after_minus_before": {
+              "point": -0.02529761904761904,
+              "lo": -0.20532864018977193,
+              "hi": 0.15386927596594877,
+              "n_skipped": 0
+            }
+          },
+          "malformed_json": {
+            "before": {
+              "point": 0.39242424242424245,
+              "lo": 0.21402010965416762,
+              "hi": 0.5759932893800501,
+              "n_skipped": 0
+            },
+            "after": {
+              "point": 0.599793388429752,
+              "lo": 0.45725295732797694,
+              "hi": 0.7419661366723866,
+              "n_skipped": 0
+            },
+            "after_minus_before": {
+              "point": 0.20736914600550962,
+              "lo": -0.025442759479270598,
+              "hi": 0.44845764126091114,
+              "n_skipped": 0
+            }
+          },
+          "wrong_document": {
+            "before": {
+              "point": 0.5963203463203464,
+              "lo": 0.38382078009012993,
+              "hi": 0.7779591185495789,
+              "n_skipped": 0
+            },
+            "after": {
+              "point": 0.4884199134199134,
+              "lo": 0.3362731466886036,
+              "hi": 0.6379476734592854,
+              "n_skipped": 0
+            },
+            "after_minus_before": {
+              "point": -0.10790043290043294,
+              "lo": -0.26867169071575997,
+              "hi": 0.07611268035593957,
+              "n_skipped": 0
+            }
+          }
+        },
+        "headline": {
+          "before": {
+            "point": 0.48084743539288993,
+            "lo": 0.3524706264173353,
+            "hi": 0.6133096600041007,
+            "n_skipped": 0
+          },
+          "after": {
+            "point": 0.5770365997638724,
+            "lo": 0.43120728133250197,
+            "hi": 0.7089712025339672,
+            "n_skipped": 0
+          },
+          "after_minus_before": {
+            "point": 0.09618916437098257,
+            "lo": -0.10829692379200197,
+            "hi": 0.2808713241188731,
+            "n_skipped": 0
+          }
+        }
+      },
+      "TEXT-raw@llama": {
+        "per_class": {
+          "looping": {
+            "before": {
+              "point": 0.8081771463955372,
+              "lo": 0.7586246854755438,
+              "hi": 0.9408886648118039,
+              "n_skipped": 1
+            },
+            "after": {
+              "point": 0.7570635197071979,
+              "lo": 0.5518900495689061,
+              "hi": 1.0,
+              "n_skipped": 1
+            },
+            "after_minus_before": {
+              "point": -0.0511136266883393,
+              "lo": -0.28302642056591554,
+              "hi": 0.14618546888251316,
+              "n_skipped": 1
+            }
+          },
+          "goal_drift": {
+            "before": {
+              "point": 0.6328614718614718,
+              "lo": 0.21431577933672316,
+              "hi": 0.8246080627554813,
+              "n_skipped": 1
+            },
+            "after": {
+              "point": 0.38561688311688314,
+              "lo": 0.22859314437984496,
+              "hi": 0.5190988537133219,
+              "n_skipped": 1
+            },
+            "after_minus_before": {
+              "point": -0.24724458874458874,
+              "lo": -0.5160921194467002,
+              "hi": 0.10602631144557999,
+              "n_skipped": 1
+            }
+          },
+          "context_corruption": {
+            "before": {
+              "point": 0.5331283909240898,
+              "lo": 0.3742819759980007,
+              "hi": 0.6461151784315547,
+              "n_skipped": 1
+            },
+            "after": {
+              "point": 0.549066574604209,
+              "lo": 0.28469529404797256,
+              "hi": 0.6428466914580141,
+              "n_skipped": 1
+            },
+            "after_minus_before": {
+              "point": 0.015938183680119233,
+              "lo": -0.2646205297148693,
+              "hi": 0.10922998632434926,
+              "n_skipped": 1
+            }
+          },
+          "tool_cascade": {
+            "before": {
+              "point": 0.7164772727272728,
+              "lo": 0.6136331967606107,
+              "hi": 0.9150142895299145,
+              "n_skipped": 0
+            },
+            "after": {
+              "point": 0.7390205627705628,
+              "lo": 0.5699105261145065,
+              "hi": 0.9635721829474665,
+              "n_skipped": 0
+            },
+            "after_minus_before": {
+              "point": 0.022543290043290032,
+              "lo": -0.08407744909043169,
+              "hi": 0.15360854832874113,
+              "n_skipped": 0
+            }
+          }
+        },
+        "headline": {
+          "before": {
+            "point": 0.6561909586469301,
+            "lo": 0.49476044018731014,
+            "hi": 0.7600740374129213,
+            "n_skipped": 0
+          },
+          "after": {
+            "point": 0.5623116632954277,
+            "lo": 0.44883382537086053,
+            "hi": 0.6430728654482647,
+            "n_skipped": 0
+          },
+          "after_minus_before": {
+            "point": -0.0938792953515023,
+            "lo": -0.25811363318610947,
+            "hi": 0.08142944871458974,
+            "n_skipped": 0
+          }
+        }
+      }
+    }
+  },
+  "reproduction": {
+    "d6.subsets.e2_split_auroc": {
+      "closeout": 0.8455038334441196,
+      "e2": 0.8455038334441196
+    },
+    "d6.a_fit_pool_only.sp4_structure_e2_pool_raw": {
+      "closeout": 0.8455038334441196,
+      "e2": 0.8455038334441196
+    },
+    "d7.b_masking.MS-raw@llama:nan.headline.before": {
+      "closeout": 0.8582860109070896,
+      "e2": 0.8582860109070896
+    },
+    "d7.b_masking.MS-raw@llama:nan.looping.before": {
+      "closeout": 0.807847495203817,
+      "e2": 0.807847495203817
+    },
+    "d7.b_masking.MS-raw@llama:nan.goal_drift.before": {
+      "closeout": 0.813426948051948,
+      "e2": 0.813426948051948
+    },
+    "d7.b_masking.MS-raw@llama:nan.context_corruption.before": {
+      "closeout": 0.9477941214500354,
+      "e2": 0.9477941214500354
+    },
+    "d7.b_masking.MS-raw@llama:nan.tool_cascade.before": {
+      "closeout": 0.800153318903319,
+      "e2": 0.800153318903319
+    },
+    "d7.b_masking.ESN_i@llama:carry.headline.before": {
+      "closeout": 0.8455038334441196,
+      "e2": 0.8455038334441196
+    },
+    "d7.b_masking.ESN_i@llama:carry.looping.before": {
+      "closeout": 0.7387548169157364,
+      "e2": 0.7387548169157364
+    },
+    "d7.b_masking.ESN_i@llama:carry.goal_drift.before": {
+      "closeout": 0.8115411255411256,
+      "e2": 0.8115411255411256
+    },
+    "d7.b_masking.ESN_i@llama:carry.context_corruption.before": {
+      "closeout": 0.9777768726693459,
+      "e2": 0.9777768726693459
+    },
+    "d7.b_masking.ESN_i@llama:carry.tool_cascade.before": {
+      "closeout": 0.6399873737373737,
+      "e2": 0.6399873737373737
+    },
+    "d7.b_masking.TL-pct@gemini:carry.headline.before": {
+      "closeout": 0.7164174209628755,
+      "e2": 0.7164174209628755
+    },
+    "d7.b_masking.TL-pct@gemini:carry.looping.before": {
+      "closeout": 0.7379148629148629,
+      "e2": 0.7379148629148629
+    },
+    "d7.b_masking.TL-pct@gemini:carry.context_corruption.before": {
+      "closeout": 0.6871572871572871,
+      "e2": 0.6871572871572871
+    },
+    "d7.b_masking.TL-pct@gemini:carry.tool_cascade.before": {
+      "closeout": 0.685930735930736,
+      "e2": 0.685930735930736
+    },
+    "d7.b_masking.TL-pct@gemini:carry.rate_limit.before": {
+      "closeout": 0.6955395794681509,
+      "e2": 0.6955395794681509
+    },
+    "d7.b_masking.TL-pct@gemini:carry.timeout.before": {
+      "closeout": 0.6524621212121212,
+      "e2": 0.6524621212121212
+    },
+    "d7.b_masking.TL-pct@gemini:carry.malformed_json.before": {
+      "closeout": 0.6745523415977961,
+      "e2": 0.6745523415977961
+    },
+    "d7.b_masking.TL-pct@gemini:carry.wrong_document.before": {
+      "closeout": 0.6667748917748917,
+      "e2": 0.6667748917748917
+    },
+    "d7.c_result_blind.ESN_i@llama.headline.before": {
+      "closeout": 0.8455038334441196,
+      "e2": 0.8455038334441196
+    },
+    "d7.c_result_blind.ESN_i@llama.looping.before": {
+      "closeout": 0.7387548169157364,
+      "e2": 0.7387548169157364
+    },
+    "d7.c_result_blind.ESN_i@llama.goal_drift.before": {
+      "closeout": 0.8115411255411256,
+      "e2": 0.8115411255411256
+    },
+    "d7.c_result_blind.ESN_i@llama.context_corruption.before": {
+      "closeout": 0.9777768726693459,
+      "e2": 0.9777768726693459
+    },
+    "d7.c_result_blind.ESN_i@llama.tool_cascade.before": {
+      "closeout": 0.6399873737373737,
+      "e2": 0.6399873737373737
+    },
+    "d7.c_result_blind.ESN_i@gemini.headline.before": {
+      "closeout": 0.48084743539288993,
+      "e2": 0.48084743539288993
+    },
+    "d7.c_result_blind.ESN_i@gemini.looping.before": {
+      "closeout": 0.46951659451659455,
+      "e2": 0.46951659451659455
+    },
+    "d7.c_result_blind.ESN_i@gemini.context_corruption.before": {
+      "closeout": 0.49607984607984607,
+      "e2": 0.49607984607984607
+    },
+    "d7.c_result_blind.ESN_i@gemini.tool_cascade.before": {
+      "closeout": 0.5203463203463203,
+      "e2": 0.5203463203463203
+    },
+    "d7.c_result_blind.ESN_i@gemini.rate_limit.before": {
+      "closeout": 0.5774969078540507,
+      "e2": 0.5774969078540507
+    },
+    "d7.c_result_blind.ESN_i@gemini.timeout.before": {
+      "closeout": 0.4622113997113997,
+      "e2": 0.4622113997113997
+    },
+    "d7.c_result_blind.ESN_i@gemini.malformed_json.before": {
+      "closeout": 0.39242424242424245,
+      "e2": 0.39242424242424245
+    },
+    "d7.c_result_blind.ESN_i@gemini.wrong_document.before": {
+      "closeout": 0.5963203463203464,
+      "e2": 0.5963203463203464
+    },
+    "d7.c_result_blind.TEXT-raw@llama.headline.before": {
+      "closeout": 0.6561909586469301,
+      "e2": 0.6561909586469301
+    },
+    "d7.c_result_blind.TEXT-raw@llama.looping.before": {
+      "closeout": 0.8081771463955372,
+      "e2": 0.8081771463955372
+    },
+    "d7.c_result_blind.TEXT-raw@llama.goal_drift.before": {
+      "closeout": 0.6328614718614718,
+      "e2": 0.6328614718614718
+    },
+    "d7.c_result_blind.TEXT-raw@llama.context_corruption.before": {
+      "closeout": 0.5331283909240898,
+      "e2": 0.5331283909240898
+    },
+    "d7.c_result_blind.TEXT-raw@llama.tool_cascade.before": {
+      "closeout": 0.7164772727272728,
+      "e2": 0.7164772727272728
+    }
+  }
+}
