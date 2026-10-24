@@ -7,7 +7,7 @@
   llama TL-pct − ESN_best (ESN_i) = −0.197 [−0.302, −0.057]; TL-pct 0.648 [0.555, 0.768], ESN_i
   0.846 [0.770, 0.896]. Both secondary expectations hold (TL-pct 0.648 > TL-raw 0.641; ≥ MS-pct
   0.552). Not gated: gemini TL-pct 0.716 vs ESN_i 0.481, ALL-pct 0.780.
-- SP5 Step 3b diagnostics 2026-09-30 (results/e2_diagnostics.json, dirty tree; three rows reproduce
+- SP5 Step 3b diagnostics 2026-09-30 (results/e2_diagnostics.json from clean a472577, identical to the dirty run; three rows reproduce
   0.846 / 0.858 / 0.646 exactly). The ESN 0.646 (SP4) -> 0.846 (E2) gap is the FIT POOL, not the
   class mix (SP4 headline-only 0.665) and not pooling or z-scoring (SP4 raw 0.661; per-fold mean
   0.602). On SP4's own folds, per-fold: E2's single model 0.838 vs SP4's fold models 0.602. Pool size
@@ -32,9 +32,8 @@
   drafted, not posted: docs/drafts/github_issue_author.md.
 - SP2 closed 2026-09-27 (tag sp02-data; code from 64622a4, tag on the closing commit).
 - Teach-back answers are owed before deploy (SP9): see "Teach-backs" below.
-- Next concrete step: /save, rerun scripts/run_e2_diagnostics.py from the clean commit, then paste
-  results/e2_ablation.json + results/e2_diagnostics.json into the chat Project for the negative-result
-  write-up spec (gate on_fail: SP6 becomes the main contribution).
+- Next concrete step: paste results/e2_ablation.json + results/e2_diagnostics.json into the chat
+  Project for the negative-result write-up spec (gate on_fail: SP6 becomes the main contribution).
 
 ## SP0 prompt (paste into Claude Code)
 > Set up SP0 for this repo. Plan first, wait for my "go". Target state: `pyproject.toml` managed by uv

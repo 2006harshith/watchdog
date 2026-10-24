@@ -1,0 +1,6 @@
+# SP5 close-out diagnostics (D-6, D-7). Interpretation only: the E2 gate (configs/e2.yaml) is final
+# and this file is not part of its pre-registration. Merged into the E2 config as cfg["closeout"].
+n_subsets: 30            # D-6: random fit subsets of ESN_i's healthy pool
+fit_size: 21             # E2 ESN_i's fit-set size (results/e2_ablation.json families.llama.esn.ESN_i.n_fit)
+seed: 0
+size_matched_draws: 30   # D-6 (b'): SP4 fold pools subsampled to fit_size, one draw = all 5 folds

@@ -97,3 +97,27 @@ def test_alarm_step_is_first_strict_crossing(baseline):
     assert result.per_step[result.alarm_step] > baseline.theta
     assert np.all(result.per_step[: result.alarm_step] <= baseline.theta)
     assert result.episode_score == result.per_step.max()
+
+
+def test_carry_forward_replaces_exactly_one_step_input(baseline, monkeypatch):
+    # Record the signal matrix the monitor is asked to score: row s must equal row s-1, every other
+    # row must equal the unmasked one.
+    seen = []
+    original = baseline._monitor.score_episode
+    monkeypatch.setattr(baseline._monitor, "score_episode", lambda ep: seen.append(ep.X.copy()) or original(ep))
+    run = _run(304, broken=True)
+    plain = baseline.score(run).per_step
+    masked = baseline.score(run, carry_forward_step=ANOMALY_FROM).per_step
+    X0, X1 = seen
+    assert np.array_equal(X1[ANOMALY_FROM], X0[ANOMALY_FROM - 1])
+    others = [i for i in range(T) if i != ANOMALY_FROM]
+    assert np.array_equal(X1[others], X0[others])
+    # Causal: nothing before the masked step can change.
+    assert np.array_equal(plain[:ANOMALY_FROM], masked[:ANOMALY_FROM])
+    assert not np.array_equal(plain, masked)
+
+
+@pytest.mark.parametrize("step", [0, T])
+def test_carry_forward_needs_a_previous_step_inside_the_run(baseline, step):
+    with pytest.raises(ValueError, match="carry_forward_step"):
+        baseline.score(_run(305), carry_forward_step=step)

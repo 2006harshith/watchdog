@@ -80,8 +80,17 @@ class ESNBaseline:
         val_streams = [monitor.score_episode(_to_episode(r)) for r in val_runs]
         self.theta = pick_threshold(val_streams, fa_budget=self.fa_budget)
 
-    def score(self, run: Run) -> RunScore:
+    def score(self, run: Run, carry_forward_step: int | None = None) -> RunScore:
+        """carry_forward_step=s (diagnostics only): step s's signal vector is replaced by step s-1's,
+        so the monitor sees nothing new at s. Done on the signal, not the step dict: a copied step
+        would count as a repeated tool call in the x channel, i.e. inject a looping signature."""
         if self._monitor is None or self.theta is None:
             raise RuntimeError("ESNBaseline.score called before fit")
-        per_step = self._monitor.score_episode(_to_episode(run))
+        episode = _to_episode(run)
+        if carry_forward_step is not None:
+            s = carry_forward_step
+            if not 1 <= s < episode.T:
+                raise ValueError(f"carry_forward_step={s} needs a step s-1 and s inside a {episode.T}-step run")
+            episode.X[s] = episode.X[s - 1]
+        per_step = self._monitor.score_episode(episode)
         return RunScore(per_step, first_alarm(per_step, self.theta), float(per_step.max()))

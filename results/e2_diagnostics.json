@@ -1,8 +1,8 @@
 {
   "what": "SP5 Step 3b, interpretation only: one-factor swaps between SP4 4d's ESN (0.646) and E2's ESN_i (0.846) on llama, plus surprisal ablations of ESN_i and MS-raw. Mean matched-step AUROC over the primary checkpoints; pooled rows carry task-group cluster CIs (n_secondary), per-fold rows are the unweighted mean of within-fold AUROCs over SP4's E1 folds (no CI).",
   "git": {
-    "commit": "860249bbf46e383e290e9063887b3756caec2fd8",
-    "dirty": true
+    "commit": "a4725770f250052373ef3e9805dd3427aaeb5b96",
+    "dirty": false
   },
   "family": "llama",
   "counts": {
