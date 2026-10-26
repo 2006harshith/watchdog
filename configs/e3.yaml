@@ -114,6 +114,7 @@ reporting:
 expectations:                         # pre-registered; each evaluated as HOLDS / FAILS / UNDEFINED
   - id: E-1
     what: validity
+    kind: every_cell_mean_fa          # added before the first run: tells the evaluator how to read this entry
     family: llama
     arms: all
     rule: conformal
@@ -126,6 +127,7 @@ expectations:                         # pre-registered; each evaluated as HOLDS 
     stat: mean over draws of headline FA
     holds_if: {le: 0.12}              # alpha + 0.02 Monte Carlo slack
   - id: E-2
+    kind: paired_median_tpr_diff
     family: llama
     a: TL-pct
     b: ESN-src
@@ -137,6 +139,7 @@ expectations:                         # pre-registered; each evaluated as HOLDS 
     holds_if: {ge: 0.0}
     expected: FAILS                   # SP5's AUROC gap was -0.20
   - id: E-3
+    kind: median_tpr_comparison
     family: llama
     a: ESN-refit
     b: ESN-src
@@ -147,6 +150,7 @@ expectations:                         # pre-registered; each evaluated as HOLDS 
     holds_if: {a_le_b: true}
     expected: open                    # SP3's B vs A gap was -0.009
   - id: E-4
+    kind: every_cell_mean_fa
     family: llama
     arms: all
     rule: plugin

@@ -137,17 +137,24 @@ class Fitted:
         return pd.Series(self.model.predict_proba(X[self.cols])[:, 1], index=X.index)
 
 
-def fit_and_score(
-    train: TrainingSet, test_X: pd.DataFrame, train_X: pd.DataFrame, cols: list[str], params: dict
-) -> tuple[Fitted, pd.Series]:
+def fit_model(
+    train_X: pd.DataFrame, y: np.ndarray, w: np.ndarray, cols: list[str], params: dict,
+    make_model: Callable = HistGradientBoostingClassifier,
+) -> Fitted:
     # A column that is NaN on every training row carries no information, and sklearn 1.9.1's HGB
     # binning crashes on it ("window shape cannot be larger than input array shape"); it is left out
     # of that model and recorded.
     dropped = [c for c in cols if train_X[c].isna().all()]
     used = [c for c in cols if c not in set(dropped)]
-    model = HistGradientBoostingClassifier(**params)
-    model.fit(train_X[used], train.y, sample_weight=train.w)
-    fitted = Fitted(model, used, dropped)
+    model = make_model(**params)
+    model.fit(train_X[used], y, sample_weight=w)
+    return Fitted(model, used, dropped)
+
+
+def fit_and_score(
+    train: TrainingSet, test_X: pd.DataFrame, train_X: pd.DataFrame, cols: list[str], params: dict
+) -> tuple[Fitted, pd.Series]:
+    fitted = fit_model(train_X, train.y, train.w, cols, params)
     return fitted, fitted.score(test_X)
 
 
