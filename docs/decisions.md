@@ -146,3 +146,27 @@ TL-pct > TL-raw on llama;
 TL-pct ≥ MS-pct on llama.
 FAIL → the negative result is written up; SP6 (thresholds from few healthy runs) becomes the main contribution.
 ```
+
+## 2026-10-26 — SP5 close (write-up: `docs/sp5_e2_result.md`)
+
+### SP5 gate: FAIL, as pre-registered
+Source: `results/e2_ablation.json` (clean commit 860249b). On llama, TL-pct − ESN_i = −0.197
+[−0.302, −0.057] (`gate.difference`, `gate.outcome` FAIL). The gate is final. The close-out diagnostics
+(D-6, D-7, attribution) are for interpretation only.
+
+### Baselines are reported as a distribution over fit draws, from SP6 on
+- Why: the ESN's score depends on its healthy fit set. 30 random 21-of-28 draws give median 0.770, range
+  0.566–0.857, and E2's single split (0.846) is matched or beaten by only 1 of 30
+  (`results/e2_closeout.json` `d6.subsets`). A single-split baseline can sit in the tail without anyone
+  noticing.
+- Rule: every baseline fitted on healthy runs (ESN, and any refitted comparator) is reported as the median
+  and range over ≥ 30 random fit-set draws of the stated size, with the pre-registered split's percentile
+  in that distribution. Gates that compare against a baseline name in the spec, before the run, which
+  statistic they use (a single pre-registered split, or the median draw).
+- Rejected: keep a single pre-registered split. It is honest but hides a ±0.1 swing that is larger than
+  most of the effects we test.
+
+### Next: SP6 (the pre-registered fail path)
+Per the SP5 GATE `on_fail`: the negative result is written up, and SP6 (E3, thresholds from few healthy
+runs) becomes the main contribution. D-6 is direct evidence for it: the ESN moves by ±0.1 with which few
+healthy runs it sees. The SP6 spec comes from the chat Project.

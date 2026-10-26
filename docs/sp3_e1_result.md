@@ -118,6 +118,10 @@ paper's setting.
   calls identical to a healthy run (diag `d1_twins.per_corpus.<corpus>.runs_in_mixing_clusters.by_failure_class`),
   so no tool-level signal can separate them.
 - ESN seed fixed at 1300 in E1 and D-1–D-3; D-5 varies it (30 seeds) for E1 only.
+- ESN fit-set variance was not varied in SP3: D-5 varied only the reservoir seed. SP5 D-6 later showed that
+  the fit-run draw alone moves the ESN by about ±0.1 on llama (21-of-28 subsets: median 0.770, range
+  0.566–0.857; `results/e2_closeout.json` `d6.subsets`). In E1, A's and B's fit/validation splits are one
+  draw each. D-2 redraws B's split, but only for the split ablation, not for E1's gap.
 - Task-disjoint D-2 skipped 10 of 30 seeds drawn (8 left a one-class test set, 2 could not be filled with
   whole task groups; diag `d2_split_ablation_B.task_disjoint.skipped_seeds`); its 20 seeds are a selected subset.
 - Twins are defined on tool calls only; text, timing and logprobs are ignored.

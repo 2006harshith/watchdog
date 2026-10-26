@@ -1,7 +1,10 @@
 # PROGRESS
 
 ## Current
-- Save point: SP5 (E2 ablation, GATE) — in progress. Step 0 (pre-registration, ae18348), Step 1
+- Save point: SP6 (E3 recalibration curve) — not started; spec needed from the chat Project.
+  SP5 closed 2026-10-26 (tag sp05-e2): gate FAIL as pre-registered, write-up docs/sp5_e2_result.md;
+  recalibration teach-back NOT ANSWERED (owner override, fourth time).
+- SP5 history (E2 ablation, GATE). Step 0 (pre-registration, ae18348), Step 1
   (recalibration.py, 4733739), Step 2 (experiments/e2.py, 860249b) done. Step 3 run 2026-09-30 from
   clean 860249b (results/e2_ablation.json, MLflow d3a8305364a64be29c2425b4a4449871): GATE FAIL.
   llama TL-pct − ESN_best (ESN_i) = −0.197 [−0.302, −0.057]; TL-pct 0.648 [0.555, 0.768], ESN_i
@@ -45,10 +48,13 @@
   drafted, not posted: docs/drafts/github_issue_author.md.
 - SP2 closed 2026-09-27 (tag sp02-data; code from 64622a4, tag on the closing commit).
 - Teach-back answers are owed before deploy (SP9): see "Teach-backs" below.
-- Next concrete step (2026-10-24): paste results/e2_ablation.json, e2_diagnostics.json,
-  e2_closeout.json and e2_channel_attribution.json plus this PROGRESS.md into the chat Project for the
-  negative-result write-up spec (gate on_fail: SP6 becomes the main contribution). SP5 cannot close
-  until the recalibration teach-back is answered (overridden three times; owner: "at last").
+- SP5 write-up 2026-10-26: docs/sp5_e2_result.md (gate FAIL, arm table llama vs gemini, per class,
+  D-6, D-7, gemini as an SP8 hypothesis), SP3 limit added (fit-set variance not varied in SP3),
+  docs/decisions.md 2026-10-26 (baselines reported as a fit-draw distribution from SP6 on; SP6 next).
+- Next concrete step (2026-10-26): re-upload PROGRESS.md to the chat Project and paste
+  docs/sp5_e2_result.md plus the docs/decisions.md 2026-10-26 section; ask for the SP6 spec
+  (pre-registered fail path: SP6 becomes the main contribution; baselines as a fit-draw
+  distribution). Plan SP6 before code and wait for "go". Recalibration teach-back still owed (SP9).
 
 ## SP0 prompt (paste into Claude Code)
 > Set up SP0 for this repo. Plan first, wait for my "go". Target state: `pyproject.toml` managed by uv
@@ -65,7 +71,7 @@
 | SP2 | Data layer: per-step table + splits (teach-back: splits) | done (teach-back owner-marked passed) | sp02-data |
 | SP3 | E1 reproduce collapse — GATE (teach-back: metrics). Pass: on the same held-out llama3.1:8b episodes, the qwen-fitted monitor is >= 0.15 AUROC below the llama-fitted one, with non-overlapping episode-bootstrap 95% CIs. Reference: 0.527 vs 0.885, arXiv 2608.02464 §5 (transferred vs refitted, not before/after) | done — gate FAIL; diagnostics D-1..D-5 done (docs/sp3_e1_result.md); teach-back owner-marked passed | sp03-e1 |
 | SP4 | Feature sets + matched-step evaluation (teach-back: feature definitions) | done — audit in results/sp4_feature_audit.json; split/metrics teach-backs owner-marked, feature-definitions teach-back not answered (owner override) | sp04-features, sp04-closeout |
-| SP5 | E2 ablation — GATE (spec to be rewritten after SP3) | in progress — gate FAIL; close-out diagnostics done; write-up pending; recalibration teach-back NOT ANSWERED | |
+| SP5 | E2 ablation — GATE (spec to be rewritten after SP3) | done — gate FAIL (pre-registered fail path); write-up docs/sp5_e2_result.md; recalibration teach-back NOT ANSWERED (owner override) | sp05-e2 |
 | SP6 | E3 recalibration curve (teach-back: threshold logic) | not started | |
 | SP7 | E4 cost/latency vs LLM judges — GATE | not started | |
 | SP8 | E5 organic runs on AgentDojo — GATE | not started | |
@@ -183,6 +189,14 @@
 - 2026-09-27: D-5 (30 paired ESN seeds, pre-registered rule): CLAIM HOLDS. Task-cluster upper bound of
   B-A < 0.15 in 30/30 seeds (max 0.126); pooled B-A median -0.005. Mean per-fold AUROC favours B in
   30/30 (median +0.074, max +0.114): a smaller model-swap effect may remain (results/e1_seed_sweep.json).
+- 2026-10-26 (SP5 close, full record in docs/decisions.md): from SP6 on, every baseline fitted on
+  healthy runs is reported as a distribution over ≥ 30 fit-set draws (median, range, and the
+  pre-registered split's percentile), because D-6 put E2's ESN split at about the 97th percentile of a
+  0.566–0.857 range. SP6 is next, on the pre-registered fail path.
+- 2026-10-26: Owner override of the teach-back HARD RULE and the /save rule to close SP5 with the
+  recalibration teach-back NOT ANSWERED (fourth override; not owner-marked). Claude disagreed: SP6
+  is threshold logic built directly on this transform, so SP6 starts on calibration logic the owner
+  has not yet defended. Risk accepted. Eight teach-backs owed before deploy (SP9).
 - Proposed for the SP4 spec, NOT decided: a length-only baseline in SP5 (length alone AUROC 0.592;
   ESN score vs length Spearman 0.85/0.80), and matched-step prefix evaluation instead of episode-max.
 
@@ -301,10 +315,19 @@ FAIL → the negative result is written up; SP6 (thresholds from few healthy run
   NOT ANSWERED, owner override 2026-09-29 (Step 2 started); overridden again 2026-09-30 to run E2
   (Step 3). Claude disagreed: it is the calibration logic the gate result rests on. SP5 done criteria
   require it answered. Eight teach-backs owed before deploy (SP9). Re-asked 2026-10-24 after the
-  close-out run; overridden a third time ("I'll do them at last"). Still NOT ANSWERED; SP5 cannot
-  close on it.
+  close-out run; overridden a third time ("I'll do them at last"). Re-asked 2026-10-26 at the SP5
+  write-up; overridden a fourth time to close SP5 ("override and move on to the next step i will
+  answer them later"). NOT ANSWERED, not owner-marked, not graded. The owner's spec cites 4 questions
+  in specs/SP5-spec.md; that file is not in the repo, so Q4 is not recorded here (paste it from the
+  chat Project). Owed before deploy (SP9).
 
 ## Session log
+- 2026-10-26 · SP5 (close) · Write-up docs/sp5_e2_result.md (gate FAIL, llama vs gemini arm table,
+  per class, D-6, D-7, gemini as an SP8 hypothesis; numbers with file + key); SP3 limit added (ESN
+  fit-set variance not varied in SP3, D-5 varied only the reservoir seed); docs/decisions.md
+  2026-10-26 (baselines as a fit-draw distribution from SP6 on; SP6 next). Recalibration teach-back
+  re-asked, owner override a fourth time (NOT ANSWERED). Tag sp05-e2 · tests: pass (445, ruff clean)
+  · next: get the SP6 spec from the chat Project.
 - 2026-10-24 · SP5 (close-out) · D-6/D-7 code committed (ecadcfb) plus D-7c result-blind transform
   (blind_results/blind_episodes: every tool result -> same-length filler in tool_events and step
   text, label-free, all runs); results/e2_closeout.json from clean ecadcfb. Channel attribution
