@@ -1,0 +1,453 @@
+{
+  "what": "SP6 Step 0: healthy test runs and eligible calibration runs per target fold",
+  "git": {
+    "commit": "b03130c08285cb5f108df553ee22cad38af7337c",
+    "dirty": true
+  },
+  "families": {
+    "llama": {
+      "family": "llama",
+      "k": 5,
+      "seed": 0,
+      "per_t": {
+        "2": {
+          "healthy_with_step": 77,
+          "per_fold": [
+            {
+              "fold": 0,
+              "runs": 17,
+              "test_healthy": 9,
+              "eligible": 68,
+              "feasible": {
+                "0": true,
+                "10": true,
+                "20": true,
+                "40": true
+              }
+            },
+            {
+              "fold": 1,
+              "runs": 108,
+              "test_healthy": 32,
+              "eligible": 45,
+              "feasible": {
+                "0": true,
+                "10": true,
+                "20": true,
+                "40": true
+              }
+            },
+            {
+              "fold": 2,
+              "runs": 29,
+              "test_healthy": 11,
+              "eligible": 66,
+              "feasible": {
+                "0": true,
+                "10": true,
+                "20": true,
+                "40": true
+              }
+            },
+            {
+              "fold": 3,
+              "runs": 23,
+              "test_healthy": 13,
+              "eligible": 64,
+              "feasible": {
+                "0": true,
+                "10": true,
+                "20": true,
+                "40": true
+              }
+            },
+            {
+              "fold": 4,
+              "runs": 16,
+              "test_healthy": 12,
+              "eligible": 65,
+              "feasible": {
+                "0": true,
+                "10": true,
+                "20": true,
+                "40": true
+              }
+            }
+          ],
+          "folds_skipped": {
+            "0": 0,
+            "10": 0,
+            "20": 0,
+            "40": 0
+          }
+        },
+        "3": {
+          "healthy_with_step": 77,
+          "per_fold": [
+            {
+              "fold": 0,
+              "runs": 17,
+              "test_healthy": 9,
+              "eligible": 68,
+              "feasible": {
+                "0": true,
+                "10": true,
+                "20": true,
+                "40": true
+              }
+            },
+            {
+              "fold": 1,
+              "runs": 108,
+              "test_healthy": 32,
+              "eligible": 45,
+              "feasible": {
+                "0": true,
+                "10": true,
+                "20": true,
+                "40": true
+              }
+            },
+            {
+              "fold": 2,
+              "runs": 29,
+              "test_healthy": 11,
+              "eligible": 66,
+              "feasible": {
+                "0": true,
+                "10": true,
+                "20": true,
+                "40": true
+              }
+            },
+            {
+              "fold": 3,
+              "runs": 23,
+              "test_healthy": 13,
+              "eligible": 64,
+              "feasible": {
+                "0": true,
+                "10": true,
+                "20": true,
+                "40": true
+              }
+            },
+            {
+              "fold": 4,
+              "runs": 16,
+              "test_healthy": 12,
+              "eligible": 65,
+              "feasible": {
+                "0": true,
+                "10": true,
+                "20": true,
+                "40": true
+              }
+            }
+          ],
+          "folds_skipped": {
+            "0": 0,
+            "10": 0,
+            "20": 0,
+            "40": 0
+          }
+        },
+        "4": {
+          "healthy_with_step": 60,
+          "per_fold": [
+            {
+              "fold": 0,
+              "runs": 17,
+              "test_healthy": 9,
+              "eligible": 51,
+              "feasible": {
+                "0": true,
+                "10": true,
+                "20": true,
+                "40": true
+              }
+            },
+            {
+              "fold": 1,
+              "runs": 108,
+              "test_healthy": 31,
+              "eligible": 29,
+              "feasible": {
+                "0": true,
+                "10": true,
+                "20": true,
+                "40": false
+              }
+            },
+            {
+              "fold": 2,
+              "runs": 29,
+              "test_healthy": 8,
+              "eligible": 52,
+              "feasible": {
+                "0": true,
+                "10": true,
+                "20": true,
+                "40": true
+              }
+            },
+            {
+              "fold": 3,
+              "runs": 23,
+              "test_healthy": 8,
+              "eligible": 52,
+              "feasible": {
+                "0": true,
+                "10": true,
+                "20": true,
+                "40": true
+              }
+            },
+            {
+              "fold": 4,
+              "runs": 16,
+              "test_healthy": 4,
+              "eligible": 56,
+              "feasible": {
+                "0": true,
+                "10": true,
+                "20": true,
+                "40": true
+              }
+            }
+          ],
+          "folds_skipped": {
+            "0": 0,
+            "10": 0,
+            "20": 0,
+            "40": 1
+          }
+        }
+      },
+      "esn_src_pool_runs": 28,
+      "esn_src_pool_runs_in_config": 28
+    },
+    "gemini": {
+      "family": "gemini",
+      "k": 5,
+      "seed": 0,
+      "per_t": {
+        "2": {
+          "healthy_with_step": 77,
+          "per_fold": [
+            {
+              "fold": 0,
+              "runs": 19,
+              "test_healthy": 17,
+              "eligible": 60,
+              "feasible": {
+                "0": true,
+                "10": true,
+                "20": true,
+                "40": true
+              }
+            },
+            {
+              "fold": 1,
+              "runs": 42,
+              "test_healthy": 15,
+              "eligible": 62,
+              "feasible": {
+                "0": true,
+                "10": true,
+                "20": true,
+                "40": true
+              }
+            },
+            {
+              "fold": 2,
+              "runs": 34,
+              "test_healthy": 12,
+              "eligible": 65,
+              "feasible": {
+                "0": true,
+                "10": true,
+                "20": true,
+                "40": true
+              }
+            },
+            {
+              "fold": 3,
+              "runs": 27,
+              "test_healthy": 18,
+              "eligible": 59,
+              "feasible": {
+                "0": true,
+                "10": true,
+                "20": true,
+                "40": true
+              }
+            },
+            {
+              "fold": 4,
+              "runs": 21,
+              "test_healthy": 15,
+              "eligible": 62,
+              "feasible": {
+                "0": true,
+                "10": true,
+                "20": true,
+                "40": true
+              }
+            }
+          ],
+          "folds_skipped": {
+            "0": 0,
+            "10": 0,
+            "20": 0,
+            "40": 0
+          }
+        },
+        "3": {
+          "healthy_with_step": 77,
+          "per_fold": [
+            {
+              "fold": 0,
+              "runs": 19,
+              "test_healthy": 17,
+              "eligible": 60,
+              "feasible": {
+                "0": true,
+                "10": true,
+                "20": true,
+                "40": true
+              }
+            },
+            {
+              "fold": 1,
+              "runs": 42,
+              "test_healthy": 15,
+              "eligible": 62,
+              "feasible": {
+                "0": true,
+                "10": true,
+                "20": true,
+                "40": true
+              }
+            },
+            {
+              "fold": 2,
+              "runs": 34,
+              "test_healthy": 12,
+              "eligible": 65,
+              "feasible": {
+                "0": true,
+                "10": true,
+                "20": true,
+                "40": true
+              }
+            },
+            {
+              "fold": 3,
+              "runs": 27,
+              "test_healthy": 18,
+              "eligible": 59,
+              "feasible": {
+                "0": true,
+                "10": true,
+                "20": true,
+                "40": true
+              }
+            },
+            {
+              "fold": 4,
+              "runs": 21,
+              "test_healthy": 15,
+              "eligible": 62,
+              "feasible": {
+                "0": true,
+                "10": true,
+                "20": true,
+                "40": true
+              }
+            }
+          ],
+          "folds_skipped": {
+            "0": 0,
+            "10": 0,
+            "20": 0,
+            "40": 0
+          }
+        },
+        "4": {
+          "healthy_with_step": 66,
+          "per_fold": [
+            {
+              "fold": 0,
+              "runs": 19,
+              "test_healthy": 17,
+              "eligible": 49,
+              "feasible": {
+                "0": true,
+                "10": true,
+                "20": true,
+                "40": true
+              }
+            },
+            {
+              "fold": 1,
+              "runs": 42,
+              "test_healthy": 15,
+              "eligible": 51,
+              "feasible": {
+                "0": true,
+                "10": true,
+                "20": true,
+                "40": true
+              }
+            },
+            {
+              "fold": 2,
+              "runs": 34,
+              "test_healthy": 12,
+              "eligible": 54,
+              "feasible": {
+                "0": true,
+                "10": true,
+                "20": true,
+                "40": true
+              }
+            },
+            {
+              "fold": 3,
+              "runs": 27,
+              "test_healthy": 14,
+              "eligible": 52,
+              "feasible": {
+                "0": true,
+                "10": true,
+                "20": true,
+                "40": true
+              }
+            },
+            {
+              "fold": 4,
+              "runs": 21,
+              "test_healthy": 8,
+              "eligible": 58,
+              "feasible": {
+                "0": true,
+                "10": true,
+                "20": true,
+                "40": true
+              }
+            }
+          ],
+          "folds_skipped": {
+            "0": 0,
+            "10": 0,
+            "20": 0,
+            "40": 0
+          }
+        }
+      },
+      "esn_src_pool_runs": 70,
+      "esn_src_pool_runs_in_config": 70
+    }
+  }
+}
