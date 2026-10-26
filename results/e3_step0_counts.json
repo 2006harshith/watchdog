@@ -1,8 +1,8 @@
 {
   "what": "SP6 Step 0: healthy test runs and eligible calibration runs per target fold",
   "git": {
-    "commit": "b03130c08285cb5f108df553ee22cad38af7337c",
-    "dirty": true
+    "commit": "b0cc4aedcdbea3a0b6250f5f8ae57319d1913255",
+    "dirty": false
   },
   "families": {
     "llama": {
