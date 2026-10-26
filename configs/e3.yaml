@@ -1,0 +1,161 @@
+# SP6 E3 recalibration curve: alarms on a new model from n healthy runs. NO GATE (HANDOFF §11).
+# PRE-REGISTERED: committed before the first E3 run; the commit hash of this file goes into every E3
+# result. Source: docs/decisions.md, "2026-10-26 — SP6 Decisions and pre-registered expectations"
+# (verbatim). Settings the decisions did not fix are marked FILLED IN, numbered as in the Step 0 plan
+# (owner "go" 2026-10-26, all 12 recommendations accepted).
+
+families:
+  primary: llama
+  descriptive: [gemini]               # every table reported, nothing tested
+  eval_only: [gemini]                 # D6: never in any model fit; calibration at evaluation time only
+
+checkpoints:
+  scored: [2, 3, 4]                   # the running max runs over the scored checkpoints {2..t}
+  report: [3, 4]                      # headline = mean over these
+
+alarm:
+  rule: running_max_exceeds_theta     # alarm by t <=> max(score at 2..t) > theta (strict: a tie does not alarm)
+  esn_score: running max of the CUSUM stream over steps 0..t   # as in SP4/SP5
+  # FILLED IN (1): one theta per checkpoint t. A calibration run's score at t is its running max over
+  # {2..t}; only calibration runs with a step t count. Rejected: one theta calibrated at t=4 (drops
+  # every calibration run that ends at step 3).
+  theta_per_checkpoint: true
+  # FILLED IN (10): TPR(t) counts any alarm by t, also one before tau (the running max SP4/SP5 used).
+  # early_alarm_rate(t) = share of those TPR positives whose first alarm step < tau.
+  tpr_counts_pre_tau_alarms: true
+
+metrics:
+  fa: share of held-out healthy runs with a step t that alarm by t
+  tpr: share of held-out headline positives (tau <= t) that alarm by t
+  classes:
+    headline: [looping, goal_drift, context_corruption]
+
+thresholds:
+  rules: [conformal, plugin]
+  conformal: theta = the ceil((m+1)(1-alpha))-th smallest calibration score; +inf if that index > m (no alarms, reported as such)
+  # FILLED IN (9): numpy's default quantile, the naive comparator (numpy 2.4.6 has `method=`).
+  # Rejected: "higher" (conservative; would blunt E-4).
+  plugin: {quantile: 1 - alpha, numpy_method: linear}
+  alphas: [0.05, 0.10]
+  primary_alpha: 0.10
+  conformal_min_m: {0.05: 19, 0.10: 9}
+
+budgets:
+  n: [0, 10, 20, 40]
+  n0: source threshold; only arms that need no target data (TL-raw, MS-raw, ESN-src)
+  skip_n_if_fewer_eligible: true      # n=40 skipped in a fold with < 40 eligible healthy runs; skips counted
+  spend:
+    all_n_for_calibration: [TL-raw, MS-raw, ESN-src]            # m = n
+    half_reference_half_calibration: [TL-pct, ALL-pct]          # m = n/2; calibration runs never in their own reference
+    half_fit_half_calibration: [ESN-refit]                      # m = n/2
+  # FILLED IN (11): the reference/calibration (or fit/calibration) halves are split by run with a
+  # fixed seed, not by task group, as the decision text says. The halves can share task groups while
+  # the test fold never does; E-1 measures the consequence. Rejected: split by task group (at n=10
+  # a half would often hold 1-2 groups).
+  half_split: {by: run, seed: 0}
+  rejected: leave-one-out inside the n (n ESN refits per draw; per-arm rules would make the comparison unfair)
+
+n0_source_threshold:
+  # FILLED IN (2): the HGB arms were trained on every source row, so they have no source validation
+  # runs. theta at n=0 comes from OUT-OF-FOLD source scores: 5 task-group folds of the source pool,
+  # 5 extra fits per arm, used only for this theta. Rejected: in-sample source scores (healthy
+  # training rows score low, so theta would be too low and FA inflated for a non-target reason).
+  hgb: {method: out_of_fold, k: 5, seed: 0, by: task_group}
+  # FILLED IN (3): ESN-src's source validation runs are its draw's left-out pool runs (llama: 7 of
+  # 28). m=7 < 9, so conformal gives theta=+inf at both alphas (no alarms), reported as such.
+  esn_src: left_out_pool_runs_of_the_fit_draw
+
+cross_fit:
+  folds: {k: 5, seed: 0, by: task_group}   # the SP5 target folds (grouped_kfold, eval_only_families=())
+  draw_from: healthy runs of the OTHER folds with a step t
+  eval_fold_healthy_runs: test only
+  one_draw: one calibration set per fold; FA and TPR pool the 5 folds' test runs
+
+draws:
+  R: {hgb_arms: 200, ESN-src: 200, ESN-refit: 30}
+  seed: 0
+  paired: same n -> same n calibration runs; where m differs, the same n runs split by half_split.seed
+  # FILLED IN (7): ESN-refit's 30 draws pair with ESN-src's first 30 draws (same calibration uids).
+  esn_refit_pairs_with_first_draws_of: ESN-src
+
+arms:
+  hgb:                                # the SP5 E2 models, trained once on source with the E2 config, not retrained per draw
+    config: configs/e2.yaml
+    names: [TL-raw, TL-pct, MS-raw, ALL-pct]
+    # E2 did not save its fitted models; they are retrained deterministically (early_stopping off,
+    # checked in SP5) and the raw arms' llama scores must equal results/e2_prefix_scores.csv exactly.
+    reproduce_from: results/e2_prefix_scores.csv
+    pct_reference: rebuilt per (fold, draw) from the draw's n/2 reference runs only
+  ESN-src:
+    fitted_on: qwen (E2 ESN_i pool), threshold recalibrated on the target
+    fit_draws:
+      llama: {n: 30, fit_size: 21, pool_runs: 28, seed: 0}   # the D-6 draws; must reproduce co d6.subsets.aurocs
+      # FILLED IN (5): gemini's ESN_i pool is 70 runs, not D-6's 28; 30 random draws at E2's own fit
+      # size, the remaining 28 as source validation. Descriptive only.
+      gemini: {n: 30, fit_size: 42, pool_runs: 70, seed: 0}
+    per_draw: each calibration draw also picks one of the 30 fit draws   # fit-set and calibration variance integrated (2026-10-26 rule)
+  ESN-refit:
+    fitted_on: the target's own n/2 healthy runs; calibrated on the other n/2
+    # FILLED IN (4): llama only. Fitting on gemini's healthy runs is a model fit on gemini (D6).
+    families: [llama]
+    # FILLED IN (12): ESNBaseline.fit needs validation runs for its built-in threshold, which E3
+    # ignores; the calibration half is passed there. A fit that fails on a tiny fit set (e.g. zero
+    # std in the standardiser at n/2=5) makes that cell UNDEFINED, counted, never patched.
+    native_threshold_val_runs: calibration_half
+    on_fit_failure: undefined_and_counted
+  esn: {K: 8, seed: 1300, channels: [e, u, m, x], drop_u_below_logprob_coverage: 0.90}   # as E2
+
+reporting:
+  per_cell: [fa_median, fa_p10, fa_p90, fa_mean, p_fa_gt_2alpha, tpr_median, tpr_p10, tpr_p90, early_alarm_rate, skip_counts]
+  per_comparison: [paired_diff_median, paired_diff_p10, paired_diff_p90, share_draws_gt_0]
+  cell: (family, arm, n, rule, alpha, t)
+  caveat: the spread over draws is calibration-set variability; test-set sampling is NOT in it (say so in every table)
+
+expectations:                         # pre-registered; each evaluated as HOLDS / FAILS / UNDEFINED
+  - id: E-1
+    what: validity
+    family: llama
+    arms: all
+    rule: conformal
+    alpha: 0.10
+    # FILLED IN (6): n=0 excluded (a source threshold is no target calibration and claims no
+    # exchangeability); n=0 reported separately.
+    n: [10, 20, 40]
+    only_where_defined: true          # m >= conformal_min_m
+    # headline FA per draw = mean of FA(3), FA(4) (decision text: "headline = mean over t = 3, 4").
+    stat: mean over draws of headline FA
+    holds_if: {le: 0.12}              # alpha + 0.02 Monte Carlo slack
+  - id: E-2
+    family: llama
+    a: TL-pct
+    b: ESN-src
+    n: 20
+    rule: conformal
+    alpha: 0.10
+    # FILLED IN (7): per draw, headline TPR = mean of TPR(3), TPR(4); paired a - b per draw.
+    stat: median over draws of the paired headline TPR difference a - b
+    holds_if: {ge: 0.0}
+    expected: FAILS                   # SP5's AUROC gap was -0.20
+  - id: E-3
+    family: llama
+    a: ESN-refit
+    b: ESN-src
+    n: 20
+    rule: conformal
+    alpha: 0.10
+    stat: median headline TPR of a vs median headline TPR of b (over draws); paired difference also reported
+    holds_if: {a_le_b: true}
+    expected: open                    # SP3's B vs A gap was -0.009
+  - id: E-4
+    family: llama
+    arms: all
+    rule: plugin
+    n: 10
+    # FILLED IN (8): alpha = primary 0.10; every arm, including the m=5 arms.
+    alpha: 0.10
+    stat: mean over draws of headline FA
+    holds_if: {gt: 0.10}
+
+mlflow:
+  tracking_dir: mlruns
+  experiment: sp6-e3
