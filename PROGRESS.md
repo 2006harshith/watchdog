@@ -4,8 +4,9 @@
 - Save point: SP6 (E3 recalibration curve, no gate) — in progress. Step 0 2026-10-26: Decisions +
   pre-registered expectations E-1..E-4 verbatim (docs/decisions.md, below), configs/e3.yaml (12 fill-ins
   accepted), results/e3_step0_counts.json: n=40 infeasible only at llama t=4 fold 1 (29 eligible; that
-  fold holds 31 of 60 healthy test runs). Next: Step 1, src/watchdog_agent/thresholds.py (core piece,
-  tests first), after the owner's "go"; then the threshold-logic teach-back before Step 2.
+  fold holds 31 of 60 healthy test runs). Step 1 2026-10-26: src/watchdog_agent/thresholds.py + 38
+  tests; threshold-logic teach-back NOT ANSWERED (owner override). Next: Step 2, experiments/e3.py +
+  scripts/run_e3.py.
   SP5 closed 2026-10-26 (tag sp05-e2): gate FAIL as pre-registered, write-up docs/sp5_e2_result.md;
   recalibration teach-back NOT ANSWERED (owner override, fourth time).
 - SP5 history (E2 ablation, GATE). Step 0 (pre-registration, ae18348), Step 1
@@ -201,6 +202,9 @@
   recalibration teach-back NOT ANSWERED (fourth override; not owner-marked). Claude disagreed: SP6
   is threshold logic built directly on this transform, so SP6 starts on calibration logic the owner
   has not yet defended. Risk accepted. Eight teach-backs owed before deploy (SP9).
+- 2026-10-26: Owner override of the teach-back HARD RULE for the SP6 threshold-logic teach-back, so
+  SP6 Step 2 can start. NOT ANSWERED, not owner-marked. Claude disagreed: E3's results, and E-1's
+  validity claim above all, rest on this logic. Risk accepted. Nine teach-backs owed before deploy.
 - Proposed for the SP4 spec, NOT decided: a length-only baseline in SP5 (length alone AUROC 0.592;
   ESN score vs length Spearman 0.85/0.80), and matched-step prefix evaluation instead of episode-max.
 
@@ -380,6 +384,19 @@ Gemini: every table is reported, nothing is tested, and it is labelled descripti
   answer them later"). NOT ANSWERED, not owner-marked, not graded. The owner's spec cites 4 questions
   in specs/SP5-spec.md; that file is not in the repo, so Q4 is not recorded here (paste it from the
   chat Project). Owed before deploy (SP9).
+
+- 2026-10-26 · SP6 · threshold logic (src/watchdog_agent/thresholds.py) · Q1: why does
+  k = ceil((m+1)(1-alpha)) give E[FA] <= alpha, where does the +1 come from, what does "a guarantee
+  over calibration sets, not over the deployed theta" mean in practice, and what does P(FA > 2alpha)
+  show that mean FA hides? Q2: E3 calibrates on other task groups and splits TL-pct's
+  reference/calibration halves by run; one concrete way each breaks exchangeability and which way FA
+  moves; why does plug-in overshoot alpha at m=10 even under exchangeability? Q3: TL-pct at n=10 has
+  m=5: what theta does conformal give at alpha=0.10 and why is that honest; why "score > theta" and
+  not ">=" (ESN example); why is a calibration score the running max up to t, not the score at t? ·
+  answers: not yet given · NOT ANSWERED, owner override 2026-10-26 ("override the teach-back and go
+  to step 2"). Not owner-marked, not graded. SP6 done criteria require it answered. Claude disagreed:
+  every E3 number, and E-1 in particular, rests on this logic. Nine teach-backs owed before deploy
+  (SP9).
 
 ## Session log
 - 2026-10-26 · SP5 (close) · Write-up docs/sp5_e2_result.md (gate FAIL, llama vs gemini arm table,
