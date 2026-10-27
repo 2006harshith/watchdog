@@ -255,3 +255,96 @@ Step 0 counts (results/e3_step0_counts.json): n=40 is infeasible in exactly one 
 runs with a step 4 (`families.llama.per_t.4.per_fold[1].test_healthy`), so llama FA(4) at n=40 pools
 only the other 29 test healthy runs. The n=40 headline therefore mixes a 5-fold t=3 and a 4-fold t=4.
 Gemini is feasible everywhere. ESN-src pools match the config (llama 28, gemini 70).
+
+## 2026-10-27 — SP6 close-out diagnostics D-8..D-12: design and expected outcomes (POST HOC)
+
+Everything in this section is post hoc. E-1..E-4 above are the pre-registered verdicts and are
+reported unedited. These expectations are written and committed before any D-8..D-12 number is
+computed. When they were written, the author had seen the E3 headline (the E-1/E-4 cells, the
+E-2/E-3 comparisons) and the Step 3 counts per fold and task group. Nothing else.
+
+Input: results/e3_group_counts.parquet from the clean d0cd3e9 rerun. That file holds per (cell,
+draw, fold, task group) counts: healthy, healthy alarms, positives, positive alarms by t, pre-tau
+first alarms, and post-onset alarms (some score > θ at a step in tau..t). Its sums equal
+results/e3_draws.csv exactly, which the runner checks. Config: configs/e3_diagnostics.yaml. Code:
+experiments/e3_diagnostics.py and scripts/run_e3_diagnostics.py, which write
+results/e3_diagnostics.json. Llama is primary; gemini gets the same tables, descriptive only.
+
+The n=40 skip (Step 0): at llama t=4, fold 1 has 29 eligible calibration runs, fewer than 40, so
+n=40 never tests fold 1 at t=4. Fold 1 holds 31 of the 60 healthy runs and 57 of the 79 headline
+positives at t=4, and one of its task groups has 23 runs, 30% (t=3) and 38% (t=4) of all llama
+healthy test runs. So E3's n=40 headline mixes a full t=3 with a t=4 that has a third of the runs.
+No n-curve that crosses n=40 is read without D-8.
+
+### D-8 Common test set
+Design: the same test runs for every n ∈ {10, 20, 40}. That is all 5 folds at t=3 (77 healthy, 92
+positives) and folds {0, 2, 3, 4} at t=4 (29 healthy, 22 positives). Re-pool FA and TPR from the
+group counts. Headline = the mean of t=3 and t=4. Report the old and new E-1 mean FA, and the TPR
+median, for every arm at conformal α=0.10.
+Check (not an expectation): n=40 reproduces E3 exactly, because it is already this set.
+Expected:
+(a) TL-pct, ALL-pct and ESN-refit mean FA at n=10/20 moves by more than 0.02, downward if fold 1
+    carries the excess (D-9).
+(b) Those three arms still fail E-1's 0.12 at n=20, because t=3 keeps fold 1.
+(c) MS-raw and ESN-src move by at most 0.02.
+(d) On the common set, TL-pct/ALL-pct/ESN-refit mean FA at n=40 is not more than 0.03 below n=20:
+    their FA does not converge as n grows.
+
+### D-9 Fold decomposition
+Design: FA(t) per fold for TL-pct, ALL-pct and ESN-refit at n=20 and n=40, conformal α=0.10. Each
+fold's FA pools its test healthy runs over draws: total alarms / total healthy, which equals the mean
+over draws because the denominator is fixed per fold. Reported: fold 1 against the other folds pooled,
+plus fold 1's share of the excess alarms Σ(alarms − α·healthy). n=40 has fold 1 at t=3 only.
+Reading, fixed now: a cell's excess is CONCENTRATED in fold 1 if fold 1's FA > 0.20 and the pooled
+other folds' FA ≤ 0.12 at every t where fold 1 is tested. It is SPREAD if the other folds' FA > 0.12.
+Expected (the spec's hypothesis): concentrated in fold 1 for all three arms at n=20 and n=40. If it is
+spread, the task-shift story (one big task group drives E-1) is wrong, and the write-up says so.
+
+### D-10 Exchangeable benchmark
+Design: conformal α_eff(m) = 1 − k/(m+1) with k = ⌈(m+1)(1−α)⌉, and 0 when k > m (θ = +∞).
+Plug-in E[FA](m) = 1 − (h+1)/(m+1) with h = (m−1)(1−α), for np.quantile(method="linear") under iid
+Uniform scores. Every table gets these columns, m per arm (m = n for TL-raw, MS-raw and ESN-src; n/2
+for TL-pct, ALL-pct and ESN-refit), and observed mean FA − expected.
+Verification: 1e5 iid replicates per (rule, α, m), tolerance 0.005.
+Caveat fixed now: conformal α_eff is distribution-free for any continuous scores. The plug-in formula
+is exact for Uniform scores only, because linear interpolation between order statistics is not
+invariant to the score distribution. It is verified on Uniform (tolerance 0.005), and Normal and
+Exponential are simulated and reported, expected within 0.01 of the formula. Real scores tie (TL
+percentiles, ESN washout zeros), and with the strict ">" rule ties push observed FA BELOW the
+exchangeable value.
+Expected:
+(a) The simulation confirms both formulas within tolerance on Uniform.
+(b) MS-raw and ESN-src are within ±0.03 of the exchangeable value at every n ≥ 10, for conformal and
+    plug-in.
+(c) TL-pct, ALL-pct and ESN-refit are more than 0.10 above it at n=20 and n=40 (conformal).
+(d) E-4 holds mechanically: plug-in E[FA] at m=10 is 0.173, and 0.233 at m=5, both above α=0.10
+    even under exchangeability.
+
+### D-11 Post-onset TPR
+Design: TPR_post(t) = positives with an alarm at a step in tau..t / positives. Headline = the mean
+over t=3, 4 per draw. Post-onset alarms are a subset of alarms by t, so TPR_post ≤ TPR in every draw
+(a check). E-2 and E-3 are restated with TPR_post, and the per-draw (FA, TPR) and (FA, TPR_post)
+points are stored. E-3 is read both ways: over the 30 paired draws, and ESN-refit's 30-draw median
+against ESN-src's 200-draw median. The 30 paired ESN-src draws' median TPR is placed among the medians
+of 10,000 random 30-of-200 subsets (seeded), as a percentile.
+Expected:
+(a) TPR_post drops most for the high-FA arms (TL-pct, ALL-pct, ESN-refit), because part of their
+    pre-tau alarms ride on the same low threshold that gives false alarms.
+(b) E-2's median paired difference with TPR_post is below +0.115, and its share of draws > 0 falls
+    below 0.80.
+(c) E-3's ESN-refit − ESN-src stays > 0 under both readings: refit buys TPR with FA.
+(d) The 30 paired ESN-src draws' median sits below the 10th percentile of 30-of-200 subset medians.
+
+### D-12 Test-side uncertainty
+Design: a task-group cluster bootstrap over each family's test task groups, B = 2000 with seed 0. The
+calibration draws are held fixed: each replicate re-weights the per-group counts of every draw. The
+groups are resampled with replacement over all test task groups. There is one resample per
+replicate, shared across t, n, arms and draws, so paired comparisons stay paired (as in
+evaluation.py). Each statistic is recomputed over all draws (mean FA, median TPR, median paired
+difference), and the result is a percentile 95% CI. A replicate whose denominator is 0 for a
+statistic is skipped for that statistic and counted. The CI covers every cell the write-up quotes.
+Fold 1's 23-run group makes some intervals wide; they are reported anyway.
+Expected:
+(a) The FA CIs of TL-pct, ALL-pct and ESN-refit at n=20 are wider than 0.15.
+(b) MS-raw's mean-FA CI at n=10/20 contains 0.10.
+(c) The CI of E-2's median paired difference (any-alarm TPR) contains 0.
