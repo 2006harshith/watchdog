@@ -1,0 +1,38 @@
+# SP6 close-out diagnostics D-8..D-12. POST HOC: design and expected outcomes are in
+# docs/decisions.md ("2026-10-27 — SP6 close-out diagnostics"), committed (cbd5108) before any run.
+inputs:
+  groups: results/e3_group_counts.parquet   # from the clean d0cd3e9 rerun (gitignored; regenerable)
+  draws: results/e3_draws.csv
+  e3: results/e3_recalibration.json
+alpha: 0.1                                  # primary alpha, as E-1
+primary_family: llama
+
+d8:                                         # common test set: drop these folds at these t, for every n
+  n: [10, 20, 40]
+  drop_folds: {4: [1]}
+
+d9:
+  arms: [TL-pct, ALL-pct, ESN-refit]
+  n: [20, 40]
+  fold: 1
+  concentrated_if: {fold_fa_gt: 0.20, rest_fa_le: 0.12}
+  spread_if: {rest_fa_gt: 0.12}
+
+d10:
+  reps: 100000
+  seed: 0
+  m: [5, 7, 10, 20, 40]                     # every m E3 used at n > 0, plus ESN-src's n = 0 (7)
+  alphas: [0.05, 0.1]
+  distributions: [uniform, normal, exponential]
+  tolerance: 0.005                          # uniform (both rules); conformal on every distribution
+  other_distribution_tolerance: 0.01        # plug-in on normal / exponential (formula is exact for uniform only)
+
+d11:
+  n: 20
+  subsets: 10000
+  subset_size: 30
+  seed: 0
+
+d12:
+  B: 2000
+  seed: 0
