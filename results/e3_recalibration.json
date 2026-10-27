@@ -258,7 +258,7 @@
     }
   },
   "git": {
-    "commit": "3ce892168744a3f695c6a0337ace6f8a75ab074c",
+    "commit": "0d3fc92c39923fd2ae7e7eb1bd923b0171591366",
     "dirty": false
   },
   "caveat": "spread over draws = calibration-set variability only; test-set sampling is NOT in it",
@@ -13009,6 +13009,20 @@
     "llama.ESN-src.fit_draw_aurocs_vs_d6": {
       "value": 0.0,
       "ok": true
+    },
+    "group_counts_sum_to_pooled_counts": {
+      "value": 0,
+      "ok": true
+    },
+    "json_vs_711a23e": {
+      "value": 0.0,
+      "ok": true,
+      "mismatches": []
+    },
+    "draws_csv_vs_711a23e": {
+      "value": 0.0,
+      "ok": true,
+      "mismatched_columns": []
     }
   }
 }
