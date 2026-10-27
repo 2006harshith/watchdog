@@ -5,8 +5,16 @@
   pre-registered expectations E-1..E-4 verbatim (docs/decisions.md, below), configs/e3.yaml (12 fill-ins
   accepted), results/e3_step0_counts.json: n=40 infeasible only at llama t=4 fold 1 (29 eligible; that
   fold holds 31 of 60 healthy test runs). Step 1 2026-10-26: src/watchdog_agent/thresholds.py + 38
-  tests; threshold-logic teach-back NOT ANSWERED (owner override). Next: Step 2, experiments/e3.py +
-  scripts/run_e3.py.
+  tests; threshold-logic teach-back NOT ANSWERED (owner override). Step 2: experiments/e3.py +
+  scripts/run_e3.py (3ce8921); results/e3_recalibration.json + e3_draws.csv from clean 3ce8921, E2
+  prefix scores reproduce (max diff 1e-16). Llama, conformal α=0.10: E-1 FAILS (mean FA TL-pct n=20
+  0.292, ALL-pct 0.396, ESN-refit 0.295; MS-raw and ESN-src n≤20 hold); E-2 HOLDS against the
+  expectation (TL-pct − ESN-src TPR median +0.115, 81.5% of draws > 0); E-3 FAILS (ESN-refit beats
+  ESN-src, +0.320 over 30 paired draws); E-4 HOLDS. Caveat: E-2/E-3 compare TPR at unequal realised
+  FA (TL-pct and ESN-refit ~0.29 vs ESN-src ~0.10). Teach-back re-asked 2026-10-27, overridden again.
+  Next (2026-10-27): paste results/e3_recalibration.json and this "Current" section into the chat
+  Project and ask for the SP6 next-step/write-up spec, including how to compare TPR at unequal
+  realised FA. Plan before code, wait for "go". Threshold-logic teach-back still owed (SP9).
   SP5 closed 2026-10-26 (tag sp05-e2): gate FAIL as pre-registered, write-up docs/sp5_e2_result.md;
   recalibration teach-back NOT ANSWERED (owner override, fourth time).
 - SP5 history (E2 ablation, GATE). Step 0 (pre-registration, ae18348), Step 1
@@ -77,7 +85,7 @@
 | SP3 | E1 reproduce collapse — GATE (teach-back: metrics). Pass: on the same held-out llama3.1:8b episodes, the qwen-fitted monitor is >= 0.15 AUROC below the llama-fitted one, with non-overlapping episode-bootstrap 95% CIs. Reference: 0.527 vs 0.885, arXiv 2608.02464 §5 (transferred vs refitted, not before/after) | done — gate FAIL; diagnostics D-1..D-5 done (docs/sp3_e1_result.md); teach-back owner-marked passed | sp03-e1 |
 | SP4 | Feature sets + matched-step evaluation (teach-back: feature definitions) | done — audit in results/sp4_feature_audit.json; split/metrics teach-backs owner-marked, feature-definitions teach-back not answered (owner override) | sp04-features, sp04-closeout |
 | SP5 | E2 ablation — GATE (spec to be rewritten after SP3) | done — gate FAIL (pre-registered fail path); write-up docs/sp5_e2_result.md; recalibration teach-back NOT ANSWERED (owner override) | sp05-e2 |
-| SP6 | E3 recalibration curve (teach-back: threshold logic) | not started | |
+| SP6 | E3 recalibration curve (teach-back: threshold logic) | in progress — Steps 0–2 done; threshold-logic teach-back NOT ANSWERED (owner override x2) | |
 | SP7 | E4 cost/latency vs LLM judges — GATE | not started | |
 | SP8 | E5 organic runs on AgentDojo — GATE | not started | |
 | SP9 | Supervisor agent + Streamlit demo on HF Spaces | not started | |
@@ -153,6 +161,15 @@
   pool. Gemini's ESN number is then mostly content shift, not failure detection.
 - SP5/E2: MS-pct is below chance on llama context_corruption (0.361) while MS-raw scores 0.948. The
   percentile transform may flip the MS signal's direction; not investigated.
+- SP6/E3: E-1 fails for exactly the arms that split the n runs (TL-pct, ALL-pct, ESN-refit: mean FA
+  ~0.29-0.40 at α=0.10), while MS-raw and ESN-src (m = n) mostly hold. Is it non-exchangeability
+  across task groups, the run-level (not task-group) split into reference/calibration halves, or the
+  smaller m? Not separated.
+- SP6/E3: E-2 and E-3 compare TPR at unequal realised FA (TL-pct, ESN-refit ~0.29 vs ESN-src ~0.10),
+  so their "wins" are partly bought with false alarms. Needs TPR at matched realised FA (or within-α
+  arms only) before either is read as a monitor comparison.
+- SP6/E3: ESN-src median TPR is 0.274 on the 30 draws paired with ESN-refit vs 0.502 over all 200
+  draws; E-3's +0.320 gap partly reflects which 30 draws were paired.
 
 ## Decisions (after HANDOFF.md)
 - 2026-09-25: Python import package is `watchdog_agent` (see CLAUDE.md "Naming").
@@ -205,6 +222,8 @@
 - 2026-10-26: Owner override of the teach-back HARD RULE for the SP6 threshold-logic teach-back, so
   SP6 Step 2 can start. NOT ANSWERED, not owner-marked. Claude disagreed: E3's results, and E-1's
   validity claim above all, rest on this logic. Risk accepted. Nine teach-backs owed before deploy.
+- 2026-10-27: Second owner override of the SP6 threshold-logic teach-back, after Step 2's run showed
+  E-1 FAILS. Claude disagreed: the E-1 failure is the mechanism Q2 asks about. Risk accepted.
 - Proposed for the SP4 spec, NOT decided: a length-only baseline in SP5 (length alone AUROC 0.592;
   ESN score vs length Spearman 0.85/0.80), and matched-step prefix evaluation instead of episode-max.
 
@@ -396,9 +415,15 @@ Gemini: every table is reported, nothing is tested, and it is labelled descripti
   answers: not yet given · NOT ANSWERED, owner override 2026-10-26 ("override the teach-back and go
   to step 2"). Not owner-marked, not graded. SP6 done criteria require it answered. Claude disagreed:
   every E3 number, and E-1 in particular, rests on this logic. Nine teach-backs owed before deploy
-  (SP9).
+  (SP9). Re-asked 2026-10-27 at resume after Step 2 (E-1 FAILS); overridden a second time ("override
+  it ill do it later"). Still NOT ANSWERED, not owner-marked, not graded.
 
 ## Session log
+- 2026-10-27 · SP6 (Step 2 recorded) · No code change. PROGRESS.md brought up to date with Step 2
+  (3ce8921, results from clean 3ce8921, 711a23e): E-1 FAILS, E-2 HOLDS (expected fail), E-3 FAILS,
+  E-4 HOLDS; SP6 row set to in progress. Threshold-logic teach-back re-asked, owner override a second
+  time (NOT ANSWERED) · tests: pass (496, ruff clean) · next: paste results/e3_recalibration.json +
+  "Current" into the chat Project for the SP6 next-step spec.
 - 2026-10-26 · SP5 (close) · Write-up docs/sp5_e2_result.md (gate FAIL, llama vs gemini arm table,
   per class, D-6, D-7, gemini as an SP8 hypothesis; numbers with file + key); SP3 limit added (ESN
   fit-set variance not varied in SP3, D-5 varied only the reservoir seed); docs/decisions.md
