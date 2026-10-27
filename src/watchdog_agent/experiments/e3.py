@@ -57,6 +57,8 @@ FAMILY_KEYS = {"counts", "n0", "esn_src", "reproduction", "cells", "comparisons"
 CAVEAT = "spread over draws = calibration-set variability only; test-set sampling is NOT in it"
 RULES = {"conformal": conformal_threshold, "plugin": plugin_threshold}
 COUNT_FIELDS = ("n_healthy", "n_healthy_alarm", "n_pos", "n_pos_alarm", "n_early")
+GROUP_FIELDS = ("n_healthy", "n_healthy_alarm", "n_pos", "n_pos_alarm", "n_pos_alarm_pre_tau", "n_pos_alarm_post")
+GROUP_META = ("family", "arm", "n", "rule", "alpha", "t", "draw", "fold")
 
 
 # ---------------------------------------------------------------- Step 0
@@ -152,6 +154,45 @@ def _thetas(scores: Scores, cal_uids: Sequence[str], t: int, alphas: Sequence[fl
 def _rates(scores: Scores, eval_runs: pd.DataFrame, thetas: dict, t: int, classes: Sequence[str]) -> dict:
     sub = {u: scores[u] for u in eval_runs["uid"]}
     return {key: fa_tpr(first_alarm_steps(sub, theta), eval_runs, t, classes) for key, theta in thetas.items()}
+
+
+def group_counts(scores: Scores, theta: float, eval_runs: pd.DataFrame, t: int, classes: Sequence[str]) -> dict:
+    """Per task group of eval_runs: fa_tpr's counts at t, plus post-onset alarms (a positive with
+    some score > theta at a step in tau..t). Post-onset is not n_pos_alarm - pre_tau: a run whose
+    first alarm precedes tau can alarm again after it. Groups with no counted run are left out.
+
+    Task-group counts are all a task-group cluster bootstrap needs, so per-run rows are not kept.
+    """
+    first = first_alarm_steps({u: scores[u] for u in eval_runs["uid"]}, theta)
+    tau = eval_runs["tau"].to_numpy(float)
+    has_step = (eval_runs["T"] >= t + 1).to_numpy()
+    neg = has_step & eval_runs["failure_class"].isna().to_numpy()
+    pos = has_step & eval_runs["failure_class"].isin(list(classes)).to_numpy() & (tau <= t)
+    step = eval_runs["uid"].map(first).to_numpy(float)  # never alarms -> NaN, and NaN <= t is False
+    alarm = step <= t
+    # NaN > theta is False, so unscored steps (HGB arms) cannot alarm post-onset either.
+    post = np.array([bool(p) and bool((np.asarray(scores[u], dtype=float)[int(ta): t + 1] > theta).any())
+                     for u, p, ta in zip(eval_runs["uid"], pos, tau)], dtype=bool)
+    masks = {"n_healthy": neg, "n_healthy_alarm": neg & alarm, "n_pos": pos, "n_pos_alarm": pos & alarm,
+             "n_pos_alarm_pre_tau": pos & alarm & (step < tau), "n_pos_alarm_post": post}
+    # pd.factorize: integer code per row plus the distinct groups, so np.bincount can sum per group.
+    codes, groups = pd.factorize(eval_runs["task_group"])
+    counts = {k: np.bincount(codes, weights=v, minlength=len(groups)).astype(int) for k, v in masks.items()}
+    keep = (counts["n_healthy"] + counts["n_pos"]) > 0
+    return {"task_group": np.asarray(groups)[keep], **{k: v[keep] for k, v in counts.items()}}
+
+
+def group_frame(group_record: list) -> pd.DataFrame:
+    """run_e3's group_record as one row per (family, arm, n, rule, alpha, t, draw, fold, task group);
+    fold = -1 at n = 0, where every target run is tested at once."""
+    cols: dict[str, list] = {k: [] for k in (*GROUP_META, "task_group", *GROUP_FIELDS)}
+    for meta, counts in group_record:
+        k = len(counts["task_group"])
+        for name in GROUP_META:
+            cols[name].extend([meta[name]] * k)
+        for name in ("task_group", *GROUP_FIELDS):
+            cols[name].extend(counts[name].tolist())
+    return pd.DataFrame(cols)
 
 
 class _Pool:
@@ -387,9 +428,18 @@ def evaluate_expectations(cfg: dict, families: dict, frames: dict) -> list[dict]
 
 
 def run_family(
-    table, episodes, family, cfg, e2_cfg, make_esn, make_model, record=None, e2_scores=None,
+    table, episodes, family, cfg, e2_cfg, make_esn, make_model, record=None, e2_scores=None, group_record=None,
 ) -> tuple[dict, pd.DataFrame]:
     runs = episodes[episodes["family"] == family]
+
+    def emit(arm, n, t, r, fold, scores, eval_runs, thetas):
+        # Called next to every pool_cells.add with the same thetas and test runs, so the group
+        # counts sum exactly to the pooled counts (checked by scripts/run_e3.py).
+        if group_record is not None:
+            for (rule, a), theta in thetas.items():
+                meta = {"family": family, "arm": arm, "n": n, "rule": rule, "alpha": a, "t": t, "draw": r, "fold": fold}
+                group_record.append((meta, group_counts(scores, theta, eval_runs, t, classes)))
+
     fam_idx = [cfg["families"]["primary"], *cfg["families"]["descriptive"]].index(family)
     scored, report, alphas = cfg["checkpoints"]["scored"], cfg["checkpoints"]["report"], cfg["thresholds"]["alphas"]
     classes = cfg["metrics"]["classes"]["headline"]
@@ -432,12 +482,14 @@ def run_family(
             cal = [u for u, s in src.items() if len(s) > t and not np.isnan(s[t])]
             thetas, m = _thetas(src, cal, t, alphas)
             pool_cells.add(arm, 0, t, 0, _rates(raw_scores[arm], runs, thetas, t, classes), thetas, m)
+            emit(arm, 0, t, 0, -1, raw_scores[arm], runs, thetas)
             n0.setdefault(arm, {})[str(t)] = {"m_source_healthy": m}
     for j, d in enumerate(esn_draws):
         for t in report:
             cal = [u for u in d["val"] if len(d["val_scores"][u]) > t]
             thetas, m = _thetas(d["val_scores"], cal, t, alphas)
             pool_cells.add("ESN-src", 0, t, j, _rates(d["target"], runs, thetas, t, classes), thetas, m, fit_draw=j)
+            emit("ESN-src", 0, t, j, -1, d["target"], runs, thetas)
             n0.setdefault("ESN-src", {}).setdefault(str(t), {"m_per_fit_draw": []})["m_per_fit_draw"].append(m)
 
     for n in [x for x in cfg["budgets"]["n"] if x > 0]:
@@ -456,15 +508,18 @@ def run_family(
                     for arm in raw_arms:
                         thetas, m = _thetas(raw_scores[arm], d.uids, t, alphas)
                         pool_cells.add(arm, n, t, r, _rates(raw_scores[arm], eval_runs, thetas, t, classes), thetas, m)
+                        emit(arm, n, t, r, f, raw_scores[arm], eval_runs, thetas)
                     pct = _pct_scores(pct_arms, rows, runs, d.half_a, [*held, *d.half_b], t)
                     for arm, sc in pct.items():
                         thetas, m = _thetas(sc, d.half_b, t, alphas)
                         pool_cells.add(arm, n, t, r, _rates(sc, eval_runs, thetas, t, classes), thetas, m)
+                        emit(arm, n, t, r, f, sc, eval_runs, thetas)
                     # ESN-src: one source fit draw per (n, r), shared by every fold and t of that draw.
                     j = int(np.random.default_rng([dseed, fam_idx, 999, n, r]).integers(len(esn_draws)))
                     target = esn_draws[j]["target"]
                     thetas, m = _thetas(target, d.uids, t, alphas)
                     pool_cells.add("ESN-src", n, t, r, _rates(target, eval_runs, thetas, t, classes), thetas, m, fit_draw=j)
+                    emit("ESN-src", n, t, r, f, target, eval_runs, thetas)
                     plan["ESN-src"] = (d.uids, ())
                     if refit and r < R["ESN-refit"]:
                         plan["ESN-refit"] = (d.half_b, d.half_a)
@@ -474,6 +529,7 @@ def run_family(
                         else:
                             thetas, m = _thetas(sc, d.half_b, t, alphas)
                             pool_cells.add("ESN-refit", n, t, r, _rates(sc, eval_runs, thetas, t, classes), thetas, m)
+                            emit("ESN-refit", n, t, r, f, sc, eval_runs, thetas)
                     if record is not None:
                         for arm, (cal, other_half) in plan.items():
                             record.append({"family": family, "arm": arm, "n": n, "t": t, "fold": f, "draw": r,
@@ -527,7 +583,9 @@ def run_e3(
     git: dict | None = None,
     record: list | None = None,
     e2_scores: pd.DataFrame | None = None,
+    group_record: list | None = None,
 ) -> tuple[dict, pd.DataFrame]:
+    """group_record, if given, collects per-(cell, draw, fold, task group) counts; see group_frame."""
     make_esn = make_esn or default_esn_factory(e2_cfg)
     if table is None:
         needed = sorted(set(e2_cfg["checkpoints"]["train"]) | set(cfg["checkpoints"]["scored"]))
@@ -535,7 +593,7 @@ def run_e3(
     families, frames = {}, {}
     for family in [cfg["families"]["primary"], *cfg["families"]["descriptive"]]:
         families[family], frames[family] = run_family(
-            table, episodes, family, cfg, e2_cfg, make_esn, make_model, record, e2_scores)
+            table, episodes, family, cfg, e2_cfg, make_esn, make_model, record, e2_scores, group_record)
     result = {
         "what": "SP6 E3 recalibration curve: FA and TPR of alarms whose thresholds come from n healthy "
         "target runs (conformal and plug-in), per arm and budget; llama primary, gemini descriptive",

@@ -15,10 +15,13 @@ from watchdog_agent.experiments.e3 import (
     calibration_draws,
     calibration_pool_counts,
     evaluate_expectations,
+    group_counts,
+    group_frame,
     run_e3,
     task_group_folds,
 )
 from watchdog_agent.features import prefix_feature_table
+from watchdog_agent.thresholds import fa_tpr, first_alarm_steps
 
 
 def _runs():
@@ -64,6 +67,7 @@ def test_e3_config_parses_and_holds_the_four_expectations():
 # ---------------------------------------------------------------- Step 2: experiment
 
 FITTED_UIDS: list[set] = []
+GROUP_RECORD: list = []
 
 
 class RecordingHGB(HistGradientBoostingClassifier):
@@ -100,9 +104,11 @@ def e3_run():
     cfg = _e3_cfg(episodes, e2_cfg)
     table = prefix_feature_table(dict(zip(episodes["uid"], episodes["steps_parsed"])), [2, 3, 4, 5])
     FITTED_UIDS.clear()
+    GROUP_RECORD.clear()
     record: list = []
     result, frame = run_e3(episodes, cfg, e2_cfg, make_esn=lambda ch: RecordingESN(), make_model=RecordingHGB,
-                           table=table, git={"commit": "test", "dirty": False}, record=record)
+                           table=table, git={"commit": "test", "dirty": False}, record=record,
+                           group_record=GROUP_RECORD)
     return episodes, cfg, e2_cfg, result, frame, record, [set(s) for s in FITTED_UIDS]
 
 
@@ -222,3 +228,57 @@ def test_n0_esn_src_has_one_row_per_fit_draw(e3_run):
     *_, frame, _, _ = e3_run
     rows = frame[(frame["arm"] == "ESN-src") & (frame["n"] == 0) & (frame["rule"] == "plugin")]
     assert sorted(rows["fit_draw"].unique()) == [0, 1, 2]
+
+
+# ---------------------------------------------------------------- Step 3: task-group counts
+
+NAN = float("nan")
+
+
+def _alarm_runs():
+    # t = 4, theta = 0.5, headline class "looping". Comments give each run's expected role.
+    rows = [
+        ("h1", "g0", 6, None, NAN, [0, 0, 0.9, 0, 0, 0]),  # healthy, alarms at 2
+        ("h2", "g0", 6, None, NAN, [0] * 6),  # healthy, quiet
+        ("p_pre", "g0", 6, "looping", 3, [0, 0.9, 0, 0, 0, 0]),  # alarms only before tau: pre, not post
+        ("p_both", "g1", 6, "looping", 3, [0, 0.9, 0, 0.9, 0, 0]),  # first alarm pre-tau, alarms again after
+        ("p_post", "g1", 6, "looping", 2, [0, 0, 0, 0, 0.9, 0]),  # first alarm at 4 >= tau
+        ("p_nan", "g1", 7, "looping", 2, [NAN, NAN, 0.2, NAN, 0.3, NAN, 0.9]),  # alarms at 6 > t: not by t
+        ("p_late", "g1", 7, "looping", 5, [0.9] * 7),  # tau > t: not a positive yet
+        ("h_short", "g2", 3, None, NAN, [0.9] * 3),  # no step 4: not counted
+        ("other", "g2", 6, "rate_limit", 1, [0.9] * 6),  # not a headline class
+    ]
+    runs = pd.DataFrame([{"uid": u, "task_group": g, "T": T, "failure_class": c, "tau": tau} for u, g, T, c, tau, _ in rows])
+    return runs, {u: s for u, *_, s in rows}
+
+
+def test_group_counts_split_pre_and_post_onset_alarms_per_task_group():
+    runs, scores = _alarm_runs()
+    out = group_counts(scores, 0.5, runs, 4, ["looping"])
+    got = {g: {k: int(out[k][i]) for k in out if k != "task_group"} for i, g in enumerate(out["task_group"])}
+    assert got == {  # g2 has no counted run, so it is left out
+        "g0": {"n_healthy": 2, "n_healthy_alarm": 1, "n_pos": 1, "n_pos_alarm": 1,
+               "n_pos_alarm_pre_tau": 1, "n_pos_alarm_post": 0},
+        "g1": {"n_healthy": 0, "n_healthy_alarm": 0, "n_pos": 3, "n_pos_alarm": 2,
+               "n_pos_alarm_pre_tau": 1, "n_pos_alarm_post": 2},
+    }
+    # Summed over groups, the counts are fa_tpr's.
+    rates = fa_tpr(first_alarm_steps(scores, 0.5), runs, 4, ["looping"])
+    for k, f in [("n_healthy", "n_healthy"), ("n_healthy_alarm", "n_healthy_alarm"), ("n_pos", "n_pos"),
+                 ("n_pos_alarm", "n_pos_alarm"), ("n_pos_alarm_pre_tau", "n_early")]:
+        assert out[k].sum() == getattr(rates, f)
+
+
+def test_group_counts_sum_to_the_pooled_counts_of_every_draw_row(e3_run):
+    _, _, _, _, frame, _, _ = e3_run
+    groups = group_frame(GROUP_RECORD)
+    assert (groups["n_pos_alarm_post"] <= groups["n_pos"]).all()
+    assert set(groups.loc[groups["n"] == 0, "fold"]) == {-1} and (groups.loc[groups["n"] > 0, "fold"] >= 0).all()
+    keys = ["family", "arm", "n", "rule", "alpha", "t", "draw"]
+    summed = groups.groupby(keys)[["n_healthy", "n_healthy_alarm", "n_pos", "n_pos_alarm", "n_pos_alarm_pre_tau"]].sum()
+    pooled = frame.set_index(keys)[["n_healthy", "n_healthy_alarm", "n_pos", "n_pos_alarm", "n_early"]]
+    pooled = pooled[pooled["n_healthy"] + pooled["n_pos"] > 0]  # cells with every fold skipped have no group rows
+    assert len(summed) == len(pooled)
+    assert (summed.loc[pooled.index].to_numpy() == pooled.to_numpy()).all()
+    # A task group sits in one fold only (folds are by task group).
+    assert (groups[groups["n"] > 0].groupby(["family", "task_group"])["fold"].nunique() == 1).all()
