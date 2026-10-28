@@ -48,7 +48,7 @@
   (synthetic, real llama groups): 80% power needs delta 0.196 / 0.178 / 0.137 at rho 0 / 0.3 / 0.6,
   so the gate is uninformative at delta <= 0.15 unless rho >= 0.6. STOPPED for owner decision.
   Owner decisions 2026-10-28: no gate (D reported with CI; J-1, J-2 kept), one judge claude-haiku-5-5
-  thinking off x3 samples, no local judge. Next: Step 1 plan (judges.py), wait for "go".
+  thinking off x3 samples, no local judge. Step 1 (judges.py) started 2026-10-28 under override.
   SP5 closed 2026-10-26 (tag sp05-e2): gate FAIL as pre-registered, write-up docs/sp5_e2_result.md;
   recalibration teach-back NOT ANSWERED (owner override, fourth time).
 - SP5 history (E2 ablation, GATE). Step 0 (pre-registration, ae18348), Step 1
@@ -268,6 +268,9 @@
   undefended. Risk accepted.
 - 2026-10-28: Owner override of the teach-back HARD RULE to start SP7 Step 0 with the SP6
   threshold-logic teach-back NOT ANSWERED ("override, go"). Claude disagreed (same reason). Risk accepted.
+- 2026-10-28: Owner override again ("override, go") to start SP7 Step 1 (judges.py) with the SP6
+  threshold-logic teach-back NOT ANSWERED. SP7's Step 1 teach-back moves from the dropped gate
+  statistic to D (paired bootstrap of a median over fit draws). Risk accepted.
 - Proposed for the SP4 spec, NOT decided: a length-only baseline in SP5 (length alone AUROC 0.592;
   ESN score vs length Spearman 0.85/0.80), and matched-step prefix evaluation instead of episode-max.
 
