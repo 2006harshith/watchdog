@@ -25,7 +25,14 @@
   folds 1/4 under; TL-raw HIGH pooled at n=10/20 t=3). D-13b: fold 1 = 32 healthy at t=3 (31 at
   t=4), 23 from one booking task group. D-13c: tpr_post = TPR by construction for ESN arms
   (running max); first-crossing TPR added; E-2 restated with it: TL-pct − ESN-src median −0.012,
-  46% of draws > 0, 95% CI [−0.220, 0.069]. Next: Step 7 (D-14) cost plan, ask before running.
+  46% of draws > 0, 95% CI [−0.220, 0.069]. Step 7 2026-10-28 (design 54325dd before run, code
+  59d8119, results from clean 59d8119; code path check on E3's draws exact, 8600 rows), POST HOC:
+  D-14 FAILS. Half split by task group, r = FA_run − FA_group (conformal α=0.10): TL-pct n=20
+  −0.010 [−0.092, 0.029], n=40 −0.036 → DOES NOT FALL (by-run split is not the explanation);
+  ALL-pct n=20 +0.020 DOES NOT FALL, n=40 +0.084 [0.028, 0.157] PARTIAL; ESN-refit n=20 +0.071
+  [0.043, 0.105], n=40 +0.113 [0.060, 0.180] PARTIAL (FA still 0.22). Fold 1 (the 23-run group,
+  never in a pool when it is tested) keeps FA 0.49–0.73 for TL-pct/ALL-pct under both splits.
+  Next: Step 8 write-up (docs/sp6_e3_result.md); spec amendments from Step 6 pending owner decision.
   SP5 closed 2026-10-26 (tag sp05-e2): gate FAIL as pre-registered, write-up docs/sp5_e2_result.md;
   recalibration teach-back NOT ANSWERED (owner override, fourth time).
 - SP5 history (E2 ablation, GATE). Step 0 (pre-registration, ae18348), Step 1
@@ -435,6 +442,10 @@ Gemini: every table is reported, nothing is tested, and it is labelled descripti
   i'll do it later go"). Still NOT ANSWERED, not owner-marked, not graded.
 
 ## Session log
+- 2026-10-28 · SP6 (Step 7) · D-14 design committed before run (54325dd); group_split_draws +
+  experiments/e3_d14.py (59d8119); run from clean 59d8119 in 19 min, code path check exact. D-14
+  FAILS (TL-pct DOES NOT FALL; ALL-pct, ESN-refit partial) · tests: pass (535, ruff clean) · next:
+  Step 8 write-up.
 - 2026-10-28 · SP6 (close-out part 2, Step 6) · Third threshold-logic teach-back override logged.
   D-13 design committed before run (49580f7); D-13a/b/c in e3_diagnostics.py (5042a7a), results from
   clean 5042a7a (70a1eef), D-8..D-12 values unchanged. D-13a HOLDS, D-13c i/ii/iii HOLD · tests: pass
