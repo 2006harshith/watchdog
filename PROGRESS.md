@@ -58,7 +58,13 @@
   Done 2026-10-28: Ollama 0.40.12, phi4-mini:3.8b digest 78fad5d1; stop-at-newline decoding (3dc1d39);
   v1 on 60 qwen dev runs (0d5be1b): 0/240 parse failures, qwen headline AUROC 0.738, 29/30 repeat calls
   identical, p50 3.0 s/call; v1 frozen by the pre-set rule. FREEZE configs/e4.yaml committed 15b31e8,
-  before any llama judge call. Next: Step 3 plan (e4.py), wait for "go".
+  before any llama judge call. Step 3 2026-10-28 (code 637e818..f86e0d4; judge cache 1618056, 539 local
+  calls; results/e4_judges.json from clean f86e0d4): every reproduction check exact (HGB vs E2, ESN-src
+  vs D-6/E3, E3 operating-point cells for MS-raw/ESN-src). 1/479 judge replies unparsed (0.21%):
+  post-hoc option 1 (pair dropped for every scorer; worst-case-0 sensitivity). J-local headline AUROC
+  0.636 [0.555, 0.744] vs ESN-src median 0.768: D = +0.132 [+0.045, +0.206] (80% of fit draws > 0);
+  J-1 FAILS (expected HOLD); J-2 HOLDS (judge mean FA 0.097, TPR median 0.296, 22% of calibration
+  scores tied at theta). Next: Step 4 write-up docs/sp7_e4_result.md (plan first).
   SP5 closed 2026-10-26 (tag sp05-e2): gate FAIL as pre-registered, write-up docs/sp5_e2_result.md;
   recalibration teach-back NOT ANSWERED (owner override, fourth time).
 - SP5 history (E2 ablation, GATE). Step 0 (pre-registration, ae18348), Step 1
@@ -490,6 +496,11 @@ Gemini: every table is reported, nothing is tested, and it is labelled descripti
   to step 2"). Not owner-marked, not graded. Eleven teach-backs owed before deploy (SP9).
 
 ## Session log
+- 2026-10-28 · SP7 (Steps 0-3) · No API credit: J-local phi4-mini via Ollama. Prompt v1 frozen on qwen
+  (0/240 failures, AUROC 0.738); configs/e4.yaml frozen 15b31e8 before any llama call. E4 run exact on
+  all reproduction checks; D +0.132 [+0.045, +0.206], J-1 FAILS, J-2 HOLDS. Bugs found and fixed on the
+  way: digest prefix (stopped before any call), CPU timer resolution; f3ec448 was committed with a
+  failing test (fixed in f86e0d4) · tests: pass (588, ruff clean) · next: Step 4 write-up.
 - 2026-10-28 · SP6 (close) · Threshold-logic teach-back overridden a fourth time (NOT ANSWERED). Tag
   sp06-e3 · tests: pass (535, ruff clean) · next: SP7 spec from the chat Project.
 - 2026-10-28 · SP6 (Step 8) · docs/sp6_e3_result.md: E-1..E-4 unedited, D-8..D-14, the amended

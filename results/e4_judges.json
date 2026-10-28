@@ -1,5 +1,117 @@
 {
-  "stopped": "1 judge scores missing (parse failures), e.g. [('ollama_llama8b/real-context_corruption-039', 4)]; the handling of missing scores needs an owner decision",
+  "what": "SP7 E4: ESN-src and HGB monitors vs J-local (phi4-mini, local) at matched steps on llama; no gate",
+  "config": {
+    "family": "llama",
+    "checkpoints": {
+      "scored": [
+        2,
+        3,
+        4
+      ],
+      "report": [
+        3,
+        4
+      ]
+    },
+    "classes": {
+      "headline": [
+        "looping",
+        "goal_drift",
+        "context_corruption"
+      ]
+    },
+    "scope": "healthy and headline-class llama runs only (479 prompts at t = 2, 3, 4); tool_cascade not judged",
+    "prompt": {
+      "file": "configs/e4_prompts/v1.txt",
+      "sha256": "4bc3bf11b3fbd2b4a05121f9aa1e3ce000273ab905cab06dac804fd13b103563",
+      "frozen_by_rule": "configs/e4_prompt_dev.yaml: revise only if parse failures > 2% or off-format output. v1 had 0 / 240 parse failures on qwen (headline AUROC 0.738), so v1 is frozen without revision."
+    },
+    "judge": {
+      "name": "J-local",
+      "provider": "ollama",
+      "model": "phi4-mini:3.8b",
+      "digest": "sha256:78fad5d182a7c33065e153a5f8ba210754207ba9d91973f57dffa7f487363753",
+      "temperature": 0.0,
+      "seed": 0,
+      "num_predict": 16,
+      "stop": [
+        "\n"
+      ],
+      "num_ctx": 4096,
+      "samples": 1,
+      "determinism_subset": {
+        "prompts": 30,
+        "samples": 3,
+        "seed": 0
+      },
+      "parse_failures": "missing and counted; if more than 2% fail, stop and report",
+      "max_parse_failure_rate": 0.02,
+      "ties": "integer scores 0-100; AUROC counts a tie as 1/2; the alarm rule is strict (score > theta)"
+    },
+    "cache": "results/e4_judge_cache.jsonl",
+    "leakage_checks": [
+      "forbidden_hits(template) is empty",
+      "label_invariant holds for every prompt",
+      "forbidden_hits(prompt) is empty on every llama prompt"
+    ],
+    "monitors": {
+      "gated": "none",
+      "primary": "ESN-src",
+      "esn_src": "recomputed exactly as E3 (scores are not on disk); per-draw AUROC must reproduce results/e2_closeout.json d6.subsets.aurocs and results/e3_recalibration.json families.llama.esn_src.headline_auroc_per_fit_draw (max abs diff <= 1e-9)",
+      "reported_not_gated": {
+        "MS-raw": "post hoc (labelled so)",
+        "TL-pct": "as E2 (cross-fitted target percentile)",
+        "TL-raw": "as E2",
+        "ESN-refit": "as E3 (fitted on n/2 = 10 target healthy runs per draw); reported at J-2's operating point only"
+      },
+      "hgb_scores_from": "results/e2_prefix_scores.csv"
+    },
+    "statistic_D": {
+      "definition": "D = median over ESN-src's 30 fit draws of (AUROC_ESN-src,draw - AUROC_J-local), each AUROC the mean matched-step AUROC over t = 3, 4, headline classes vs all healthy llama runs (the E2 metric).",
+      "ci": "paired task-group cluster bootstrap, B = 2000, seed 0; each replicate recomputes all 30 draws and the judge",
+      "covers": "test-side (task-group) sampling only; the 30 fit draws are held fixed",
+      "B": 2000,
+      "seed": 0,
+      "gate": "none. Step 0c power (results/e4_step0_power.json): 80% power needs delta 0.196 / 0.178 / 0.137 at rho 0 / 0.3 / 0.6"
+    },
+    "expectations": [
+      {
+        "id": "J-1",
+        "text": "the best judge's headline AUROC > ESN-src's median AUROC. I expect this to HOLD.",
+        "holds_if": "judge headline AUROC > median over the 30 fit draws of ESN-src headline AUROC"
+      },
+      {
+        "id": "J-2",
+        "text": "at conformal alpha=0.10, n=20, on E3's folds and draws, each judge's pooled mean FA <= 0.12. Judges spend no target runs, like MS-raw and ESN-src. Report ties at theta: discrete scores plus the strict \">\" can push FA well below alpha_eff.",
+        "holds_if": "mean over E3's 200 draws of headline FA (mean of t = 3, 4) <= 0.12, m = n = 20",
+        "rule": "conformal",
+        "alpha": 0.1,
+        "n": 20,
+        "max_mean_fa": 0.12
+      }
+    ],
+    "reported_only": [
+      "per-class AUROC: looping, goal_drift, context_corruption",
+      "first-crossing TPR at the J-2 operating point",
+      "judge determinism: share identical and SD on the subset",
+      "share of calibration scores tied at theta"
+    ],
+    "cost_latency": {
+      "judge": "tokens in/out per call, wall-clock per call p50/p95, model load time; $0 (local, no per-token price)",
+      "monitors": "CPU time per step for ESN-src and the HGB arms on this machine",
+      "machine": "Windows 10, GTX 1650 4 GB (judge on GPU via Ollama 0.40.12); measured on the run date"
+    },
+    "not_allowed": [
+      "any claim at unequal FA without stating both FAs",
+      "\"cheaper\" stated as a finding (it is a measured property, reported)",
+      "extending the result to organic failures (that is SP8)",
+      "\"LLM judges\" in general: this is one 3.8B local judge"
+    ]
+  },
+  "git": {
+    "commit": "f86e0d4307f87d9bdfc2bbece1a0caa331337fbd",
+    "dirty": false
+  },
   "checks": {
     "TL-raw.headline_auroc_vs_e2_ablation": {
       "value": 0.0,
@@ -20,10 +132,359 @@
     "ESN-src.fit_draw_aurocs_vs_e3_esn_src": {
       "value": 0.0,
       "ok": true
+    },
+    "MS-raw.e3_operating_point_cells_n20": {
+      "value": 0.0,
+      "where": "",
+      "ok": true
+    },
+    "ESN-src.e3_operating_point_cells_n20": {
+      "value": 0.0,
+      "where": "",
+      "ok": true
     }
   },
-  "git": {
-    "commit": "9060f0a263ad4588bdac5264c3c95b6fc1242705",
-    "dirty": false
+  "caveat": "monitor spread over fit draws and E3 draws = fit-set / calibration variability; D's CI is test-side (task-group) only; one 3.8B local judge",
+  "judge": {
+    "prompts": 479,
+    "scoring_calls": 479,
+    "calls": 539,
+    "new_calls": 0,
+    "parse_failures": 1,
+    "parse_failure_rate": 0.0020876826722338203,
+    "refusals": 0,
+    "determinism": {
+      "prompts": 30,
+      "share_identical_text": 0.8666666666666667,
+      "sd_median": 0.0
+    },
+    "digest": "78fad5d182a7c33065e153a5f8ba210754207ba9d91973f57dffa7f487363753",
+    "model_key": "phi4-mini:3.8b@78fad5d182a7#0b5562ee",
+    "reply_counts": {
+      "10": 311,
+      "20": 94,
+      "100": 42,
+      "30": 32,
+      "85": 32,
+      "80": 18,
+      "75": 4,
+      "25": 3,
+      "40": 2,
+      "Based on the steps provided, it appears that the agent has correctly retrieved the prices": 1
+    }
+  },
+  "excluded_pairs": [
+    [
+      "ollama_llama8b/real-context_corruption-039",
+      4
+    ]
+  ],
+  "auroc": {
+    "J-local": {
+      "headline": 0.6357629387520691,
+      "per_t": {
+        "3": 0.6427865612648221,
+        "4": 0.6287393162393162
+      },
+      "per_class": {
+        "looping": 0.6797401353435837,
+        "goal_drift": 0.6261404220779221,
+        "context_corruption": 0.6033110706497804
+      },
+      "headline_ci": {
+        "lo": 0.554944859440721,
+        "hi": 0.7437236517223468,
+        "n_skipped": 0
+      }
+    },
+    "TL-raw": {
+      "headline": 0.6414521468869295,
+      "per_t": {
+        "3": 0.6408102766798419,
+        "4": 0.6420940170940171
+      },
+      "per_class": {
+        "looping": 0.911516920712323,
+        "goal_drift": 0.46101812770562767,
+        "context_corruption": 0.557288343377053
+      }
+    },
+    "TL-pct": {
+      "headline": 0.6476050821159517,
+      "per_t": {
+        "3": 0.6542913608130999,
+        "4": 0.6409188034188035
+      },
+      "per_class": {
+        "looping": 0.8607724757150044,
+        "goal_drift": 0.492185606060606,
+        "context_corruption": 0.5983846126991288
+      }
+    },
+    "MS-raw": {
+      "headline": 0.8573582818148036,
+      "per_t": {
+        "3": 0.8779644268774703,
+        "4": 0.8367521367521368
+      },
+      "per_class": {
+        "looping": 0.807847495203817,
+        "goal_drift": 0.813426948051948,
+        "context_corruption": 0.9464289742515548
+      }
+    },
+    "ESN-src": {
+      "headline_per_fit_draw": [
+        0.7810975050449459,
+        0.857134309920496,
+        0.6134833772904769,
+        0.7633263704741415,
+        0.8058364722784095,
+        0.7566909264831665,
+        0.6799753470708342,
+        0.7683861772056599,
+        0.8267562308357574,
+        0.6224818155610671,
+        0.8135938657746583,
+        0.8290947151362671,
+        0.8198387880693879,
+        0.8230727651544933,
+        0.8411355178485063,
+        0.6052656548184892,
+        0.7708592430317802,
+        0.8110498311998038,
+        0.8361738403771977,
+        0.6668075618199449,
+        0.6735896487478765,
+        0.5971790294643899,
+        0.611307081745992,
+        0.8338477450819223,
+        0.6791485000964913,
+        0.5658603687635058,
+        0.7616017673392467,
+        0.7884182456692088,
+        0.676327618904669,
+        0.806194026116976
+      ],
+      "headline_median": 0.768246668790147,
+      "headline_min": 0.5658603687635058,
+      "headline_max": 0.857134309920496,
+      "per_class_median": {
+        "looping": 0.7104493207941484,
+        "goal_drift": 0.7045389610389611,
+        "context_corruption": 0.8829297718410621
+      }
+    }
+  },
+  "labels": {
+    "MS-raw": "post hoc"
+  },
+  "D": {
+    "point": 0.13248373003807795,
+    "lo": 0.04543745970950504,
+    "hi": 0.2059882288629211,
+    "n_skipped": 0,
+    "B": 2000,
+    "seed": 0,
+    "excluded_pairs": [
+      [
+        "ollama_llama8b/real-context_corruption-039",
+        4
+      ]
+    ],
+    "per_draw_diff": [
+      0.1439564964021487,
+      0.2205383083100475,
+      -0.02507356773661118,
+      0.1262218759501369,
+      0.169155271057445,
+      0.11958913670870197,
+      0.041897142712360225,
+      0.13114509282987552,
+      0.19001146800059843,
+      -0.015949358612401987,
+      0.17672197971111014,
+      0.19231749530662579,
+      0.18297231150492022,
+      0.18625091695743878,
+      0.20445837375185205,
+      -0.0333088710806102,
+      0.13382236724628038,
+      0.17418876413441642,
+      0.19944665841404974,
+      0.028621167479863208,
+      0.035504682515552055,
+      -0.0413779155626981,
+      -0.02704430231604138,
+      0.19710974412061377,
+      0.040999972249972316,
+      -0.0731347456890935,
+      0.12448104431800089,
+      0.15134620813968636,
+      0.03829404291360827,
+      0.16928292118509514
+    ],
+    "share_draws_gt_0": 0.8
+  },
+  "J-1": {
+    "judge_headline_auroc": 0.6357629387520691,
+    "esn_src_median_headline_auroc": 0.768246668790147,
+    "outcome": "FAILS"
+  },
+  "J-2": {
+    "judge_mean_fa": 0.09650919913419914,
+    "threshold": 0.12,
+    "outcome": "HOLDS",
+    "judge_headline": {
+      "n_draws": 200,
+      "n_draws_undefined": 0,
+      "fa": {
+        "median": 0.08246753246753247,
+        "p10": 0.08246753246753247,
+        "p90": 0.13246753246753246,
+        "mean": 0.09650919913419914,
+        "p_fa_gt_2alpha": 0.0
+      },
+      "tpr": {
+        "median": 0.2958860759493671,
+        "p10": 0.27414694551458446,
+        "p90": 0.3556686846450192,
+        "mean": 0.3097874243258118
+      },
+      "early_alarm_rate": {
+        "median": 0.0,
+        "mean": 0.0
+      },
+      "conformal_defined": true,
+      "tpr_first_crossing_median": 0.2958860759493671,
+      "calibration_share_tied_at_theta_mean": 0.21572499999999997
+    },
+    "context_at_same_point": {
+      "MS-raw": {
+        "n_draws": 200,
+        "n_draws_undefined": 0,
+        "fa": {
+          "median": 0.08344155844155844,
+          "p10": 0.0658008658008658,
+          "p90": 0.11677489177489178,
+          "mean": 0.0877905844155844,
+          "p_fa_gt_2alpha": 0.0
+        },
+        "tpr": {
+          "median": 0.7289832140891579,
+          "p10": 0.6914556962025317,
+          "p90": 0.7791689598238856,
+          "mean": 0.7345421711612548
+        },
+        "early_alarm_rate": {
+          "median": 0.007407813871817383,
+          "mean": 0.008404183624870882
+        },
+        "conformal_defined": true,
+        "tpr_first_crossing_median": 0.7207966428178316,
+        "calibration_share_tied_at_theta_mean": 0.05
+      },
+      "ESN-src": {
+        "n_draws": 200,
+        "n_draws_undefined": 0,
+        "fa": {
+          "median": 0.10378787878787879,
+          "p10": 0.07781385281385281,
+          "p90": 0.1316017316017316,
+          "mean": 0.10490854978354978,
+          "p_fa_gt_2alpha": 0.0
+        },
+        "tpr": {
+          "median": 0.5022014309301046,
+          "p10": 0.09810814529444141,
+          "p90": 0.6109865162355532,
+          "mean": 0.39735553109521193
+        },
+        "early_alarm_rate": {
+          "median": 0.0,
+          "mean": 0.0
+        },
+        "conformal_defined": true,
+        "tpr_first_crossing_median": 0.5022014309301046,
+        "calibration_share_tied_at_theta_mean": 0.076425
+      },
+      "ESN-refit (E3, reused)": {
+        "n_draws": 30,
+        "n_draws_undefined": 0,
+        "fa": {
+          "median": 0.27445887445887446,
+          "p10": 0.19892857142857145,
+          "p90": 0.4436255411255412,
+          "mean": 0.29519480519480523,
+          "p_fa_gt_2alpha": 0.9
+        },
+        "tpr": {
+          "median": 0.6020913593835993,
+          "p10": 0.4135112823335168,
+          "p90": 0.8006053935057789,
+          "mean": 0.5984200146762063
+        },
+        "early_alarm_rate": {
+          "median": 0.0,
+          "mean": 0.001727291056506063
+        },
+        "conformal_defined": true
+      }
+    }
+  },
+  "sensitivity_missing_as_0": {
+    "missing": [
+      [
+        "ollama_llama8b/real-context_corruption-039",
+        4
+      ]
+    ],
+    "rule": "missing failed-run score set to 0, no pair dropped",
+    "judge_headline_auroc": 0.6317835759910608,
+    "D": {
+      "point": 0.13783913412765925,
+      "lo": 0.04543745970950504,
+      "hi": 0.21281703504164795,
+      "n_skipped": 0,
+      "B": 2000,
+      "seed": 0,
+      "excluded_pairs": [],
+      "share_draws_gt_0": 0.8
+    }
+  },
+  "cost_latency": {
+    "judge": {
+      "calls": 539,
+      "latency_s_p50": 3.0319761999999173,
+      "latency_s_p95": 3.509994029998052,
+      "input_tokens_mean": 333.93506493506493,
+      "output_tokens_mean": 2.0259740259740258,
+      "usd_per_call_mean": 0.0,
+      "calls_per_run": 2.8176470588235296,
+      "usd_per_1000_runs": 0.0,
+      "usd_total": 0.0,
+      "model_load_s_max": 15.727138700000001,
+      "usd": 0.0,
+      "note": "wall-clock per call on this machine; local GPU (GTX 1650), no per-token price"
+    },
+    "ESN-src": {
+      "cpu_s_total": 2.046875,
+      "repeats": 1,
+      "steps": 1303,
+      "cpu_ms_per_step": 1.5708940905602455
+    },
+    "HGB.features": {
+      "cpu_s_total": 1.375,
+      "repeats": 1,
+      "steps": 765,
+      "cpu_ms_per_step": 1.7973856209150327
+    },
+    "HGB.MS-raw.predict": {
+      "cpu_s_total": 1.0,
+      "repeats": 30,
+      "steps": 765,
+      "cpu_ms_per_step": 0.04357298474945534
+    },
+    "machine": "Windows 10, GTX 1650 4 GB, Ollama 0.40.12; measured 2026-10-28"
   }
 }
