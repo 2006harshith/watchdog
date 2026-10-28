@@ -19,7 +19,13 @@
   D-9 FAILS (TL-pct concentrated in fold 1 at n=20/40, ALL-pct n=40 and ESN-refit spread);
   D-10 a/b/c FAIL, d HOLDS; D-11a FAILS, b/c/d HOLD; D-12 HOLDS. Close-out part 2 spec received 2026-10-28
   (Steps 6-8: D-13, D-14, docs/sp6_e3_result.md, tag sp06-e3). Threshold-logic teach-back
-  overridden a third time 2026-10-28. Next: Step 6 (D-13) plan, wait for "go".
+  overridden a third time 2026-10-28. Step 6 2026-10-28 (design 49580f7 before run, code 5042a7a,
+  results 70a1eef from clean 5042a7a; D-8..D-12 unchanged exactly), POST HOC: D-13a HOLDS (no-spend
+  arms' pooled FA hides offsetting fold errors: fold 3 over-alarms for MS-raw, ESN-src and TL-raw,
+  folds 1/4 under; TL-raw HIGH pooled at n=10/20 t=3). D-13b: fold 1 = 32 healthy at t=3 (31 at
+  t=4), 23 from one booking task group. D-13c: tpr_post = TPR by construction for ESN arms
+  (running max); first-crossing TPR added; E-2 restated with it: TL-pct − ESN-src median −0.012,
+  46% of draws > 0, 95% CI [−0.220, 0.069]. Next: Step 7 (D-14) cost plan, ask before running.
   SP5 closed 2026-10-26 (tag sp05-e2): gate FAIL as pre-registered, write-up docs/sp5_e2_result.md;
   recalibration teach-back NOT ANSWERED (owner override, fourth time).
 - SP5 history (E2 ablation, GATE). Step 0 (pre-registration, ae18348), Step 1
@@ -429,6 +435,10 @@ Gemini: every table is reported, nothing is tested, and it is labelled descripti
   i'll do it later go"). Still NOT ANSWERED, not owner-marked, not graded.
 
 ## Session log
+- 2026-10-28 · SP6 (close-out part 2, Step 6) · Third threshold-logic teach-back override logged.
+  D-13 design committed before run (49580f7); D-13a/b/c in e3_diagnostics.py (5042a7a), results from
+  clean 5042a7a (70a1eef), D-8..D-12 values unchanged. D-13a HOLDS, D-13c i/ii/iii HOLD · tests: pass
+  (524, ruff clean) · next: Step 7 D-14 cost plan.
 - 2026-10-27 · SP6 (Step 2 recorded) · No code change. PROGRESS.md brought up to date with Step 2
   (3ce8921, results from clean 3ce8921, 711a23e): E-1 FAILS, E-2 HOLDS (expected fail), E-3 FAILS,
   E-4 HOLDS; SP6 row set to in progress. Threshold-logic teach-back re-asked, owner override a second
