@@ -134,6 +134,40 @@ def calibration_draws(
     return out
 
 
+def group_split_draws(
+    eligible: Sequence[str], group_of: dict[str, str], n: int, R: int, seed: int, half_seed: int,
+    key: Sequence[int], max_tries: int,
+) -> tuple[list[Draw], list[int]] | None:
+    """D-14 (POST HOC): R draws whose two n/2 halves come from disjoint task groups.
+
+    Per draw, the eligible pool's task groups go to side A or B with probability 1/2, retried until
+    both sides hold >= n/2 runs; half_a is n/2 runs of A, half_b n/2 runs of B. Returns the draws and
+    each draw's try count, or None if n > len(eligible) (E3's skip) or a draw finds no split.
+    """
+    if n > len(eligible):
+        return None
+    pool = sorted(eligible)
+    groups = sorted({group_of[u] for u in pool})
+    members = {g: [u for u in pool if group_of[u] == g] for g in groups}
+    half = n // 2
+    draws, tries = [], []
+    for r in range(R):
+        for k in range(max_tries):
+            in_a = np.random.default_rng([half_seed, *key, n, r, k]).random(len(groups)) < 0.5
+            side_a = [u for g, a in zip(groups, in_a) if a for u in members[g]]
+            side_b = [u for g, a in zip(groups, in_a) if not a for u in members[g]]
+            if len(side_a) >= half and len(side_b) >= n - half:
+                break
+        else:
+            return None
+        rng = np.random.default_rng([seed, *key, n, r])
+        a = sorted(rng.choice(side_a, size=half, replace=False).tolist())
+        b = sorted(rng.choice(side_b, size=n - half, replace=False).tolist())
+        draws.append(Draw(tuple(sorted(a + b)), tuple(a), tuple(b)))
+        tries.append(k + 1)
+    return draws, tries
+
+
 def task_group_folds(pool: pd.DataFrame, k: int, seed: int) -> list[tuple[list[str], list[str]]]:
     """k folds over a multi-family source pool's task groups (grouped_kfold works on one family)."""
     groups = sorted(pool["task_group"].unique())
