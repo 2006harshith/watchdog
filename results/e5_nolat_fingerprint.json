@@ -1,0 +1,39 @@
+{
+  "what": "SP8 MS-raw-noLat fitted on source before any SP8 score (O-3 control)",
+  "git": {
+    "commit": "138c75dd23def229654ded51b4123b38228183e3",
+    "dirty": false
+  },
+  "features": [
+    "ms__log_output_tokens__mean",
+    "ms__log_output_tokens__max",
+    "ms__log_output_tokens__last",
+    "ms__log_output_tokens__last3_mean",
+    "ms__synth_text_log_chars__mean",
+    "ms__synth_text_log_chars__max",
+    "ms__synth_text_log_chars__last",
+    "ms__synth_text_log_chars__last3_mean",
+    "ms__surprisal_mean__mean",
+    "ms__surprisal_mean__max",
+    "ms__surprisal_mean__last",
+    "ms__surprisal_mean__last3_mean",
+    "ms__surprisal_max__mean",
+    "ms__surprisal_max__max",
+    "ms__surprisal_max__last",
+    "ms__surprisal_max__last3_mean"
+  ],
+  "n_features": 16,
+  "hgb_params": {
+    "max_depth": 3,
+    "learning_rate": 0.05,
+    "max_iter": 300,
+    "l2_regularization": 1.0,
+    "early_stopping": false,
+    "random_state": 0
+  },
+  "fingerprint_rows": "llama E2 prefix rows at t in {2, 3, 4}",
+  "n_rows": 548,
+  "MS-raw-noLat_sha256": "34838f50ce4f60b613d10ff6aae3ca47adb7e783f134eaac8fa946aca259e7d9",
+  "MS-raw_sha256": "f8b68f46741d78d77ff28dbfaf2b538f1e0868ff491beb8ffc1e3d3e6734d367",
+  "MS-raw_vs_e2_prefix_scores_max_abs_diff": 1.1102230246251565e-16
+}

@@ -26,3 +26,15 @@ def test_nolat_refuses_if_no_latency_column_matches(monkeypatch):
 def test_fingerprint_is_order_free_and_sensitive_to_any_score():
     s = pd.Series([0.1, 0.2, 0.3], index=["b", "a", "c"])
     assert e5m.fingerprint(s) == e5m.fingerprint(s.sort_index()) and e5m.fingerprint(s) != e5m.fingerprint(s + 1e-9)
+
+
+def test_frozen_e5_config_pins_the_gate_label_and_expectations():
+    import json
+
+    cfg = yaml.safe_load(Path("configs/e5.yaml").read_text(encoding="utf-8"))
+    g = cfg["gate"]
+    assert (g["arm"], g["corpus"], g["c"], g["B"], g["seed"]) == ("MS-raw", "organic_llama8b_cold", 0.5, 2000, 0)
+    assert [e["id"] for e in cfg["expectations"]] == ["O-1", "O-2", "O-3", "O-4"]
+    assert cfg["expectations"][1]["status"] == "dropped" and cfg["expectations"][3]["status"] == "untestable"
+    fp = json.loads(Path("results/e5_nolat_fingerprint.json").read_text())
+    assert fp["MS-raw-noLat_sha256"].startswith(cfg["monitors"]["nolat_fingerprint"])

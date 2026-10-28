@@ -1,0 +1,80 @@
+# SP8 E5: frozen source monitors on organic llama8b failures. GATE. PRE-REGISTERED.
+# Committed before any SP8 monitor score and before experiments/e5.py exists.
+# Decisions: docs/decisions.md 2026-10-28 (SP8: AgentDojo dropped; option 3; strict label; cold-corpus
+# gate; O-2 dropped). Data and label: src/watchdog_agent/organic.py; docs/data_card.md (SP8 section).
+
+data:
+  loader: watchdog_agent.organic.load_organic
+  corpora: [organic_llama8b, organic_llama8b_cold]
+  gate_corpus: organic_llama8b_cold          # 10 healthy / 110 failed; every run has steps 3 and 4
+  descriptive_corpus: organic_llama8b        # 1 healthy / 119 failed: label confounded with corpus
+  label: >-
+    strict: HEALTHY iff the last synthesis step states metadata.expected_total (a number within 0.5);
+    else FAILED
+  estimand: >-
+    run-level ("will this run end wrong"), read at matched steps; a failed run is a positive at every
+    checkpoint (tau = 0); no onset exists
+  task_group: the run (random itineraries)
+checkpoints: {scored: [2, 3, 4], report: [3, 4]}
+
+monitors:                                    # all frozen; none is fitted on SP8 data
+  primary: MS-raw                            # the SP5 HGB on MS features, refitted deterministically as E2
+  secondary: ESN-src                         # 30 fit draws (2026-10-26 rule), E3's _esn_src
+  reported: [TL-raw, TL-pct]                 # TL-pct: percentile reference cross-fitted on the corpus's own healthy runs (as E2)
+  sensitivity: MS-raw-noLat                  # MS-raw config without the 4 ms__log_latency__* aggregates
+  nolat_fingerprint: 34838f50ce4f60b6        # results/e5_nolat_fingerprint.json (full sha256 there); e5.py must reproduce it
+
+gate:
+  text: >-
+    On organic_llama8b_cold, MS-raw's mean matched-step AUROC over t = 3, 4 (run-level labels) has a
+    run-level cluster-bootstrap 95% CI (B = 2000, seed 0) whose lower bound is > 0.5. Low-powered: with
+    about 10 healthy runs it passes only if the true AUROC is about 0.65 or more.
+  arm: MS-raw
+  corpus: organic_llama8b_cold
+  c: 0.5
+  B: 2000
+  seed: 0
+  pass_if: ci_lower_bound > c
+  on_fail: the negative result is written up; SP9's scope is decided in the chat Project
+
+expectations:
+  - id: O-1
+    text: "MS-raw's organic AUROC < its synthetic llama AUROC (E2: 0.858). Expected to HOLD."
+    corpus: organic_llama8b_cold
+    holds_if: MS-raw headline AUROC < 0.858
+    note: different estimands (run-level here, onset-based in E2); the write-up states both next to each other
+  - id: O-2
+    status: dropped
+    reason: fewer than 20 healthy runs exist (11 in total), so E3's n = 20 operating point cannot be run
+  - id: O-3
+    text: "MS-raw-noLat's AUROC >= MS-raw's - 0.05. Stated as HOLD so it can fail. If it fails, MS-raw's organic signal is mostly latency."
+    corpus: organic_llama8b_cold
+    holds_if: AUROC(MS-raw-noLat) >= AUROC(MS-raw) - 0.05
+  - id: O-4
+    status: untestable
+    hypothesis_verbatim: >-
+      Hypothesis for SP8, stated before any SP8 data is seen: on a held-out family whose ESN signal is
+      content-driven, TL-pct ranks failures above ESN_best, but it does not alarm at 5% FPR until its
+      threshold is recalibrated (SP6). Both halves can come out wrong. The SP8 spec fixes the test and
+      threshold before the run.
+    source: docs/sp5_e2_result.md section 6
+    reason: >-
+      its premise is a held-out family whose ESN signal is content-driven; these runs are llama, whose ESN
+      signal SP5's close-out traced to the m channel, not content (results/e2_channel_attribution.json);
+      no new family is in the SP8 data
+
+reproduction:                                 # before any SP8 statistic
+  - frozen MS-raw on the llama E2 prefix rows equals results/e2_prefix_scores.csv (max abs diff <= 1e-9)
+  - ESN-src's 30 fit-draw headline AUROCs equal results/e2_closeout.json d6.subsets.aurocs (<= 1e-9)
+  - MS-raw-noLat refitted reproduces the committed fingerprint
+
+reported_only:
+  - 'per-t AUROC and AUROC per corpus; the T = 0.9 corpus AUROC rests on its single healthy run'
+  - 'ESN-src as a distribution over its 30 fit draws (median, range)'
+  - 'latency and output-token quantiles: organic healthy/failed vs llama source vs qwen source'
+  - 'no operating point (O-2 dropped), so no any-alarm or first-crossing TPR'
+caveat: 'CI = run-level cluster bootstrap (each run its own task group); ESN draw spread = fit-set variability only'
+not_allowed:
+  - 'organic and synthetic AUROCs in one comparison without the estimand note'
+  - 'any claim at unequal FA without both FAs'
+  - 'generalising beyond llama3.1:8b, these two corpora of the booking environment, and the dataset collection'

@@ -90,6 +90,11 @@
   label (no monitor score seen): healthy iff the final synthesis text states expected_total: 11/240
   healthy (1/120 at T=0.9, 10/120 in the T=0.2 'cold' corpus): label confounded with corpus; O-2
   (n=20 healthy) infeasible. STOPPED for a decision on the label rule and the gate.
+  Owner: strict rule, cold-corpus gate (c = 0.5), O-2 dropped (66d72df). Step 1: organic.py + tests +
+  data card (3ccd493); label/estimand teach-back NOT ANSWERED (override). Step 2: MS-raw-noLat fitted
+  from clean 138c75d (MS-raw reproduces E2 to 1.1e-16; noLat fingerprint 34838f50); configs/e5.yaml
+  (gate, O-1, O-3, O-4 untestable, O-2 dropped) committed BEFORE any SP8 score and before e5.py exists.
+  Next: Step 4 plan (e5.py), wait for "go".
   SP5 closed 2026-10-26 (tag sp05-e2): gate FAIL as pre-registered, write-up docs/sp5_e2_result.md;
   recalibration teach-back NOT ANSWERED (owner override, fourth time).
 - SP5 history (E2 ablation, GATE). Step 0 (pre-registration, ae18348), Step 1
