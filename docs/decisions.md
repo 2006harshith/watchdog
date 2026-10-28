@@ -461,3 +461,5 @@ Owner-approved ("add the amendments to the write-up and go"), after D-13 and D-1
 4. D-14's status: the by-run split is not the explanation for TL-pct; it explains part of ESN-refit's
    and ALL-pct's (n = 40) excess; the narrower fit set is an open confound.
 Tag sp06-e3 is NOT applied: SP6's done criteria require the threshold-logic teach-back, still NOT ANSWERED.
+- 2026-10-28 (later): owner override of SP6's done criterion; tag sp06-e3 applied with the
+  threshold-logic teach-back NOT ANSWERED (fourth override for SP6). Claude disagreed. Risk accepted.

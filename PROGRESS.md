@@ -33,8 +33,9 @@
   [0.043, 0.105], n=40 +0.113 [0.060, 0.180] PARTIAL (FA still 0.22). Fold 1 (the 23-run group,
   never in a pool when it is tested) keeps FA 0.49–0.73 for TL-pct/ALL-pct under both splits.
   Step 8 2026-10-28: write-up docs/sp6_e3_result.md with the owner-approved amendments (decisions.md
-  2026-10-28). Everything else in SP6's done list is met. Next: the threshold-logic teach-back
-  (PROGRESS "Teach-backs", SP6 entry), which tag sp06-e3 requires.
+  2026-10-28). SP6 closed 2026-10-28 (tag sp06-e3) with the threshold-logic teach-back NOT ANSWERED
+  (owner override, fourth time for SP6). Next: SP7 needs a spec from the chat Project (paste
+  docs/sp6_e3_result.md and this section). Ten teach-backs owed before deploy (SP9).
   SP5 closed 2026-10-26 (tag sp05-e2): gate FAIL as pre-registered, write-up docs/sp5_e2_result.md;
   recalibration teach-back NOT ANSWERED (owner override, fourth time).
 - SP5 history (E2 ablation, GATE). Step 0 (pre-registration, ae18348), Step 1
@@ -105,7 +106,7 @@
 | SP3 | E1 reproduce collapse — GATE (teach-back: metrics). Pass: on the same held-out llama3.1:8b episodes, the qwen-fitted monitor is >= 0.15 AUROC below the llama-fitted one, with non-overlapping episode-bootstrap 95% CIs. Reference: 0.527 vs 0.885, arXiv 2608.02464 §5 (transferred vs refitted, not before/after) | done — gate FAIL; diagnostics D-1..D-5 done (docs/sp3_e1_result.md); teach-back owner-marked passed | sp03-e1 |
 | SP4 | Feature sets + matched-step evaluation (teach-back: feature definitions) | done — audit in results/sp4_feature_audit.json; split/metrics teach-backs owner-marked, feature-definitions teach-back not answered (owner override) | sp04-features, sp04-closeout |
 | SP5 | E2 ablation — GATE (spec to be rewritten after SP3) | done — gate FAIL (pre-registered fail path); write-up docs/sp5_e2_result.md; recalibration teach-back NOT ANSWERED (owner override) | sp05-e2 |
-| SP6 | E3 recalibration curve (teach-back: threshold logic) | write-up done (docs/sp6_e3_result.md); not tagged: threshold-logic teach-back NOT ANSWERED (owner override x3) | |
+| SP6 | E3 recalibration curve (teach-back: threshold logic) | done — write-up docs/sp6_e3_result.md; threshold-logic teach-back NOT ANSWERED (owner override x4) | sp06-e3 |
 | SP7 | E4 cost/latency vs LLM judges — GATE | not started | |
 | SP8 | E5 organic runs on AgentDojo — GATE | not started | |
 | SP9 | Supervisor agent + Streamlit demo on HF Spaces | not started | |
@@ -248,6 +249,10 @@
   part 2 (Steps 6-8) ("override it, i'll do it later go"). NOT ANSWERED, not owner-marked. Claude
   disagreed: the write-up's lead (E-1, alpha_eff(m), D-12) is this logic, and tag sp06-e3 needs the
   teach-back answered under SP6's done criteria, so tagging will need a further override. Risk accepted.
+- 2026-10-28: Fourth owner override of the SP6 threshold-logic teach-back, to close SP6 and tag
+  sp06-e3 ("override it and tag sp06-e3"). NOT ANSWERED, not owner-marked. Claude disagreed: the tag
+  marks SP6 done while the logic behind its lead (conformal alpha_eff, exchangeability, D-12) is
+  undefended. Risk accepted.
 - Proposed for the SP4 spec, NOT decided: a length-only baseline in SP5 (length alone AUROC 0.592;
   ESN score vs length Spearman 0.85/0.80), and matched-step prefix evaluation instead of episode-max.
 
@@ -441,9 +446,12 @@ Gemini: every table is reported, nothing is tested, and it is labelled descripti
   every E3 number, and E-1 in particular, rests on this logic. Nine teach-backs owed before deploy
   (SP9). Re-asked 2026-10-27 at resume after Step 2 (E-1 FAILS); overridden a second time ("override
   it ill do it later"). Overridden a third time 2026-10-28 for the close-out part 2 ("override it,
-  i'll do it later go"). Still NOT ANSWERED, not owner-marked, not graded.
+  i'll do it later go"). Overridden a fourth time 2026-10-28 to close SP6 and tag sp06-e3 ("override
+  it and tag sp06-e3"). Still NOT ANSWERED, not owner-marked, not graded.
 
 ## Session log
+- 2026-10-28 · SP6 (close) · Threshold-logic teach-back overridden a fourth time (NOT ANSWERED). Tag
+  sp06-e3 · tests: pass (535, ruff clean) · next: SP7 spec from the chat Project.
 - 2026-10-28 · SP6 (Step 8) · docs/sp6_e3_result.md: E-1..E-4 unedited, D-8..D-14, the amended
   allowed/not-allowed lists, gemini descriptive, limits. Amendments recorded in decisions.md. Not
   tagged (teach-back owed) · tests: pass (535, ruff clean) · next: threshold-logic teach-back.
