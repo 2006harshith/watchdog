@@ -31,6 +31,7 @@ judge:
   samples: 1
   determinism_subset: {prompts: 30, samples: 3, seed: 0}
   parse_failures: missing and counted; if more than 2% fail, stop and report
+  max_parse_failure_rate: 0.02      # machine-readable form of the line above (added before any llama call)
   ties: integer scores 0-100; AUROC counts a tie as 1/2; the alarm rule is strict (score > theta)
 cache: results/e4_judge_cache.jsonl   # committed; keys, hashes, replies, tokens, latency; no trace text
 leakage_checks:
@@ -57,6 +58,8 @@ statistic_D:
     matched-step AUROC over t = 3, 4, headline classes vs all healthy llama runs (the E2 metric).
   ci: paired task-group cluster bootstrap, B = 2000, seed 0; each replicate recomputes all 30 draws and the judge
   covers: test-side (task-group) sampling only; the 30 fit draws are held fixed
+  B: 2000
+  seed: 0
   gate: 'none. Step 0c power (results/e4_step0_power.json): 80% power needs delta 0.196 / 0.178 / 0.137 at rho 0 / 0.3 / 0.6'
 
 expectations:                       # verbatim from the SP7 spec; "best judge" = the one judge (J-local)
@@ -69,6 +72,10 @@ expectations:                       # verbatim from the SP7 spec; "best judge" =
       Judges spend no target runs, like MS-raw and ESN-src. Report ties at theta: discrete scores plus the
       strict ">" can push FA well below alpha_eff.
     holds_if: mean over E3's 200 draws of headline FA (mean of t = 3, 4) <= 0.12, m = n = 20
+    rule: conformal
+    alpha: 0.1
+    n: 20
+    max_mean_fa: 0.12
 reported_only:
   - 'per-class AUROC: looping, goal_drift, context_corruption'
   - 'first-crossing TPR at the J-2 operating point'

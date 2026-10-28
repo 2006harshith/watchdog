@@ -6,7 +6,7 @@ and spending stops at a hard budget counted from the usage the API reports.
 """
 
 import math
-from collections.abc import Sequence
+from collections.abc import Callable, Sequence
 from pathlib import Path
 
 import numpy as np
@@ -83,14 +83,12 @@ def determinism_subset(n_prompts: int, spec: dict) -> set[int]:
     return set(np.random.default_rng(spec["seed"]).choice(n_prompts, size=k, replace=False).tolist())
 
 
-def run_version(template: str, runs: pd.DataFrame, judge, cache: JudgeCache, cfg: dict) -> dict:
-    """Judge every dev prompt (cache first), stop at the budget, and summarise the version. Each
-    prompt gets judge.samples scoring samples; the determinism subset gets more, used only for SD."""
-    jc, price = cfg["judge"], cfg["price"]
-    p_hash = prompt_hash(template)
-    todo = preflight(template, runs, cfg["checkpoints"]["scored"])
+def collect(todo: Sequence[tuple[str, int, str]], judge, cache: JudgeCache, jc: dict, p_hash: str,
+            before_call: Callable[[str, int], None] | None = None) -> tuple[dict, list]:
+    """Responses per (uid, t), cache first. Each prompt gets jc["samples"] scoring samples; the
+    determinism subset gets more, used only for SD. before_call can veto a call (the budget)."""
     subset = determinism_subset(len(todo), jc["determinism_subset"])
-    texts: dict[tuple[str, int], list[str]] = {}
+    texts: dict[tuple[str, int], list] = {}
     new = []
     for i, (uid, t, prompt) in enumerate(todo):
         got = []
@@ -99,12 +97,26 @@ def run_version(template: str, runs: pd.DataFrame, judge, cache: JudgeCache, cfg
             key = CacheKey(jc["name"], judge.model, p_hash, uid, t, s)
             rec = cache.get(key)
             if rec is None:
-                if spent_usd(cache, price["input_usd_per_mtok"], price["output_usd_per_mtok"]) >= cfg["budget_usd"]:
-                    raise BudgetExceeded(f"dev spend reached ${cfg['budget_usd']}; stopping before {uid} t={t}")
+                if before_call is not None:
+                    before_call(uid, t)
                 rec = cache.put(key, judge.call(prompt))
                 new.append(rec["response"])
             got.append(rec["response"])
         texts[(uid, t)] = got
+    return texts, new
+
+
+def run_version(template: str, runs: pd.DataFrame, judge, cache: JudgeCache, cfg: dict) -> dict:
+    """Judge every dev prompt (cache first), stop at the budget, and summarise the version."""
+    price = cfg["price"]
+    p_hash = prompt_hash(template)
+    todo = preflight(template, runs, cfg["checkpoints"]["scored"])
+
+    def budget(uid, t):
+        if spent_usd(cache, price["input_usd_per_mtok"], price["output_usd_per_mtok"]) >= cfg["budget_usd"]:
+            raise BudgetExceeded(f"dev spend reached ${cfg['budget_usd']}; stopping before {uid} t={t}")
+
+    texts, new = collect(todo, judge, cache, cfg["judge"], p_hash, before_call=budget)
     return summarise(runs, texts, cfg, p_hash, new)
 
 
