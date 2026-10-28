@@ -65,7 +65,9 @@
   0.636 [0.555, 0.744] vs ESN-src median 0.768: D = +0.132 [+0.045, +0.206] (80% of fit draws > 0);
   J-1 FAILS (expected HOLD); J-2 HOLDS (judge mean FA 0.097, TPR median 0.296, 22% of calibration
   scores tied at theta). Step 4 2026-10-28: write-up docs/sp7_e4_result.md. Not tagged: the SP7 teach-back
-  on D (and SP6's) is NOT ANSWERED. Next: teach-back on D, or an owner override to tag sp07-e4.
+  on D (and SP6's) is NOT ANSWERED. SP7 closed 2026-10-28 (tag sp07-e4) under owner override of the
+  teach-back on D (second override for it). Twelve teach-backs owed before deploy (SP9). Next: SP8 needs
+  a spec from the chat Project (paste docs/sp7_e4_result.md and this section).
   SP5 closed 2026-10-26 (tag sp05-e2): gate FAIL as pre-registered, write-up docs/sp5_e2_result.md;
   recalibration teach-back NOT ANSWERED (owner override, fourth time).
 - SP5 history (E2 ablation, GATE). Step 0 (pre-registration, ae18348), Step 1
@@ -137,7 +139,7 @@
 | SP4 | Feature sets + matched-step evaluation (teach-back: feature definitions) | done — audit in results/sp4_feature_audit.json; split/metrics teach-backs owner-marked, feature-definitions teach-back not answered (owner override) | sp04-features, sp04-closeout |
 | SP5 | E2 ablation — GATE (spec to be rewritten after SP3) | done — gate FAIL (pre-registered fail path); write-up docs/sp5_e2_result.md; recalibration teach-back NOT ANSWERED (owner override) | sp05-e2 |
 | SP6 | E3 recalibration curve (teach-back: threshold logic) | done — write-up docs/sp6_e3_result.md; threshold-logic teach-back NOT ANSWERED (owner override x4) | sp06-e3 |
-| SP7 | E4 cheap monitor vs LLM judge (gate dropped: power) | write-up done (docs/sp7_e4_result.md): D +0.132 [+0.045, +0.206], J-1 FAILS, J-2 HOLDS; not tagged: teach-back on D NOT ANSWERED | |
+| SP7 | E4 cheap monitor vs LLM judge (gate dropped: power) | done — docs/sp7_e4_result.md: D +0.132 [+0.045, +0.206], J-1 FAILS, J-2 HOLDS; teach-back on D NOT ANSWERED (owner override x2) | sp07-e4 |
 | SP8 | E5 organic runs on AgentDojo — GATE | not started | |
 | SP9 | Supervisor agent + Streamlit demo on HF Spaces | not started | |
 | SP10 | Write-up: arXiv report, README, blog | not started | |
@@ -290,6 +292,9 @@
   statistic to D (paired bootstrap of a median over fit draws). Risk accepted.
 - 2026-10-28: Owner override of the SP7 teach-back on D ("override it, go to step 2"). NOT ANSWERED.
   Claude disagreed: D is the headline number of SP7. Risk accepted.
+- 2026-10-28: Second owner override of the SP7 teach-back on D, to close SP7 and tag sp07-e4 ("override
+  it and tag sp07-e4"). NOT ANSWERED. Claude disagreed: the tag marks SP7 done while its core statistic
+  is undefended. Risk accepted.
 - Proposed for the SP4 spec, NOT decided: a length-only baseline in SP5 (length alone AUROC 0.592;
   ESN score vs length Spearman 0.85/0.80), and matched-step prefix evaluation instead of episode-max.
 
@@ -494,9 +499,11 @@ Gemini: every table is reported, nothing is tested, and it is labelled descripti
   bimodal fit-draw AUROCs? Q3: why picking the better of two judges on the test data biases D against
   the monitor and why re-select per replicate; with no delta, what does a CI of [-0.15, +0.05] allow
   you to say? · answers: not yet given · NOT ANSWERED, owner override 2026-10-28 ("override it, go
-  to step 2"). Not owner-marked, not graded. Eleven teach-backs owed before deploy (SP9).
+  to step 2"). Overridden again 2026-10-28 to tag sp07-e4. Not owner-marked, not graded.
 
 ## Session log
+- 2026-10-28 · SP7 (close) · Write-up committed f3b6405; teach-back on D overridden a second time (NOT
+  ANSWERED). Tag sp07-e4 · tests: pass (588, ruff clean) · next: SP8 spec from the chat Project.
 - 2026-10-28 · SP7 (Steps 0-3) · No API credit: J-local phi4-mini via Ollama. Prompt v1 frozen on qwen
   (0/240 failures, AUROC 0.738); configs/e4.yaml frozen 15b31e8 before any llama call. E4 run exact on
   all reproduction checks; D +0.132 [+0.045, +0.206], J-1 FAILS, J-2 HOLDS. Bugs found and fixed on the
