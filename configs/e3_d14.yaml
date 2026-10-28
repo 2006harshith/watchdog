@@ -1,0 +1,15 @@
+# SP6 D-14 (POST HOC): E3's split arms with the halves drawn from disjoint task groups.
+# Design and expected outcome: docs/decisions.md, "D-14 Half split by task group", committed before the run.
+# Draw counts, seeds, folds, thresholds and source models come from configs/e3.yaml.
+family: llama
+arms: [TL-pct, ALL-pct, ESN-refit]
+n: [20, 40]
+alpha: 0.1                        # primary alpha for the comparison (both alphas are run)
+split: {by: task_group, max_tries: 1000}
+big_group_min_runs: 10            # placement is reported for task groups with at least this many healthy runs
+code_path_check: {n: 20, t: 3, fold: 0}
+reading: {falls_share_of_excess: 0.5, no_fall_le: 0.02}
+bootstrap: {B: 2000, seed: 0}
+inputs:
+  e3_groups: results/e3_group_counts.parquet
+  e3_draws: results/e3_draws.csv

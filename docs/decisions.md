@@ -404,3 +404,48 @@ Checks, expected to hold (mechanical, not findings): (i) first-crossing ≤ post
 every group row of every cell; (ii) post-onset = any-alarm in every group row of ESN-src and
 ESN-refit; (iii) post-onset > first-crossing in at least one row of some HGB arm (otherwise the
 distinction does not matter on these data, and the write-up says so).
+
+### D-14 Half split by task group (needs a rerun)
+Written and committed before the run, after D-13's results. The author had seen every D-8..D-13
+number, the eligible pools' task-group sizes and two timings (an ESN refit takes about 1 s, a
+percentile re-reference 0.06 s). No FA or TPR under a group split.
+
+Question: does the by-run half split explain the split arms' excess FA? Under it, the calibration
+half shares task groups with the reference half (TL-pct, ALL-pct) or the fit half (ESN-refit). The
+test fold's groups are new to both halves. So calibration scores may look more normal than test
+scores, and θ comes out too low.
+
+Design (llama only: ESN-refit is llama-only and llama is primary; arms TL-pct, ALL-pct, ESN-refit;
+n = 20 and 40; t = 3, 4; conformal and plug-in at α = 0.05 and 0.10):
+- Per (t, fold f, n, draw r), split the eligible pool's task groups (E3's eligible runs: healthy,
+  other folds, a step t) at random into sides A and B. Each group goes to A with probability 1/2,
+  from default_rng([half_seed, family, t, f, n, r, try]). Retry with try = 0, 1, ... until both sides
+  hold ≥ n/2 runs, up to 1000 tries. If no try works, the fold is skipped at that (n, t) and counted.
+- The reference/fit half is n/2 runs from A; the calibration half is n/2 runs from B,
+  default_rng([seed, family, t, f, n, r]). No task group is in both halves. m = n/2 exactly, as in E3.
+- Everything else as E3: the same source models, test runs, folds, R (200; ESN-refit the first 30),
+  seeds, θ rules, n=40 skips and task-group counts.
+- Rejected: a task-group split of E3's own n picked runs. It keeps run-level pairing with E3, but m
+  would vary per draw (one eligible group has 23 runs; the others have 1–4). That changes α_eff(m),
+  and at m < 9 θ = +∞. The design above loses pairing with E3's draws. So the two splits are compared
+  as distributions on the same test runs, not draw by draw.
+- Code path check: the D-14 loop run with E3's own by-run draws must reproduce E3's group counts
+  exactly for n=20, t=3, fold 0 (all three arms).
+
+Comparison, per arm and n, conformal α = 0.10. FA_run is from E3's group counts and FA_group from
+D-14's. Headline mean FA over t = 3, 4, as E-1.
+- excess = FA_run − α_eff(n/2), where α_eff = 0.091 at m=10 and 0.095 at m=20.
+- r = FA_run − FA_group. The CI is a task-group cluster bootstrap over the test groups (B = 2000,
+  seed 0), with one resample shared by both splits, so r's interval is test-side only.
+- FALLS if r ≥ 0.5 · excess and r's 95% CI excludes 0. PARTIAL if r > 0.02 and not FALLS.
+  DOES NOT FALL if r ≤ 0.02.
+Expected: FALLS for TL-pct, ALL-pct and ESN-refit at n = 20. If DOES NOT FALL, the write-up says the
+by-run split is not the explanation for that arm.
+Also reported (descriptive, no reading): mean FA, P(FA > 2α), median TPR and first-crossing TPR, and
+per-fold FA (as D-9) under both splits. Per (n, t, fold): where the 23-run group sits (reference/fit
+half, calibration half, or neither), FA by placement, the number of distinct partitions and the
+largest try count.
+Known confounds, stated now: a group half spans fewer task groups than a by-run half, so the
+reference or fit set is narrower, and that alone can raise FA and cancel part of any gain. That is
+the first alternative if the result is DOES NOT FALL. The placement of the 23-run group shifts half
+composition. At n=40 t=4 the retry condition restricts the possible partitions.
