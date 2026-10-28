@@ -79,6 +79,11 @@
   tool call; failure modes: stops after the first tool result and writes prose, never calls a tool,
   invalid args ("null" strings), invented IDs. No run reaches t = 3 or 4; no healthy run exists, so AUROC
   and the operating point are undefined. STOPPED for owner decision (no monitor score computed).
+  Option A re-pilot 2026-10-28 (AgentDojo LocalLLM, prompt-based tools; same 10 runs; 31ae4d5): utility
+  0/10 again; median 1 LLM call per run (one run 9). New failure modes: closing the call with <function>
+  instead of </function> (AgentDojo's parser then sees no call and the run ends; 4/10 runs), privacy
+  refusals (workspace 16, both seeds), calling an unrelated tool. Across both drivers: 0/20 successes.
+  STOPPED again: SP8 as specified is not feasible with llama3.1:8b on AgentDojo here; spec decision.
   SP5 closed 2026-10-26 (tag sp05-e2): gate FAIL as pre-registered, write-up docs/sp5_e2_result.md;
   recalibration teach-back NOT ANSWERED (owner override, fourth time).
 - SP5 history (E2 ablation, GATE). Step 0 (pre-registration, ae18348), Step 1
