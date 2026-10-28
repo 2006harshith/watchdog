@@ -449,3 +449,15 @@ Known confounds, stated now: a group half spans fewer task groups than a by-run 
 reference or fit set is narrower, and that alone can raise FA and cancel part of any gain. That is
 the first alternative if the result is DOES NOT FALL. The placement of the 23-run group shifts half
 composition. At n=40 t=4 the retry condition restricts the possible partitions.
+
+## 2026-10-28 — SP6 write-up (docs/sp6_e3_result.md): amendments to the Step 8 spec
+Owner-approved ("add the amendments to the write-up and go"), after D-13 and D-14:
+1. E-2's lead reports first-crossing TPR (−0.012 [−0.220, 0.069]) next to the any-alarm +0.115 and
+   post-onset +0.081, because post-onset = any-alarm by construction for ESN arms (D-13c).
+2. "MS-raw and ESN-src are near nominal on the common test set" becomes "near nominal pooled, with
+   offsetting per-fold errors" (D-13a). The common-set range is 0.108–0.122 over n = 10–40, not the
+   spec's 0.109–0.120, which covered n = 10–20 only.
+3. Added to "not allowed": comparing tpr_post between ESN and HGB arms.
+4. D-14's status: the by-run split is not the explanation for TL-pct; it explains part of ESN-refit's
+   and ALL-pct's (n = 40) excess; the narrower fit set is an open confound.
+Tag sp06-e3 is NOT applied: SP6's done criteria require the threshold-logic teach-back, still NOT ANSWERED.
