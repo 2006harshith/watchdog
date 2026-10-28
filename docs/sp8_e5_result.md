@@ -115,7 +115,7 @@ Not allowed:
   have failed it too.
 - **The label is confounded with the corpus,** hence the cold-corpus gate. The strict rule is literal:
   any number in the final answer that matches the total counts as healthy.
-- **The estimand is run-level.** Many runs fail only at the final arithmetic, so the prefix at t = 3, 4 may
+- **The estimand is run-level.** Some runs fail only at the final arithmetic (seen in examples, not counted), so the prefix at t = 3, 4 may
   look the same as a healthy run's. That caps any monitor read early.
 - **Not unseen tasks, and not this machine.** It is the same booking environment as the source pool, and
   the runs come from the dataset's own collection. The SP8 spec asked for runs collected here: the
