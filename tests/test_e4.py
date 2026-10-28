@@ -204,5 +204,5 @@ def test_a_different_model_digest_stops_the_run():
 def test_cpu_per_step_repeats_a_fast_call_until_the_clock_can_see_it():
     from watchdog_agent.experiments.e4 import cpu_per_step
 
-    c = cpu_per_step(lambda: sum(range(2000)), steps=10, min_cpu_s=0.05)
+    c = cpu_per_step(lambda: sum(range(50_000)), steps=10, min_cpu_s=0.05)  # ~1 ms a call
     assert c["repeats"] > 1 and c["cpu_s_total"] >= 0.05 and c["cpu_ms_per_step"] > 0
