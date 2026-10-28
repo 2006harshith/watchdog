@@ -71,6 +71,14 @@
 - Save point: SP8 (E5 frozen monitors on organic AgentDojo failures, GATE). Step 0 (read-only + pilot)
   started 2026-10-28 under owner override of the SP6 and SP7 teach-backs ("override go"), which also
   approves installing AgentDojo in its own environment and pulling llama3.1:8b in Ollama.
+  Step 0 report 2026-10-28: AgentDojo 0.1.35 (MIT, own uv env envs/agentdojo, 0ad34a2); 97 user tasks
+  (workspace 40, travel 20, banking 16, slack 21), utility = one boolean at run end; Ollama's OpenAI
+  endpoint returns logprobs (u and surprisal producible); llama3.1:8b Q4_K_M 4.92 GB, 2.36/5.63 GB in
+  VRAM, ~6.7 tok/s. Llama SOURCE step latencies: 53-57% < 50 ms (not generation time; unexplained).
+  Pilot (10 runs, 5 set-aside tasks, d8fe0ff): utility 0/10, 1-2 LLM calls per run, 9/10 runs with <= 1
+  tool call; failure modes: stops after the first tool result and writes prose, never calls a tool,
+  invalid args ("null" strings), invented IDs. No run reaches t = 3 or 4; no healthy run exists, so AUROC
+  and the operating point are undefined. STOPPED for owner decision (no monitor score computed).
   SP5 closed 2026-10-26 (tag sp05-e2): gate FAIL as pre-registered, write-up docs/sp5_e2_result.md;
   recalibration teach-back NOT ANSWERED (owner override, fourth time).
 - SP5 history (E2 ablation, GATE). Step 0 (pre-registration, ae18348), Step 1
