@@ -1,0 +1,26 @@
+{
+  "benchmark": "v1.2.2",
+  "seed": 0,
+  "excluded_from_sp8": [
+    [
+      "banking",
+      "user_task_12"
+    ],
+    [
+      "slack",
+      "user_task_13"
+    ],
+    [
+      "travel",
+      "user_task_1"
+    ],
+    [
+      "workspace",
+      "user_task_16"
+    ],
+    [
+      "workspace",
+      "user_task_33"
+    ]
+  ]
+}
