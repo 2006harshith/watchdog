@@ -1,7 +1,7 @@
 """SP7 Step 2: judge one prompt version on the qwen dev set -> results/e4_prompt_dev.json.
 
 Run: uv run python scripts/run_e4_prompt_dev.py v1   (template: configs/e4_prompts/v1.txt)
-Spends money on uncached calls only (hard stop: configs/e4_prompt_dev.yaml budget_usd). Responses go to
+Calls the judge on uncached keys only (local Ollama judge: $0; a hosted one stops at budget_usd). Responses go to
 results/e4_dev_cache.jsonl (committed: no trace text). Reads qwen runs only; never a llama run.
 """
 
@@ -15,7 +15,7 @@ from dotenv import load_dotenv
 from watchdog_agent.data import load_episodes
 from watchdog_agent.experiments.e1 import git_state
 from watchdog_agent.experiments.e4_dev import load_template, run_version, select_dev_runs, spent_usd
-from watchdog_agent.judges import AnthropicJudge, JudgeCache
+from watchdog_agent.judges import AnthropicJudge, JudgeCache, OllamaJudge, ollama_digest
 
 OUT = Path("results/e4_prompt_dev.json")
 
@@ -38,7 +38,13 @@ def main() -> int:
     cache = JudgeCache(cfg["cache"])
     price = cfg["price"]
     print(f"{version}: {len(runs)} qwen dev runs; spent so far ${spent_usd(cache, price['input_usd_per_mtok'], price['output_usd_per_mtok']):.4f}")
-    judge = AnthropicJudge(cfg["judge"]["model"], max_tokens=cfg["judge"]["max_tokens"])
+    jc = cfg["judge"]
+    if jc["provider"] == "ollama":
+        judge = OllamaJudge(jc["model"], ollama_digest(jc["model"]), num_predict=jc["num_predict"],
+                            num_ctx=jc["num_ctx"], seed=jc["seed"], temperature=jc["temperature"])
+        print(f"judge {judge.model} (local, Ollama)")
+    else:
+        judge = AnthropicJudge(jc["model"], max_tokens=jc["max_tokens"])
     summary = run_version(template, runs, judge, cache, cfg) | {"git": git}
     out["versions"][version] = summary
     out["config"] = cfg
@@ -48,7 +54,8 @@ def main() -> int:
     print(f"{version}: calls {summary['calls']} (new {summary['new_calls']}), parse failures "
           f"{summary['parse_failures']} ({summary['parse_failure_rate']:.1%}), refusals {summary['refusals']}; "
           f"qwen headline AUROC {h['mean']:.3f} (t=3 {h['per_t']['3']['auroc']:.3f}, t=4 {h['per_t']['4']['auroc']:.3f}); "
-          f"sample SD median {summary['sample_sd']['median']}")
+          f"determinism: identical text in {summary['determinism']['share_identical_text']} of "
+          f"{summary['determinism']['prompts']} repeated prompts")
     print(f"total dev spend ${spent_usd(cache, price['input_usd_per_mtok'], price['output_usd_per_mtok']):.4f}; wrote {OUT}")
     return 0 if summary["parse_failure_rate"] <= cfg["max_parse_failure_rate"] else 2
 

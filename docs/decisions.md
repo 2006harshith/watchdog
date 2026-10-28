@@ -483,3 +483,10 @@ Tag sp06-e3 is NOT applied: SP6's done criteria require the threshold-logic teac
     temperature since 2026-10-21), 3 samples per (run, t), score = their mean, sample SD reported.
     This replaces "T=0 × 1": T=0 cannot be set on this model. "Best judge" becomes the one judge.
   - No J-local: no runtime or model is installed, and the owner declined to install one.
+- 2026-10-28 (later): owner declined to buy API credit. The judge becomes J-local: a Microsoft Phi
+  model (~3.8B) served by Ollama on this machine (GTX 1650, 4 GB), installed via winget. Consequences:
+  no third-party API, so the Llama-licence question for sending traces does not arise; temperature 0 is
+  available again, so sampling returns to T=0 x 1 sample plus a determinism subset (3 samples on a fixed
+  subset, SD reported); the cost row is $0 plus measured local GPU time. Superseded: J-api =
+  claude-haiku-5-5 (thinking off x3). Limit stated in advance: a small local judge, so J-1 is about this
+  judge, not LLM judges in general.

@@ -8,12 +8,14 @@ from watchdog_agent.judges import (
     CacheKey,
     JudgeAPIError,
     JudgeCache,
+    OllamaJudge,
     build_prompt,
     cost_latency,
     forbidden_hits,
     judge_samples,
     label_invariant,
     mean_score,
+    ollama_digest,
     parse_score,
     prompt_for_run,
     prompt_hash,
@@ -184,3 +186,65 @@ def test_cost_latency_from_recorded_tokens():
     assert c["usd_per_call_mean"] == pytest.approx(0.30) and c["usd_per_1000_runs"] == pytest.approx(2700.0)
     assert c["latency_s_p50"] == pytest.approx(2.0) and c["calls"] == 2
     assert cost_latency([], 0.1, 0.5, 9) == {"calls": 0}
+
+
+# ---------------------------------------------------------------- Ollama (local judge)
+
+def _ollama_ok(text="35", n_in=420, n_out=2):
+    body = {"model": "phi4-mini:3.8b", "message": {"role": "assistant", "content": text}, "done": True,
+            "done_reason": "stop", "prompt_eval_count": n_in, "eval_count": n_out,
+            "total_duration": 2_500_000_000, "load_duration": 1_000_000_000}
+    return 200, json.dumps(body).encode()
+
+
+def test_ollama_request_is_deterministic_and_reply_maps_to_the_common_record():
+    fake = FakeTransport([_ollama_ok()])
+    j = OllamaJudge("phi4-mini:3.8b", "sha256:abcdef0123456789", transport=fake)
+    r = j.call("prompt")
+    url, _, body = fake.calls[0]
+    assert url == "http://localhost:11434/api/chat" and body["stream"] is False
+    assert body["options"] == {"temperature": 0.0, "seed": 0, "num_predict": 16, "num_ctx": 4096}
+    assert r["text"] == "35" and r["input_tokens"] == 420 and r["output_tokens"] == 2
+    assert r["server_total_s"] == pytest.approx(2.5) and r["server_load_s"] == pytest.approx(1.0)
+    assert j.model == "phi4-mini:3.8b@sha256:abcde"  # the digest is part of every cache key
+
+
+def test_ollama_refuses_a_prompt_that_filled_the_context():
+    j = OllamaJudge("m", "sha256:0", num_ctx=4096, transport=FakeTransport([_ollama_ok(n_in=4096)]))
+    with pytest.raises(JudgeAPIError, match="truncated"):
+        j.call("p")
+
+
+def test_ollama_unreachable_is_a_clear_error():
+    def down(url, headers, body):
+        raise ConnectionRefusedError("refused")
+
+    with pytest.raises(JudgeAPIError, match="not reachable"):
+        OllamaJudge("m", "sha256:0", transport=down).call("p")
+
+
+class _Resp:
+    def __init__(self, payload):
+        self.payload = payload
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, *a):
+        return False
+
+    def read(self):
+        return json.dumps(self.payload).encode()
+
+
+def test_ollama_digest_finds_the_pulled_model_or_says_how_to_pull_it():
+    tags = {"models": [{"name": "phi4-mini:3.8b", "digest": "sha256:feed"}]}
+    assert ollama_digest("phi4-mini:3.8b", opener=lambda url, timeout: _Resp(tags)) == "sha256:feed"
+    with pytest.raises(JudgeAPIError, match="ollama pull other"):
+        ollama_digest("other", opener=lambda url, timeout: _Resp(tags))
+
+    def down(url, timeout):
+        raise ConnectionRefusedError("refused")
+
+    with pytest.raises(JudgeAPIError, match="not reachable"):
+        ollama_digest("x", opener=down)

@@ -77,16 +77,25 @@ def preflight(template: str, runs: pd.DataFrame, scored: Sequence[int]) -> list[
     return out
 
 
+def determinism_subset(n_prompts: int, spec: dict) -> set[int]:
+    """Indices of the prompts that get extra samples, to measure whether a repeat call repeats."""
+    k = min(spec["prompts"], n_prompts)
+    return set(np.random.default_rng(spec["seed"]).choice(n_prompts, size=k, replace=False).tolist())
+
+
 def run_version(template: str, runs: pd.DataFrame, judge, cache: JudgeCache, cfg: dict) -> dict:
-    """Judge every dev prompt (cache first), stop at the budget, and summarise the version."""
+    """Judge every dev prompt (cache first), stop at the budget, and summarise the version. Each
+    prompt gets judge.samples scoring samples; the determinism subset gets more, used only for SD."""
     jc, price = cfg["judge"], cfg["price"]
     p_hash = prompt_hash(template)
     todo = preflight(template, runs, cfg["checkpoints"]["scored"])
+    subset = determinism_subset(len(todo), jc["determinism_subset"])
     texts: dict[tuple[str, int], list[str]] = {}
     new = []
-    for uid, t, prompt in todo:
+    for i, (uid, t, prompt) in enumerate(todo):
         got = []
-        for s in range(jc["samples"]):
+        n = max(jc["samples"], jc["determinism_subset"]["samples"]) if i in subset else jc["samples"]
+        for s in range(n):
             key = CacheKey(jc["name"], judge.model, p_hash, uid, t, s)
             rec = cache.get(key)
             if rec is None:
@@ -100,19 +109,25 @@ def run_version(template: str, runs: pd.DataFrame, judge, cache: JudgeCache, cfg
 
 
 def summarise(runs: pd.DataFrame, texts: dict, cfg: dict, p_hash: str, new: list) -> dict:
-    report = cfg["checkpoints"]["report"]
+    report, k = cfg["checkpoints"]["report"], cfg["judge"]["samples"]
     scores = {uid: np.full(int(T), np.nan) for uid, T in zip(runs["uid"], runs["T"])}
     failures = calls = refusals = 0
-    sds = []
+    sds, identical = [], []
     for (uid, t), rs in texts.items():
-        m, bad = mean_score([r["text"] for r in rs])
-        failures, calls = failures + bad, calls + len(rs)
+        # Scores use the first k samples only, so a determinism-subset prompt is scored like the rest.
+        m, bad = mean_score([r["text"] for r in rs[:k]])
+        failures += bad
+        calls += len(rs)
         refusals += sum(r.get("stop_reason") == "refusal" for r in rs)
         if m is not None:
             scores[uid][t] = m
-        vals = [v for v in (parse_score(r["text"]) for r in rs) if v is not None]
-        if len(vals) >= 2:
-            sds.append(float(np.std(vals, ddof=1)))
+        if len(rs) > k:
+            vals = [parse_score(r["text"]) for r in rs]
+            identical.append(len({r["text"] for r in rs}) == 1)
+            ok_vals = [v for v in vals if v is not None]
+            if len(ok_vals) >= 2:
+                sds.append(float(np.std(ok_vals, ddof=1)))
+    scoring_calls = k * len(texts)
     per_t, per_class = {}, {}
     for t in report:
         cs = prefix_eval_set(runs, t)
@@ -128,10 +143,11 @@ def summarise(runs: pd.DataFrame, texts: dict, cfg: dict, p_hash: str, new: list
     calls_per_run = calls / max(1, len(runs))
     return {"prompt_sha256": p_hash, "runs": len(runs), "prompts": len(texts), "calls": calls,
             "new_calls": len(new), "parse_failures": failures,
-            "parse_failure_rate": failures / calls if calls else math.nan, "refusals": refusals,
+            "parse_failure_rate": failures / scoring_calls if scoring_calls else math.nan, "refusals": refusals,
             "headline_auroc": {"per_t": per_t, "mean": float(np.mean([v["auroc"] for v in per_t.values()]))},
             "per_class_auroc_mean": {c: float(np.mean(list(v.values()))) for c, v in per_class.items()},
-            "sample_sd": {"median": float(np.median(sds)) if sds else None,
-                          "share_zero": float(np.mean(np.array(sds) == 0)) if sds else None, "n": len(sds)},
+            "determinism": {"prompts": len(identical),
+                            "share_identical_text": float(np.mean(identical)) if identical else None,
+                            "sd_median": float(np.median(sds)) if sds else None, "n_sd": len(sds)},
             "cost_latency_new_calls": cost_latency(new, price["input_usd_per_mtok"], price["output_usd_per_mtok"],
                                                    calls_per_run)}

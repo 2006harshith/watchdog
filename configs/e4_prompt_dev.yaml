@@ -11,18 +11,20 @@ dev_set:
   min_T: 5                          # a step 4 exists, so every run is scored at t = 2, 3, 4
   max_tau: 3                        # positives count at t = 3 and 4 (tau <= t)
 checkpoints: {scored: [2, 3, 4], report: [3, 4]}
-judge:
-  name: J-api
-  model: claude-haiku-5-5
-  max_tokens: 16
-  thinking: disabled
-  samples: 3
-price:                              # read 2026-10-28; prompts up to 100K tokens
-  url: https://platform.claude.com/docs/en/about-claude/pricing
-  read_on: "2026-10-28"
-  input_usd_per_mtok: 0.10
-  output_usd_per_mtok: 0.50
-budget_usd: 2.0                     # hard stop over all dev calls, from reported usage
+judge:                              # docs/decisions.md 2026-10-28: J-local replaces the hosted judge
+  name: J-local
+  provider: ollama
+  model: phi4-mini:3.8b             # ollama.com/library/phi4-mini, 2.5 GB, 3.8B; the digest goes into every cache key
+  temperature: 0.0
+  seed: 0
+  num_predict: 16
+  num_ctx: 4096                     # longest dev prompt is 4,245 chars; a filled context is refused, not truncated
+  samples: 1                        # scoring samples per (run, t)
+  determinism_subset: {prompts: 30, samples: 3, seed: 0}
+price:                              # local model: no per-token price; cost is measured GPU time
+  input_usd_per_mtok: 0.0
+  output_usd_per_mtok: 0.0
+budget_usd: 2.0                     # kept for a hosted judge; a local judge spends $0
 max_parse_failure_rate: 0.02
 max_versions: 3
 cache: results/e4_dev_cache.jsonl

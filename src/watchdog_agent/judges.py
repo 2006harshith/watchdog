@@ -2,7 +2,9 @@
 
 The judge sees a run's task text and its steps 0..t (model text, tool calls, tool results) and
 answers one integer 0-100: how likely the run has already gone wrong. Design: docs/decisions.md
-2026-10-28 (SP7): one judge, claude-haiku-5-5, thinking off, default sampling, 3 samples per (run, t).
+2026-10-28 (SP7): one judge, J-local = phi4-mini served by Ollama on this machine, temperature 0, one
+sample per (run, t) plus a determinism subset. AnthropicJudge stays for a hosted judge (not used: no API
+credit), with the same call() record so the cache and summaries are judge-agnostic.
 
 - Leakage: the prompt is built from (task, steps) only. A run's labels and provenance (failure_class,
   tau, injection metadata, uid, corpus, model, family) never reach the builder, and
@@ -209,6 +211,65 @@ class AnthropicJudge:
                 raise JudgeAPIError(f"HTTP {status}: {raw[:500].decode('utf-8', 'replace')}")
             self.sleep(self.backoff_s * 2 ** attempt)
         raise AssertionError("unreachable")
+
+
+OLLAMA_URL = "http://localhost:11434"
+
+
+def ollama_digest(name: str, base_url: str = OLLAMA_URL, opener: Callable = urllib.request.urlopen) -> str:
+    """The local model's content digest (GET /api/tags): a tag like phi4-mini:3.8b can be re-pulled
+    to different weights, the digest cannot, so it goes into every cache key."""
+    try:
+        with opener(f"{base_url}/api/tags", timeout=10) as resp:
+            models = json.loads(resp.read())["models"]
+    except OSError as e:  # URLError is an OSError: nothing listening on the port
+        raise JudgeAPIError(f"Ollama is not reachable at {base_url} (is it running?): {e}") from e
+    for m in models:
+        if m["name"] == name:
+            return m["digest"]
+    raise JudgeAPIError(f"model {name} is not pulled; run: ollama pull {name}")
+
+
+class OllamaJudge:
+    """One local /api/chat call per sample. temperature 0 and a fixed seed, so a repeat call should
+    give the same reply; the determinism subset measures whether it does."""
+
+    def __init__(self, name: str, digest: str, num_predict: int = 16, num_ctx: int = 4096, seed: int = 0,
+                 temperature: float = 0.0, keep_alive: str = "30m", base_url: str = OLLAMA_URL,
+                 transport: Transport | None = None):
+        self.name, self.digest = name, digest
+        self.model = f"{name}@{digest[:12]}"  # the cache key's model field
+        self.num_ctx = num_ctx
+        self.options = {"temperature": temperature, "seed": seed, "num_predict": num_predict, "num_ctx": num_ctx}
+        self.keep_alive, self.url = keep_alive, f"{base_url}/api/chat"
+        # The first call loads 2.5 GB into a 4 GB GPU, so the timeout is long.
+        self.transport = transport or (lambda url, headers, body: urllib_transport(url, headers, body, timeout=600))
+
+    def body(self, prompt: str) -> dict:
+        return {"model": self.name, "messages": [{"role": "user", "content": prompt}], "stream": False,
+                "options": self.options, "keep_alive": self.keep_alive}
+
+    def call(self, prompt: str) -> dict:
+        start = time.perf_counter()
+        try:
+            status, raw = self.transport(self.url, {"content-type": "application/json"},
+                                         json.dumps(self.body(prompt)).encode("utf-8"))
+        except OSError as e:
+            raise JudgeAPIError(f"Ollama is not reachable at {self.url} (is it running?): {e}") from e
+        latency = time.perf_counter() - start
+        if status != 200:
+            raise JudgeAPIError(f"HTTP {status}: {raw[:500].decode('utf-8', 'replace')}")
+        msg = json.loads(raw)
+        n_in = msg.get("prompt_eval_count")
+        if n_in is not None and n_in >= self.num_ctx:
+            # Ollama truncates a prompt longer than num_ctx without an error; refuse instead.
+            raise JudgeAPIError(f"prompt used {n_in} tokens >= num_ctx {self.num_ctx}: it was truncated")
+        ns = 1e-9  # Ollama reports durations in nanoseconds
+        return {"text": msg.get("message", {}).get("content", ""), "model": msg.get("model"),
+                "stop_reason": msg.get("done_reason"), "input_tokens": n_in, "output_tokens": msg.get("eval_count"),
+                "latency_s": latency, "server_total_s": (msg.get("total_duration") or 0) * ns,
+                "server_load_s": (msg.get("load_duration") or 0) * ns, "attempts": 1,
+                "timestamp": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())}
 
 
 def judge_samples(judge, cache: JudgeCache, judge_name: str, p_hash: str, uid: str, t: int, prompt: str,

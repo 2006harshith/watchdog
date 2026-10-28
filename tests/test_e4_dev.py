@@ -34,22 +34,24 @@ def _episodes():
     return pd.DataFrame(rows)
 
 
-def _cfg(**over):
+def _cfg(subset=30, **over):
     cfg = copy.deepcopy(CFG)
     cfg["dev_set"] |= {"healthy": 6, "per_class": 3}
+    cfg["judge"]["determinism_subset"] |= {"prompts": subset}
     return cfg | over
 
 
 class FakeJudge:
     model = "claude-haiku-5-5"
 
-    def __init__(self, bad_text=None, tokens=(300, 2)):
-        self.calls, self.bad_text, self.tokens = 0, bad_text, tokens
+    def __init__(self, bad_text=None, tokens=(300, 2), bad_every=4):
+        self.calls, self.bad_text, self.tokens, self.bad_every = 0, bad_text, tokens, bad_every
 
     def call(self, prompt):
         self.calls += 1
         text = "80" if "ERROR-MARK" in prompt else "20"
-        if self.bad_text is not None and self.calls % 3 == 0:
+        # Every 4th call: prompts run t = 2, 3, 4 per run, so this spreads failures over checkpoints.
+        if self.bad_text is not None and self.calls % self.bad_every == 0:
             text = self.bad_text
         return {"text": text, "input_tokens": self.tokens[0], "output_tokens": self.tokens[1], "latency_s": 0.5,
                 "stop_reason": "end_turn", "model": self.model}
@@ -88,9 +90,11 @@ def test_run_version_scores_caches_and_reruns_for_free(tmp_path):
     runs = select_dev_runs(_episodes(), _cfg()["dev_set"], "qwen")
     judge = FakeJudge()
     out = run_version(TEMPLATE, runs, judge, JudgeCache(tmp_path / "c.jsonl"), _cfg())
-    assert out["calls"] == judge.calls == 3 * 3 * len(runs) and out["new_calls"] == out["calls"]
+    prompts = 3 * len(runs)  # t = 2, 3, 4; one scoring sample each, 2 extra for the 30-prompt subset
+    assert out["calls"] == judge.calls == prompts + 2 * 30 and out["new_calls"] == out["calls"]
     assert out["headline_auroc"]["mean"] == 1.0 and out["parse_failures"] == 0
-    assert out["sample_sd"]["share_zero"] == 1.0 and out["prompt_sha256"] == prompt_hash(TEMPLATE)
+    assert out["determinism"] == {"prompts": 30, "share_identical_text": 1.0, "sd_median": 0.0, "n_sd": 30}
+    assert out["prompt_sha256"] == prompt_hash(TEMPLATE)
     again = run_version(TEMPLATE, runs, judge, JudgeCache(tmp_path / "c.jsonl"), _cfg())
     assert again["new_calls"] == 0 and judge.calls == out["calls"]
     assert again["headline_auroc"] == out["headline_auroc"]
@@ -98,14 +102,17 @@ def test_run_version_scores_caches_and_reruns_for_free(tmp_path):
 
 def test_parse_failures_are_counted_not_scored(tmp_path):
     runs = select_dev_runs(_episodes(), _cfg()["dev_set"], "qwen")
-    out = run_version(TEMPLATE, runs, FakeJudge(bad_text="maybe 40"), JudgeCache(tmp_path / "c.jsonl"), _cfg())
-    assert out["parse_failures"] == out["calls"] // 3 and out["parse_failure_rate"] == pytest.approx(1 / 3)
-    assert out["headline_auroc"]["mean"] == 1.0  # the mean of the two samples that parse
+    out = run_version(TEMPLATE, runs, FakeJudge(bad_text="maybe 40"), JudgeCache(tmp_path / "c.jsonl"), _cfg(subset=0))
+    assert out["parse_failures"] == out["calls"] // 4
+    assert out["parse_failure_rate"] == pytest.approx(out["parse_failures"] / out["calls"])
+    assert out["headline_auroc"]["mean"] == 1.0  # unparsed prompts are missing, not scored as 0
 
 
 def test_budget_stops_spending_before_the_next_call(tmp_path):
     runs = select_dev_runs(_episodes(), _cfg()["dev_set"], "qwen")
-    judge = FakeJudge(tokens=(1_000_000, 0))  # $0.10 per call
+    judge = FakeJudge(tokens=(1_000_000, 0))  # $0.10 per call at a hosted judge's price
+    cfg = _cfg(budget_usd=0.25)
+    cfg["price"] = {"input_usd_per_mtok": 0.10, "output_usd_per_mtok": 0.50}
     with pytest.raises(BudgetExceeded):
-        run_version(TEMPLATE, runs, judge, JudgeCache(tmp_path / "c.jsonl"), _cfg(budget_usd=0.25))
+        run_version(TEMPLATE, runs, judge, JudgeCache(tmp_path / "c.jsonl"), cfg)
     assert judge.calls == 3
