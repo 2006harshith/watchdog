@@ -320,6 +320,8 @@
 - 2026-10-28: Owner override of the teach-back HARD RULE to start SP8 with the SP6 and SP7 teach-backs
   NOT ANSWERED ("override go"). Claude disagreed: SP8's gate is an AUROC cluster CI and O-2 is E3's
   threshold logic. Risk accepted.
+- 2026-10-28: Owner override of the SP8 label/estimand teach-back ("override it, go to step 2"). NOT
+  ANSWERED. Claude disagreed: the gate's meaning rests on the tau = 0 estimand. Risk accepted.
 - Proposed for the SP4 spec, NOT decided: a length-only baseline in SP5 (length alone AUROC 0.592;
   ESN score vs length Spearman 0.85/0.80), and matched-step prefix evaluation instead of episode-max.
 
@@ -531,7 +533,7 @@ Gemini: every table is reported, nothing is tested, and it is labelled descripti
   E2's 0.858? Q2: one way the strict rule mislabels in each direction, how you would notice, and why a
   programmatic rule over a human or LLM judgement? Q3: how pooling both corpora could give a high AUROC
   for the wrong reason, why the gate is cold-only, and what "task group = run" assumes? · answers: not
-  yet given · PENDING.
+  yet given · NOT ANSWERED, owner override 2026-10-28 ("override it, go to step 2"). Not owner-marked.
 
 ## Session log
 - 2026-10-28 · SP7 (close) · Write-up committed f3b6405; teach-back on D overridden a second time (NOT
