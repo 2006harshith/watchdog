@@ -512,3 +512,12 @@ Tag sp06-e3 is NOT applied: SP6's done criteria require the threshold-logic teac
   HOLD), J-2 HOLDS, both unedited. Tag sp07-e4 not applied: the SP7 teach-back on D is NOT ANSWERED.
 - 2026-10-28 (later): owner override; tag sp07-e4 applied with the SP7 teach-back on D NOT ANSWERED
   (second override for it). Claude disagreed. Risk accepted.
+
+## 2026-10-28 — SP8: AgentDojo dropped; organic failures from the dataset's own organic llama8b runs
+- AgentDojo pilots (5 set-aside tasks x 2 seeds, both drivers): utility 0/20, median 1 LLM call per run,
+  almost no run with a step 3 or 4. SP8 as specified is infeasible with llama3.1:8b on this machine.
+- Owner chose option 3 ("option 3, go"): label a subset of the existing organic llama8b corpora
+  (organic_llama8b, organic_llama8b_cold), with a written label rule fixed before any monitor score.
+  This is a spec change made without the chat Project; the SP8 gate, c, K and O-1..O-4 are re-derived
+  for the new data in a new Step 0 report before configs/e5.yaml is written.
+- AgentDojo pilot artefacts stay (envs/agentdojo, data/agentdojo_pilot); its 5 pilot tasks are irrelevant now.

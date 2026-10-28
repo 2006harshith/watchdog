@@ -84,6 +84,12 @@
   instead of </function> (AgentDojo's parser then sees no call and the run ends; 4/10 runs), privacy
   refusals (workspace 16, both seeds), calling an unrelated tool. Across both drivers: 0/20 successes.
   STOPPED again: SP8 as specified is not feasible with llama3.1:8b on AgentDojo here; spec decision.
+  Option 3 chosen 2026-10-28 (decisions.md): organic_llama8b + organic_llama8b_cold, 240 runs, T 5-20
+  (median 8), logprobs 100%, real latencies (2.7-10 s), old step schema (no tool_events / task text;
+  parseable from "[tool(args) -> result]"), metadata expected_total = the correct answer. Candidate
+  label (no monitor score seen): healthy iff the final synthesis text states expected_total: 11/240
+  healthy (1/120 at T=0.9, 10/120 in the T=0.2 'cold' corpus): label confounded with corpus; O-2
+  (n=20 healthy) infeasible. STOPPED for a decision on the label rule and the gate.
   SP5 closed 2026-10-26 (tag sp05-e2): gate FAIL as pre-registered, write-up docs/sp5_e2_result.md;
   recalibration teach-back NOT ANSWERED (owner override, fourth time).
 - SP5 history (E2 ablation, GATE). Step 0 (pre-registration, ae18348), Step 1
