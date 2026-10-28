@@ -1,0 +1,29 @@
+{
+  "stopped": "1 judge scores missing (parse failures), e.g. [('ollama_llama8b/real-context_corruption-039', 4)]; the handling of missing scores needs an owner decision",
+  "checks": {
+    "TL-raw.headline_auroc_vs_e2_ablation": {
+      "value": 0.0,
+      "ok": true
+    },
+    "TL-pct.headline_auroc_vs_e2_ablation": {
+      "value": 0.0,
+      "ok": true
+    },
+    "MS-raw.headline_auroc_vs_e2_ablation": {
+      "value": 0.0,
+      "ok": true
+    },
+    "ESN-src.fit_draw_aurocs_vs_d6_aurocs": {
+      "value": 0.0,
+      "ok": true
+    },
+    "ESN-src.fit_draw_aurocs_vs_e3_esn_src": {
+      "value": 0.0,
+      "ok": true
+    }
+  },
+  "git": {
+    "commit": "9060f0a263ad4588bdac5264c3c95b6fc1242705",
+    "dirty": false
+  }
+}
