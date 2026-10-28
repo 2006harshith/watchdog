@@ -1,5 +1,5 @@
 {
-  "what": "SP6 close-out diagnostics D-8..D-12 on E3's task-group counts",
+  "what": "SP6 close-out diagnostics D-8..D-13 on E3's task-group counts",
   "post_hoc": true,
   "caveat": "POST HOC (docs/decisions.md 2026-10-27). Draw spread = calibration-set variability only; D-12 intervals = test-set (task-group) sampling with the calibration draws held fixed",
   "config": {
@@ -72,6 +72,37 @@
     "d12": {
       "B": 2000,
       "seed": 0
+    },
+    "d13": {
+      "a": {
+        "arms": [
+          "MS-raw",
+          "ESN-src",
+          "TL-raw"
+        ],
+        "n": [
+          10,
+          20,
+          40
+        ],
+        "min_healthy": 5,
+        "nominal_band": [
+          0.03,
+          0.2
+        ],
+        "high_if_pooled_gt": 0.12,
+        "expect_offsetting_at_n": 20
+      },
+      "b": {
+        "fold": 1
+      },
+      "c": {
+        "e2": {
+          "a": "TL-pct",
+          "b": "ESN-src",
+          "n": 20
+        }
+      }
     }
   },
   "families": {
@@ -10408,6 +10439,1116 @@
             "n_skipped": 0
           }
         }
+      },
+      "d13a": {
+        "rule": "conformal",
+        "alpha": 0.1,
+        "spec": {
+          "arms": [
+            "MS-raw",
+            "ESN-src",
+            "TL-raw"
+          ],
+          "n": [
+            10,
+            20,
+            40
+          ],
+          "min_healthy": 5,
+          "nominal_band": [
+            0.03,
+            0.2
+          ],
+          "high_if_pooled_gt": 0.12,
+          "expect_offsetting_at_n": 20
+        },
+        "caveat": "per-fold FA carries test-sampling noise that pooling over draws does not remove",
+        "rows": [
+          {
+            "arm": "MS-raw",
+            "n": 10,
+            "m": {
+              "3": [
+                10,
+                10
+              ],
+              "4": [
+                10,
+                10
+              ]
+            },
+            "per_t": {
+              "3": {
+                "folds": [
+                  {
+                    "fold": 0,
+                    "fa": 0.10444444444444445,
+                    "n_test_healthy": 9,
+                    "excess_alarms_per_draw": 0.04
+                  },
+                  {
+                    "fold": 1,
+                    "fa": 0.0384375,
+                    "n_test_healthy": 32,
+                    "excess_alarms_per_draw": -1.97
+                  },
+                  {
+                    "fold": 2,
+                    "fa": 0.06636363636363636,
+                    "n_test_healthy": 11,
+                    "excess_alarms_per_draw": -0.37
+                  },
+                  {
+                    "fold": 3,
+                    "fa": 0.3619230769230769,
+                    "n_test_healthy": 13,
+                    "excess_alarms_per_draw": 3.405
+                  },
+                  {
+                    "fold": 4,
+                    "fa": 0.0025,
+                    "n_test_healthy": 12,
+                    "excess_alarms_per_draw": -1.17
+                  }
+                ],
+                "pooled_fa": 0.09915584415584415,
+                "rated_folds": [
+                  0,
+                  1,
+                  2,
+                  3,
+                  4
+                ],
+                "reading": "OFFSETTING"
+              },
+              "4": {
+                "folds": [
+                  {
+                    "fold": 0,
+                    "fa": 0.17555555555555555,
+                    "n_test_healthy": 9,
+                    "excess_alarms_per_draw": 0.68
+                  },
+                  {
+                    "fold": 1,
+                    "fa": 0.04467741935483871,
+                    "n_test_healthy": 31,
+                    "excess_alarms_per_draw": -1.715
+                  },
+                  {
+                    "fold": 2,
+                    "fa": 0.05875,
+                    "n_test_healthy": 8,
+                    "excess_alarms_per_draw": -0.33
+                  },
+                  {
+                    "fold": 3,
+                    "fa": 0.178125,
+                    "n_test_healthy": 8,
+                    "excess_alarms_per_draw": 0.625
+                  },
+                  {
+                    "fold": 4,
+                    "fa": 0.0,
+                    "n_test_healthy": 4,
+                    "excess_alarms_per_draw": -0.4
+                  }
+                ],
+                "pooled_fa": 0.081,
+                "rated_folds": [
+                  0,
+                  1,
+                  2,
+                  3
+                ],
+                "reading": "NOMINAL"
+              }
+            }
+          },
+          {
+            "arm": "MS-raw",
+            "n": 20,
+            "m": {
+              "3": [
+                20,
+                20
+              ],
+              "4": [
+                20,
+                20
+              ]
+            },
+            "per_t": {
+              "3": {
+                "folds": [
+                  {
+                    "fold": 0,
+                    "fa": 0.1111111111111111,
+                    "n_test_healthy": 9,
+                    "excess_alarms_per_draw": 0.1
+                  },
+                  {
+                    "fold": 1,
+                    "fa": 0.029375,
+                    "n_test_healthy": 32,
+                    "excess_alarms_per_draw": -2.26
+                  },
+                  {
+                    "fold": 2,
+                    "fa": 0.06318181818181819,
+                    "n_test_healthy": 11,
+                    "excess_alarms_per_draw": -0.405
+                  },
+                  {
+                    "fold": 3,
+                    "fa": 0.4115384615384615,
+                    "n_test_healthy": 13,
+                    "excess_alarms_per_draw": 4.05
+                  },
+                  {
+                    "fold": 4,
+                    "fa": 0.0008333333333333334,
+                    "n_test_healthy": 12,
+                    "excess_alarms_per_draw": -1.19
+                  }
+                ],
+                "pooled_fa": 0.10383116883116883,
+                "rated_folds": [
+                  0,
+                  1,
+                  2,
+                  3,
+                  4
+                ],
+                "reading": "OFFSETTING"
+              },
+              "4": {
+                "folds": [
+                  {
+                    "fold": 0,
+                    "fa": 0.2222222222222222,
+                    "n_test_healthy": 9,
+                    "excess_alarms_per_draw": 1.1
+                  },
+                  {
+                    "fold": 1,
+                    "fa": 0.02258064516129032,
+                    "n_test_healthy": 31,
+                    "excess_alarms_per_draw": -2.4
+                  },
+                  {
+                    "fold": 2,
+                    "fa": 0.048125,
+                    "n_test_healthy": 8,
+                    "excess_alarms_per_draw": -0.415
+                  },
+                  {
+                    "fold": 3,
+                    "fa": 0.1525,
+                    "n_test_healthy": 8,
+                    "excess_alarms_per_draw": 0.42
+                  },
+                  {
+                    "fold": 4,
+                    "fa": 0.0,
+                    "n_test_healthy": 4,
+                    "excess_alarms_per_draw": -0.4
+                  }
+                ],
+                "pooled_fa": 0.07175,
+                "rated_folds": [
+                  0,
+                  1,
+                  2,
+                  3
+                ],
+                "reading": "OFFSETTING"
+              }
+            }
+          },
+          {
+            "arm": "MS-raw",
+            "n": 40,
+            "m": {
+              "3": [
+                40,
+                40
+              ],
+              "4": [
+                40,
+                40
+              ]
+            },
+            "per_t": {
+              "3": {
+                "folds": [
+                  {
+                    "fold": 0,
+                    "fa": 0.1111111111111111,
+                    "n_test_healthy": 9,
+                    "excess_alarms_per_draw": 0.1
+                  },
+                  {
+                    "fold": 1,
+                    "fa": 0.03140625,
+                    "n_test_healthy": 32,
+                    "excess_alarms_per_draw": -2.195
+                  },
+                  {
+                    "fold": 2,
+                    "fa": 0.075,
+                    "n_test_healthy": 11,
+                    "excess_alarms_per_draw": -0.275
+                  },
+                  {
+                    "fold": 3,
+                    "fa": 0.4346153846153846,
+                    "n_test_healthy": 13,
+                    "excess_alarms_per_draw": 4.35
+                  },
+                  {
+                    "fold": 4,
+                    "fa": 0.0,
+                    "n_test_healthy": 12,
+                    "excess_alarms_per_draw": -1.2
+                  }
+                ],
+                "pooled_fa": 0.11012987012987013,
+                "rated_folds": [
+                  0,
+                  1,
+                  2,
+                  3,
+                  4
+                ],
+                "reading": "OFFSETTING"
+              },
+              "4": {
+                "folds": [
+                  {
+                    "fold": 0,
+                    "fa": 0.2222222222222222,
+                    "n_test_healthy": 9,
+                    "excess_alarms_per_draw": 1.1
+                  },
+                  {
+                    "fold": 1,
+                    "fa": null,
+                    "n_test_healthy": 0,
+                    "excess_alarms_per_draw": 0.0
+                  },
+                  {
+                    "fold": 2,
+                    "fa": 0.005625,
+                    "n_test_healthy": 8,
+                    "excess_alarms_per_draw": -0.755
+                  },
+                  {
+                    "fold": 3,
+                    "fa": 0.13125,
+                    "n_test_healthy": 8,
+                    "excess_alarms_per_draw": 0.25
+                  },
+                  {
+                    "fold": 4,
+                    "fa": 0.0,
+                    "n_test_healthy": 4,
+                    "excess_alarms_per_draw": -0.4
+                  }
+                ],
+                "pooled_fa": 0.10672413793103448,
+                "rated_folds": [
+                  0,
+                  2,
+                  3
+                ],
+                "reading": "OFFSETTING"
+              }
+            }
+          },
+          {
+            "arm": "ESN-src",
+            "n": 10,
+            "m": {
+              "3": [
+                10,
+                10
+              ],
+              "4": [
+                10,
+                10
+              ]
+            },
+            "per_t": {
+              "3": {
+                "folds": [
+                  {
+                    "fold": 0,
+                    "fa": 0.06,
+                    "n_test_healthy": 9,
+                    "excess_alarms_per_draw": -0.36
+                  },
+                  {
+                    "fold": 1,
+                    "fa": 0.04765625,
+                    "n_test_healthy": 32,
+                    "excess_alarms_per_draw": -1.675
+                  },
+                  {
+                    "fold": 2,
+                    "fa": 0.0959090909090909,
+                    "n_test_healthy": 11,
+                    "excess_alarms_per_draw": -0.045
+                  },
+                  {
+                    "fold": 3,
+                    "fa": 0.18846153846153846,
+                    "n_test_healthy": 13,
+                    "excess_alarms_per_draw": 1.15
+                  },
+                  {
+                    "fold": 4,
+                    "fa": 0.09916666666666667,
+                    "n_test_healthy": 12,
+                    "excess_alarms_per_draw": -0.01
+                  }
+                ],
+                "pooled_fa": 0.0877922077922078,
+                "rated_folds": [
+                  0,
+                  1,
+                  2,
+                  3,
+                  4
+                ],
+                "reading": "NOMINAL"
+              },
+              "4": {
+                "folds": [
+                  {
+                    "fold": 0,
+                    "fa": 0.0011111111111111111,
+                    "n_test_healthy": 9,
+                    "excess_alarms_per_draw": -0.89
+                  },
+                  {
+                    "fold": 1,
+                    "fa": 0.07193548387096774,
+                    "n_test_healthy": 31,
+                    "excess_alarms_per_draw": -0.87
+                  },
+                  {
+                    "fold": 2,
+                    "fa": 0.044375,
+                    "n_test_healthy": 8,
+                    "excess_alarms_per_draw": -0.445
+                  },
+                  {
+                    "fold": 3,
+                    "fa": 0.423125,
+                    "n_test_healthy": 8,
+                    "excess_alarms_per_draw": 2.585
+                  },
+                  {
+                    "fold": 4,
+                    "fa": 0.1075,
+                    "n_test_healthy": 4,
+                    "excess_alarms_per_draw": 0.03
+                  }
+                ],
+                "pooled_fa": 0.10683333333333334,
+                "rated_folds": [
+                  0,
+                  1,
+                  2,
+                  3
+                ],
+                "reading": "OFFSETTING"
+              }
+            }
+          },
+          {
+            "arm": "ESN-src",
+            "n": 20,
+            "m": {
+              "3": [
+                20,
+                20
+              ],
+              "4": [
+                20,
+                20
+              ]
+            },
+            "per_t": {
+              "3": {
+                "folds": [
+                  {
+                    "fold": 0,
+                    "fa": 0.06944444444444445,
+                    "n_test_healthy": 9,
+                    "excess_alarms_per_draw": -0.275
+                  },
+                  {
+                    "fold": 1,
+                    "fa": 0.05453125,
+                    "n_test_healthy": 32,
+                    "excess_alarms_per_draw": -1.455
+                  },
+                  {
+                    "fold": 2,
+                    "fa": 0.10363636363636364,
+                    "n_test_healthy": 11,
+                    "excess_alarms_per_draw": 0.04
+                  },
+                  {
+                    "fold": 3,
+                    "fa": 0.19,
+                    "n_test_healthy": 13,
+                    "excess_alarms_per_draw": 1.17
+                  },
+                  {
+                    "fold": 4,
+                    "fa": 0.11916666666666667,
+                    "n_test_healthy": 12,
+                    "excess_alarms_per_draw": 0.23
+                  }
+                ],
+                "pooled_fa": 0.09623376623376623,
+                "rated_folds": [
+                  0,
+                  1,
+                  2,
+                  3,
+                  4
+                ],
+                "reading": "NOMINAL"
+              },
+              "4": {
+                "folds": [
+                  {
+                    "fold": 0,
+                    "fa": 0.0,
+                    "n_test_healthy": 9,
+                    "excess_alarms_per_draw": -0.9
+                  },
+                  {
+                    "fold": 1,
+                    "fa": 0.08516129032258064,
+                    "n_test_healthy": 31,
+                    "excess_alarms_per_draw": -0.46
+                  },
+                  {
+                    "fold": 2,
+                    "fa": 0.0475,
+                    "n_test_healthy": 8,
+                    "excess_alarms_per_draw": -0.42
+                  },
+                  {
+                    "fold": 3,
+                    "fa": 0.448125,
+                    "n_test_healthy": 8,
+                    "excess_alarms_per_draw": 2.785
+                  },
+                  {
+                    "fold": 4,
+                    "fa": 0.0525,
+                    "n_test_healthy": 4,
+                    "excess_alarms_per_draw": -0.19
+                  }
+                ],
+                "pooled_fa": 0.11358333333333333,
+                "rated_folds": [
+                  0,
+                  1,
+                  2,
+                  3
+                ],
+                "reading": "OFFSETTING"
+              }
+            }
+          },
+          {
+            "arm": "ESN-src",
+            "n": 40,
+            "m": {
+              "3": [
+                40,
+                40
+              ],
+              "4": [
+                40,
+                40
+              ]
+            },
+            "per_t": {
+              "3": {
+                "folds": [
+                  {
+                    "fold": 0,
+                    "fa": 0.07388888888888889,
+                    "n_test_healthy": 9,
+                    "excess_alarms_per_draw": -0.235
+                  },
+                  {
+                    "fold": 1,
+                    "fa": 0.05625,
+                    "n_test_healthy": 32,
+                    "excess_alarms_per_draw": -1.4
+                  },
+                  {
+                    "fold": 2,
+                    "fa": 0.13,
+                    "n_test_healthy": 11,
+                    "excess_alarms_per_draw": 0.33
+                  },
+                  {
+                    "fold": 3,
+                    "fa": 0.2230769230769231,
+                    "n_test_healthy": 13,
+                    "excess_alarms_per_draw": 1.6
+                  },
+                  {
+                    "fold": 4,
+                    "fa": 0.12083333333333333,
+                    "n_test_healthy": 12,
+                    "excess_alarms_per_draw": 0.25
+                  }
+                ],
+                "pooled_fa": 0.10707792207792208,
+                "rated_folds": [
+                  0,
+                  1,
+                  2,
+                  3,
+                  4
+                ],
+                "reading": "OFFSETTING"
+              },
+              "4": {
+                "folds": [
+                  {
+                    "fold": 0,
+                    "fa": 0.0,
+                    "n_test_healthy": 9,
+                    "excess_alarms_per_draw": -0.9
+                  },
+                  {
+                    "fold": 1,
+                    "fa": null,
+                    "n_test_healthy": 0,
+                    "excess_alarms_per_draw": 0.0
+                  },
+                  {
+                    "fold": 2,
+                    "fa": 0.04625,
+                    "n_test_healthy": 8,
+                    "excess_alarms_per_draw": -0.43
+                  },
+                  {
+                    "fold": 3,
+                    "fa": 0.4275,
+                    "n_test_healthy": 8,
+                    "excess_alarms_per_draw": 2.62
+                  },
+                  {
+                    "fold": 4,
+                    "fa": 0.0475,
+                    "n_test_healthy": 4,
+                    "excess_alarms_per_draw": -0.21
+                  }
+                ],
+                "pooled_fa": 0.13724137931034483,
+                "rated_folds": [
+                  0,
+                  2,
+                  3
+                ],
+                "reading": "HIGH"
+              }
+            }
+          },
+          {
+            "arm": "TL-raw",
+            "n": 10,
+            "m": {
+              "3": [
+                10,
+                10
+              ],
+              "4": [
+                10,
+                10
+              ]
+            },
+            "per_t": {
+              "3": {
+                "folds": [
+                  {
+                    "fold": 0,
+                    "fa": 0.0,
+                    "n_test_healthy": 9,
+                    "excess_alarms_per_draw": -0.9
+                  },
+                  {
+                    "fold": 1,
+                    "fa": 0.21921875,
+                    "n_test_healthy": 32,
+                    "excess_alarms_per_draw": 3.815
+                  },
+                  {
+                    "fold": 2,
+                    "fa": 0.0,
+                    "n_test_healthy": 11,
+                    "excess_alarms_per_draw": -1.1
+                  },
+                  {
+                    "fold": 3,
+                    "fa": 0.38461538461538464,
+                    "n_test_healthy": 13,
+                    "excess_alarms_per_draw": 3.7
+                  },
+                  {
+                    "fold": 4,
+                    "fa": 0.0,
+                    "n_test_healthy": 12,
+                    "excess_alarms_per_draw": -1.2
+                  }
+                ],
+                "pooled_fa": 0.15603896103896103,
+                "rated_folds": [
+                  0,
+                  1,
+                  2,
+                  3,
+                  4
+                ],
+                "reading": "HIGH"
+              },
+              "4": {
+                "folds": [
+                  {
+                    "fold": 0,
+                    "fa": 0.0,
+                    "n_test_healthy": 9,
+                    "excess_alarms_per_draw": -0.9
+                  },
+                  {
+                    "fold": 1,
+                    "fa": 0.0482258064516129,
+                    "n_test_healthy": 31,
+                    "excess_alarms_per_draw": -1.605
+                  },
+                  {
+                    "fold": 2,
+                    "fa": 0.0,
+                    "n_test_healthy": 8,
+                    "excess_alarms_per_draw": -0.8
+                  },
+                  {
+                    "fold": 3,
+                    "fa": 0.625,
+                    "n_test_healthy": 8,
+                    "excess_alarms_per_draw": 4.2
+                  },
+                  {
+                    "fold": 4,
+                    "fa": 0.0,
+                    "n_test_healthy": 4,
+                    "excess_alarms_per_draw": -0.4
+                  }
+                ],
+                "pooled_fa": 0.10825,
+                "rated_folds": [
+                  0,
+                  1,
+                  2,
+                  3
+                ],
+                "reading": "OFFSETTING"
+              }
+            }
+          },
+          {
+            "arm": "TL-raw",
+            "n": 20,
+            "m": {
+              "3": [
+                20,
+                20
+              ],
+              "4": [
+                20,
+                20
+              ]
+            },
+            "per_t": {
+              "3": {
+                "folds": [
+                  {
+                    "fold": 0,
+                    "fa": 0.0,
+                    "n_test_healthy": 9,
+                    "excess_alarms_per_draw": -0.9
+                  },
+                  {
+                    "fold": 1,
+                    "fa": 0.18703125,
+                    "n_test_healthy": 32,
+                    "excess_alarms_per_draw": 2.785
+                  },
+                  {
+                    "fold": 2,
+                    "fa": 0.0,
+                    "n_test_healthy": 11,
+                    "excess_alarms_per_draw": -1.1
+                  },
+                  {
+                    "fold": 3,
+                    "fa": 0.38461538461538464,
+                    "n_test_healthy": 13,
+                    "excess_alarms_per_draw": 3.7
+                  },
+                  {
+                    "fold": 4,
+                    "fa": 0.0,
+                    "n_test_healthy": 12,
+                    "excess_alarms_per_draw": -1.2
+                  }
+                ],
+                "pooled_fa": 0.14266233766233766,
+                "rated_folds": [
+                  0,
+                  1,
+                  2,
+                  3,
+                  4
+                ],
+                "reading": "HIGH"
+              },
+              "4": {
+                "folds": [
+                  {
+                    "fold": 0,
+                    "fa": 0.0,
+                    "n_test_healthy": 9,
+                    "excess_alarms_per_draw": -0.9
+                  },
+                  {
+                    "fold": 1,
+                    "fa": 0.003709677419354839,
+                    "n_test_healthy": 31,
+                    "excess_alarms_per_draw": -2.985
+                  },
+                  {
+                    "fold": 2,
+                    "fa": 0.0,
+                    "n_test_healthy": 8,
+                    "excess_alarms_per_draw": -0.8
+                  },
+                  {
+                    "fold": 3,
+                    "fa": 0.625,
+                    "n_test_healthy": 8,
+                    "excess_alarms_per_draw": 4.2
+                  },
+                  {
+                    "fold": 4,
+                    "fa": 0.0,
+                    "n_test_healthy": 4,
+                    "excess_alarms_per_draw": -0.4
+                  }
+                ],
+                "pooled_fa": 0.08525,
+                "rated_folds": [
+                  0,
+                  1,
+                  2,
+                  3
+                ],
+                "reading": "OFFSETTING"
+              }
+            }
+          },
+          {
+            "arm": "TL-raw",
+            "n": 40,
+            "m": {
+              "3": [
+                40,
+                40
+              ],
+              "4": [
+                40,
+                40
+              ]
+            },
+            "per_t": {
+              "3": {
+                "folds": [
+                  {
+                    "fold": 0,
+                    "fa": 0.0,
+                    "n_test_healthy": 9,
+                    "excess_alarms_per_draw": -0.9
+                  },
+                  {
+                    "fold": 1,
+                    "fa": 0.06109375,
+                    "n_test_healthy": 32,
+                    "excess_alarms_per_draw": -1.245
+                  },
+                  {
+                    "fold": 2,
+                    "fa": 0.0,
+                    "n_test_healthy": 11,
+                    "excess_alarms_per_draw": -1.1
+                  },
+                  {
+                    "fold": 3,
+                    "fa": 0.38461538461538464,
+                    "n_test_healthy": 13,
+                    "excess_alarms_per_draw": 3.7
+                  },
+                  {
+                    "fold": 4,
+                    "fa": 0.0,
+                    "n_test_healthy": 12,
+                    "excess_alarms_per_draw": -1.2
+                  }
+                ],
+                "pooled_fa": 0.09032467532467532,
+                "rated_folds": [
+                  0,
+                  1,
+                  2,
+                  3,
+                  4
+                ],
+                "reading": "OFFSETTING"
+              },
+              "4": {
+                "folds": [
+                  {
+                    "fold": 0,
+                    "fa": 0.0,
+                    "n_test_healthy": 9,
+                    "excess_alarms_per_draw": -0.9
+                  },
+                  {
+                    "fold": 1,
+                    "fa": null,
+                    "n_test_healthy": 0,
+                    "excess_alarms_per_draw": 0.0
+                  },
+                  {
+                    "fold": 2,
+                    "fa": 0.0,
+                    "n_test_healthy": 8,
+                    "excess_alarms_per_draw": -0.8
+                  },
+                  {
+                    "fold": 3,
+                    "fa": 0.625,
+                    "n_test_healthy": 8,
+                    "excess_alarms_per_draw": 4.2
+                  },
+                  {
+                    "fold": 4,
+                    "fa": 0.0,
+                    "n_test_healthy": 4,
+                    "excess_alarms_per_draw": -0.4
+                  }
+                ],
+                "pooled_fa": 0.1724137931034483,
+                "rated_folds": [
+                  0,
+                  2,
+                  3
+                ],
+                "reading": "HIGH"
+              }
+            }
+          }
+        ]
+      },
+      "d13b": {
+        "fold": 1,
+        "per_t": {
+          "3": {
+            "healthy_per_task_group": {
+              "text:You are a booking assistant. Use the tools to gather every number you need; do not guess prices. Finish with a one-line answer. Task: Compute the total price of item-1, item-3 and item-6 with 8% tax added, using the catalog and the calculator. Report the total.": 23,
+              "text:You are a booking assistant. Use the tools to gather every number you need; do not guess prices. Finish with a one-line answer. Task: Find the cheaper of the two routes Cusco->Prague->Lisbon and Cusco->Bergen->Lisbon (sum the two legs of each), then add 3 hotel nights in Lisbon. Report the total in USD.": 3,
+              "text:You are a booking assistant. Use the tools to gather every number you need; do not guess prices. Finish with a one-line answer. Task: Find the cheaper of the two routes Prague->Cusco->Tunis and Prague->Bergen->Tunis (sum the two legs of each), then add 3 hotel nights in Tunis. Report the total in USD.": 3,
+              "text:You are a booking assistant. Use the tools to gather every number you need; do not guess prices. Finish with a one-line answer. Task: Find the cheaper of the two routes Osaka->Prague->Tunis and Osaka->Cusco->Tunis (sum the two legs of each), then add 3 hotel nights in Tunis. Report the total in USD.": 2,
+              "text:You are a booking assistant. Use the tools to gather every number you need; do not guess prices. Finish with a one-line answer. Task: Price a two-city trip: flight Cusco->Osaka, 2 hotel nights in Osaka, flight Osaka->Cusco. Use the calculator for the total.": 1
+            },
+            "fold_total": 32,
+            "all_folds_total": 77
+          },
+          "4": {
+            "healthy_per_task_group": {
+              "text:You are a booking assistant. Use the tools to gather every number you need; do not guess prices. Finish with a one-line answer. Task: Compute the total price of item-1, item-3 and item-6 with 8% tax added, using the catalog and the calculator. Report the total.": 23,
+              "text:You are a booking assistant. Use the tools to gather every number you need; do not guess prices. Finish with a one-line answer. Task: Find the cheaper of the two routes Cusco->Prague->Lisbon and Cusco->Bergen->Lisbon (sum the two legs of each), then add 3 hotel nights in Lisbon. Report the total in USD.": 3,
+              "text:You are a booking assistant. Use the tools to gather every number you need; do not guess prices. Finish with a one-line answer. Task: Find the cheaper of the two routes Prague->Cusco->Tunis and Prague->Bergen->Tunis (sum the two legs of each), then add 3 hotel nights in Tunis. Report the total in USD.": 3,
+              "text:You are a booking assistant. Use the tools to gather every number you need; do not guess prices. Finish with a one-line answer. Task: Find the cheaper of the two routes Osaka->Prague->Tunis and Osaka->Cusco->Tunis (sum the two legs of each), then add 3 hotel nights in Tunis. Report the total in USD.": 2
+            },
+            "fold_total": 31,
+            "all_folds_total": 60
+          }
+        }
+      },
+      "d13c": {
+        "definitions": {
+          "early_alarm_rate": "per (cell, t, draw), pooled over folds: n_early / n_pos_alarm. n_pos_alarm = positives (headline classes, tau <= t, a step t) whose first alarm is <= t; n_early = those whose first alarm is < tau. Denominator: alarmed positives, not all positives. NaN when n_pos_alarm = 0 at some t; such draws leave E3's headline median",
+          "tpr_post": "positives with some score > theta at a step in tau..t / all positives (alarm state at >= tau, not first crossing >= tau). ESN arms score a running max, so for them tpr_post = TPR by construction",
+          "tpr_first": "(n_pos_alarm - n_pos_alarm_pre_tau) / n_pos: first alarm at a step in tau..t; same meaning for every arm"
+        },
+        "checks": {
+          "first_gt_post_entries": 0,
+          "post_gt_alarm_entries": 0,
+          "esn_post_ne_alarm_entries": 0,
+          "hgb_post_gt_first_entries": 11334
+        },
+        "cells": {
+          "ALL-pct": {
+            "10": {
+              "tpr_median": 0.0,
+              "tpr_post_median": 0.0,
+              "tpr_first_median": 0.0
+            },
+            "20": {
+              "tpr_median": 0.703529168959824,
+              "tpr_post_median": 0.671470831040176,
+              "tpr_first_median": 0.4289350577875619
+            },
+            "40": {
+              "tpr_median": 0.525197628458498,
+              "tpr_post_median": 0.5024703557312253,
+              "tpr_first_median": 0.39920948616600793
+            }
+          },
+          "ESN-refit": {
+            "10": {
+              "tpr_median": 0.0,
+              "tpr_post_median": 0.0,
+              "tpr_first_median": 0.0
+            },
+            "20": {
+              "tpr_median": 0.6020913593835993,
+              "tpr_post_median": 0.6020913593835993,
+              "tpr_first_median": 0.5989268024215739
+            },
+            "40": {
+              "tpr_median": 0.7119565217391304,
+              "tpr_post_median": 0.7119565217391304,
+              "tpr_first_median": 0.7119565217391304
+            }
+          },
+          "ESN-src": {
+            "0": {
+              "tpr_median": 0.0,
+              "tpr_post_median": 0.0,
+              "tpr_first_median": 0.0
+            },
+            "10": {
+              "tpr_median": 0.4877201430930104,
+              "tpr_post_median": 0.4877201430930104,
+              "tpr_first_median": 0.4877201430930104
+            },
+            "20": {
+              "tpr_median": 0.5022014309301046,
+              "tpr_post_median": 0.5022014309301046,
+              "tpr_first_median": 0.5022014309301046
+            },
+            "40": {
+              "tpr_median": 0.5064229249011858,
+              "tpr_post_median": 0.5064229249011858,
+              "tpr_first_median": 0.5064229249011858
+            }
+          },
+          "MS-raw": {
+            "0": {
+              "tpr_median": 0.8262245459548707,
+              "tpr_post_median": 0.8153549807374794,
+              "tpr_first_median": 0.7737341772151899
+            },
+            "10": {
+              "tpr_median": 0.6606356631810677,
+              "tpr_post_median": 0.6579526692350027,
+              "tpr_first_median": 0.6574367088607596
+            },
+            "20": {
+              "tpr_median": 0.7289832140891579,
+              "tpr_post_median": 0.7280544854155201,
+              "tpr_first_median": 0.7207966428178316
+            },
+            "40": {
+              "tpr_median": 0.7104743083003953,
+              "tpr_post_median": 0.7104743083003953,
+              "tpr_first_median": 0.7104743083003953
+            }
+          },
+          "TL-pct": {
+            "10": {
+              "tpr_median": 0.0,
+              "tpr_post_median": 0.0,
+              "tpr_first_median": 0.0
+            },
+            "20": {
+              "tpr_median": 0.5954182718767198,
+              "tpr_post_median": 0.5605737479361586,
+              "tpr_first_median": 0.4705558613098514
+            },
+            "40": {
+              "tpr_median": 0.4762845849802372,
+              "tpr_post_median": 0.45998023715415026,
+              "tpr_first_median": 0.42193675889328064
+            }
+          },
+          "TL-raw": {
+            "0": {
+              "tpr_median": 0.6787286736378646,
+              "tpr_post_median": 0.6787286736378646,
+              "tpr_first_median": 0.5782883874518437
+            },
+            "10": {
+              "tpr_median": 0.22530269675288936,
+              "tpr_post_median": 0.22530269675288936,
+              "tpr_first_median": 0.22530269675288936
+            },
+            "20": {
+              "tpr_median": 0.22530269675288936,
+              "tpr_post_median": 0.22530269675288936,
+              "tpr_first_median": 0.22530269675288936
+            },
+            "40": {
+              "tpr_median": 0.29693675889328064,
+              "tpr_post_median": 0.29693675889328064,
+              "tpr_first_median": 0.29693675889328064
+            }
+          }
+        },
+        "e2_tpr_first": {
+          "a": "TL-pct",
+          "b": "ESN-src",
+          "n": 20,
+          "B": 2000,
+          "seed": 0,
+          "paired_diff": {
+            "median": -0.012211062190423783,
+            "p10": -0.18227160154100172,
+            "p90": 0.298892405063291,
+            "mean": 0.045927008805723715,
+            "share_gt_0": 0.46,
+            "n": 200
+          },
+          "ci": {
+            "lo": -0.21966501240694783,
+            "hi": 0.06875734794014762,
+            "n_skipped": 0
+          }
+        }
       }
     },
     "gemini": {
@@ -19785,6 +20926,1120 @@
             "n_skipped": 0
           }
         }
+      },
+      "d13a": {
+        "rule": "conformal",
+        "alpha": 0.1,
+        "spec": {
+          "arms": [
+            "MS-raw",
+            "ESN-src",
+            "TL-raw"
+          ],
+          "n": [
+            10,
+            20,
+            40
+          ],
+          "min_healthy": 5,
+          "nominal_band": [
+            0.03,
+            0.2
+          ],
+          "high_if_pooled_gt": 0.12,
+          "expect_offsetting_at_n": 20
+        },
+        "caveat": "per-fold FA carries test-sampling noise that pooling over draws does not remove",
+        "rows": [
+          {
+            "arm": "MS-raw",
+            "n": 10,
+            "m": {
+              "3": [
+                10,
+                10
+              ],
+              "4": [
+                10,
+                10
+              ]
+            },
+            "per_t": {
+              "3": {
+                "folds": [
+                  {
+                    "fold": 0,
+                    "fa": 0.018235294117647058,
+                    "n_test_healthy": 17,
+                    "excess_alarms_per_draw": -1.39
+                  },
+                  {
+                    "fold": 1,
+                    "fa": 0.036,
+                    "n_test_healthy": 15,
+                    "excess_alarms_per_draw": -0.96
+                  },
+                  {
+                    "fold": 2,
+                    "fa": 0.08,
+                    "n_test_healthy": 12,
+                    "excess_alarms_per_draw": -0.24
+                  },
+                  {
+                    "fold": 3,
+                    "fa": 0.11777777777777777,
+                    "n_test_healthy": 18,
+                    "excess_alarms_per_draw": 0.32
+                  },
+                  {
+                    "fold": 4,
+                    "fa": 0.20966666666666667,
+                    "n_test_healthy": 15,
+                    "excess_alarms_per_draw": 1.645
+                  }
+                ],
+                "pooled_fa": 0.09188311688311689,
+                "rated_folds": [
+                  0,
+                  1,
+                  2,
+                  3,
+                  4
+                ],
+                "reading": "OFFSETTING"
+              },
+              "4": {
+                "folds": [
+                  {
+                    "fold": 0,
+                    "fa": 0.16588235294117648,
+                    "n_test_healthy": 17,
+                    "excess_alarms_per_draw": 1.12
+                  },
+                  {
+                    "fold": 1,
+                    "fa": 0.03,
+                    "n_test_healthy": 15,
+                    "excess_alarms_per_draw": -1.05
+                  },
+                  {
+                    "fold": 2,
+                    "fa": 0.05625,
+                    "n_test_healthy": 12,
+                    "excess_alarms_per_draw": -0.525
+                  },
+                  {
+                    "fold": 3,
+                    "fa": 0.09178571428571429,
+                    "n_test_healthy": 14,
+                    "excess_alarms_per_draw": -0.115
+                  },
+                  {
+                    "fold": 4,
+                    "fa": 0.014375,
+                    "n_test_healthy": 8,
+                    "excess_alarms_per_draw": -0.685
+                  }
+                ],
+                "pooled_fa": 0.08098484848484848,
+                "rated_folds": [
+                  0,
+                  1,
+                  2,
+                  3,
+                  4
+                ],
+                "reading": "OFFSETTING"
+              }
+            }
+          },
+          {
+            "arm": "MS-raw",
+            "n": 20,
+            "m": {
+              "3": [
+                20,
+                20
+              ],
+              "4": [
+                20,
+                20
+              ]
+            },
+            "per_t": {
+              "3": {
+                "folds": [
+                  {
+                    "fold": 0,
+                    "fa": 0.010294117647058823,
+                    "n_test_healthy": 17,
+                    "excess_alarms_per_draw": -1.525
+                  },
+                  {
+                    "fold": 1,
+                    "fa": 0.035333333333333335,
+                    "n_test_healthy": 15,
+                    "excess_alarms_per_draw": -0.97
+                  },
+                  {
+                    "fold": 2,
+                    "fa": 0.08416666666666667,
+                    "n_test_healthy": 12,
+                    "excess_alarms_per_draw": -0.19
+                  },
+                  {
+                    "fold": 3,
+                    "fa": 0.12444444444444444,
+                    "n_test_healthy": 18,
+                    "excess_alarms_per_draw": 0.44
+                  },
+                  {
+                    "fold": 4,
+                    "fa": 0.25033333333333335,
+                    "n_test_healthy": 15,
+                    "excess_alarms_per_draw": 2.255
+                  }
+                ],
+                "pooled_fa": 0.10012987012987012,
+                "rated_folds": [
+                  0,
+                  1,
+                  2,
+                  3,
+                  4
+                ],
+                "reading": "OFFSETTING"
+              },
+              "4": {
+                "folds": [
+                  {
+                    "fold": 0,
+                    "fa": 0.20323529411764707,
+                    "n_test_healthy": 17,
+                    "excess_alarms_per_draw": 1.755
+                  },
+                  {
+                    "fold": 1,
+                    "fa": 0.02266666666666667,
+                    "n_test_healthy": 15,
+                    "excess_alarms_per_draw": -1.16
+                  },
+                  {
+                    "fold": 2,
+                    "fa": 0.07375,
+                    "n_test_healthy": 12,
+                    "excess_alarms_per_draw": -0.315
+                  },
+                  {
+                    "fold": 3,
+                    "fa": 0.11107142857142857,
+                    "n_test_healthy": 14,
+                    "excess_alarms_per_draw": 0.155
+                  },
+                  {
+                    "fold": 4,
+                    "fa": 0.014375,
+                    "n_test_healthy": 8,
+                    "excess_alarms_per_draw": -0.685
+                  }
+                ],
+                "pooled_fa": 0.09621212121212121,
+                "rated_folds": [
+                  0,
+                  1,
+                  2,
+                  3,
+                  4
+                ],
+                "reading": "OFFSETTING"
+              }
+            }
+          },
+          {
+            "arm": "MS-raw",
+            "n": 40,
+            "m": {
+              "3": [
+                40,
+                40
+              ],
+              "4": [
+                40,
+                40
+              ]
+            },
+            "per_t": {
+              "3": {
+                "folds": [
+                  {
+                    "fold": 0,
+                    "fa": 0.001176470588235294,
+                    "n_test_healthy": 17,
+                    "excess_alarms_per_draw": -1.68
+                  },
+                  {
+                    "fold": 1,
+                    "fa": 0.016666666666666666,
+                    "n_test_healthy": 15,
+                    "excess_alarms_per_draw": -1.25
+                  },
+                  {
+                    "fold": 2,
+                    "fa": 0.08333333333333333,
+                    "n_test_healthy": 12,
+                    "excess_alarms_per_draw": -0.2
+                  },
+                  {
+                    "fold": 3,
+                    "fa": 0.11361111111111111,
+                    "n_test_healthy": 18,
+                    "excess_alarms_per_draw": 0.245
+                  },
+                  {
+                    "fold": 4,
+                    "fa": 0.30033333333333334,
+                    "n_test_healthy": 15,
+                    "excess_alarms_per_draw": 3.005
+                  }
+                ],
+                "pooled_fa": 0.10155844155844156,
+                "rated_folds": [
+                  0,
+                  1,
+                  2,
+                  3,
+                  4
+                ],
+                "reading": "OFFSETTING"
+              },
+              "4": {
+                "folds": [
+                  {
+                    "fold": 0,
+                    "fa": 0.21794117647058822,
+                    "n_test_healthy": 17,
+                    "excess_alarms_per_draw": 2.005
+                  },
+                  {
+                    "fold": 1,
+                    "fa": 0.008,
+                    "n_test_healthy": 15,
+                    "excess_alarms_per_draw": -1.38
+                  },
+                  {
+                    "fold": 2,
+                    "fa": 0.08333333333333333,
+                    "n_test_healthy": 12,
+                    "excess_alarms_per_draw": -0.2
+                  },
+                  {
+                    "fold": 3,
+                    "fa": 0.11535714285714285,
+                    "n_test_healthy": 14,
+                    "excess_alarms_per_draw": 0.215
+                  },
+                  {
+                    "fold": 4,
+                    "fa": 0.0,
+                    "n_test_healthy": 8,
+                    "excess_alarms_per_draw": -0.8
+                  }
+                ],
+                "pooled_fa": 0.09757575757575758,
+                "rated_folds": [
+                  0,
+                  1,
+                  2,
+                  3,
+                  4
+                ],
+                "reading": "OFFSETTING"
+              }
+            }
+          },
+          {
+            "arm": "ESN-src",
+            "n": 10,
+            "m": {
+              "3": [
+                10,
+                10
+              ],
+              "4": [
+                10,
+                10
+              ]
+            },
+            "per_t": {
+              "3": {
+                "folds": [
+                  {
+                    "fold": 0,
+                    "fa": 0.12205882352941176,
+                    "n_test_healthy": 17,
+                    "excess_alarms_per_draw": 0.375
+                  },
+                  {
+                    "fold": 1,
+                    "fa": 0.023666666666666666,
+                    "n_test_healthy": 15,
+                    "excess_alarms_per_draw": -1.145
+                  },
+                  {
+                    "fold": 2,
+                    "fa": 0.017916666666666668,
+                    "n_test_healthy": 12,
+                    "excess_alarms_per_draw": -0.985
+                  },
+                  {
+                    "fold": 3,
+                    "fa": 0.2811111111111111,
+                    "n_test_healthy": 18,
+                    "excess_alarms_per_draw": 3.26
+                  },
+                  {
+                    "fold": 4,
+                    "fa": 0.058333333333333334,
+                    "n_test_healthy": 15,
+                    "excess_alarms_per_draw": -0.625
+                  }
+                ],
+                "pooled_fa": 0.11142857142857143,
+                "rated_folds": [
+                  0,
+                  1,
+                  2,
+                  3,
+                  4
+                ],
+                "reading": "OFFSETTING"
+              },
+              "4": {
+                "folds": [
+                  {
+                    "fold": 0,
+                    "fa": 0.07941176470588235,
+                    "n_test_healthy": 17,
+                    "excess_alarms_per_draw": -0.35
+                  },
+                  {
+                    "fold": 1,
+                    "fa": 0.059666666666666666,
+                    "n_test_healthy": 15,
+                    "excess_alarms_per_draw": -0.605
+                  },
+                  {
+                    "fold": 2,
+                    "fa": 0.0175,
+                    "n_test_healthy": 12,
+                    "excess_alarms_per_draw": -0.99
+                  },
+                  {
+                    "fold": 3,
+                    "fa": 0.3142857142857143,
+                    "n_test_healthy": 14,
+                    "excess_alarms_per_draw": 3.0
+                  },
+                  {
+                    "fold": 4,
+                    "fa": 0.02,
+                    "n_test_healthy": 8,
+                    "excess_alarms_per_draw": -0.64
+                  }
+                ],
+                "pooled_fa": 0.10628787878787879,
+                "rated_folds": [
+                  0,
+                  1,
+                  2,
+                  3,
+                  4
+                ],
+                "reading": "OFFSETTING"
+              }
+            }
+          },
+          {
+            "arm": "ESN-src",
+            "n": 20,
+            "m": {
+              "3": [
+                20,
+                20
+              ],
+              "4": [
+                20,
+                20
+              ]
+            },
+            "per_t": {
+              "3": {
+                "folds": [
+                  {
+                    "fold": 0,
+                    "fa": 0.10441176470588236,
+                    "n_test_healthy": 17,
+                    "excess_alarms_per_draw": 0.075
+                  },
+                  {
+                    "fold": 1,
+                    "fa": 0.012,
+                    "n_test_healthy": 15,
+                    "excess_alarms_per_draw": -1.32
+                  },
+                  {
+                    "fold": 2,
+                    "fa": 0.0225,
+                    "n_test_healthy": 12,
+                    "excess_alarms_per_draw": -0.93
+                  },
+                  {
+                    "fold": 3,
+                    "fa": 0.29,
+                    "n_test_healthy": 18,
+                    "excess_alarms_per_draw": 3.42
+                  },
+                  {
+                    "fold": 4,
+                    "fa": 0.07133333333333333,
+                    "n_test_healthy": 15,
+                    "excess_alarms_per_draw": -0.43
+                  }
+                ],
+                "pooled_fa": 0.11058441558441559,
+                "rated_folds": [
+                  0,
+                  1,
+                  2,
+                  3,
+                  4
+                ],
+                "reading": "OFFSETTING"
+              },
+              "4": {
+                "folds": [
+                  {
+                    "fold": 0,
+                    "fa": 0.0811764705882353,
+                    "n_test_healthy": 17,
+                    "excess_alarms_per_draw": -0.32
+                  },
+                  {
+                    "fold": 1,
+                    "fa": 0.04633333333333333,
+                    "n_test_healthy": 15,
+                    "excess_alarms_per_draw": -0.805
+                  },
+                  {
+                    "fold": 2,
+                    "fa": 0.025833333333333333,
+                    "n_test_healthy": 12,
+                    "excess_alarms_per_draw": -0.89
+                  },
+                  {
+                    "fold": 3,
+                    "fa": 0.31285714285714283,
+                    "n_test_healthy": 14,
+                    "excess_alarms_per_draw": 2.98
+                  },
+                  {
+                    "fold": 4,
+                    "fa": 0.02125,
+                    "n_test_healthy": 8,
+                    "excess_alarms_per_draw": -0.63
+                  }
+                ],
+                "pooled_fa": 0.10507575757575757,
+                "rated_folds": [
+                  0,
+                  1,
+                  2,
+                  3,
+                  4
+                ],
+                "reading": "OFFSETTING"
+              }
+            }
+          },
+          {
+            "arm": "ESN-src",
+            "n": 40,
+            "m": {
+              "3": [
+                40,
+                40
+              ],
+              "4": [
+                40,
+                40
+              ]
+            },
+            "per_t": {
+              "3": {
+                "folds": [
+                  {
+                    "fold": 0,
+                    "fa": 0.10205882352941177,
+                    "n_test_healthy": 17,
+                    "excess_alarms_per_draw": 0.035
+                  },
+                  {
+                    "fold": 1,
+                    "fa": 0.007333333333333333,
+                    "n_test_healthy": 15,
+                    "excess_alarms_per_draw": -1.39
+                  },
+                  {
+                    "fold": 2,
+                    "fa": 0.011666666666666667,
+                    "n_test_healthy": 12,
+                    "excess_alarms_per_draw": -1.06
+                  },
+                  {
+                    "fold": 3,
+                    "fa": 0.28888888888888886,
+                    "n_test_healthy": 18,
+                    "excess_alarms_per_draw": 3.4
+                  },
+                  {
+                    "fold": 4,
+                    "fa": 0.06233333333333333,
+                    "n_test_healthy": 15,
+                    "excess_alarms_per_draw": -0.565
+                  }
+                ],
+                "pooled_fa": 0.10545454545454545,
+                "rated_folds": [
+                  0,
+                  1,
+                  2,
+                  3,
+                  4
+                ],
+                "reading": "OFFSETTING"
+              },
+              "4": {
+                "folds": [
+                  {
+                    "fold": 0,
+                    "fa": 0.07411764705882352,
+                    "n_test_healthy": 17,
+                    "excess_alarms_per_draw": -0.44
+                  },
+                  {
+                    "fold": 1,
+                    "fa": 0.03833333333333333,
+                    "n_test_healthy": 15,
+                    "excess_alarms_per_draw": -0.925
+                  },
+                  {
+                    "fold": 2,
+                    "fa": 0.022083333333333333,
+                    "n_test_healthy": 12,
+                    "excess_alarms_per_draw": -0.935
+                  },
+                  {
+                    "fold": 3,
+                    "fa": 0.3125,
+                    "n_test_healthy": 14,
+                    "excess_alarms_per_draw": 2.975
+                  },
+                  {
+                    "fold": 4,
+                    "fa": 0.01875,
+                    "n_test_healthy": 8,
+                    "excess_alarms_per_draw": -0.65
+                  }
+                ],
+                "pooled_fa": 0.10037878787878787,
+                "rated_folds": [
+                  0,
+                  1,
+                  2,
+                  3,
+                  4
+                ],
+                "reading": "OFFSETTING"
+              }
+            }
+          },
+          {
+            "arm": "TL-raw",
+            "n": 10,
+            "m": {
+              "3": [
+                10,
+                10
+              ],
+              "4": [
+                10,
+                10
+              ]
+            },
+            "per_t": {
+              "3": {
+                "folds": [
+                  {
+                    "fold": 0,
+                    "fa": 0.0,
+                    "n_test_healthy": 17,
+                    "excess_alarms_per_draw": -1.7
+                  },
+                  {
+                    "fold": 1,
+                    "fa": 0.0,
+                    "n_test_healthy": 15,
+                    "excess_alarms_per_draw": -1.5
+                  },
+                  {
+                    "fold": 2,
+                    "fa": 0.0,
+                    "n_test_healthy": 12,
+                    "excess_alarms_per_draw": -1.2
+                  },
+                  {
+                    "fold": 3,
+                    "fa": 0.0,
+                    "n_test_healthy": 18,
+                    "excess_alarms_per_draw": -1.8
+                  },
+                  {
+                    "fold": 4,
+                    "fa": 0.0,
+                    "n_test_healthy": 15,
+                    "excess_alarms_per_draw": -1.5
+                  }
+                ],
+                "pooled_fa": 0.0,
+                "rated_folds": [
+                  0,
+                  1,
+                  2,
+                  3,
+                  4
+                ],
+                "reading": "OFFSETTING"
+              },
+              "4": {
+                "folds": [
+                  {
+                    "fold": 0,
+                    "fa": 0.0,
+                    "n_test_healthy": 17,
+                    "excess_alarms_per_draw": -1.7
+                  },
+                  {
+                    "fold": 1,
+                    "fa": 0.0,
+                    "n_test_healthy": 15,
+                    "excess_alarms_per_draw": -1.5
+                  },
+                  {
+                    "fold": 2,
+                    "fa": 0.0,
+                    "n_test_healthy": 12,
+                    "excess_alarms_per_draw": -1.2
+                  },
+                  {
+                    "fold": 3,
+                    "fa": 0.0,
+                    "n_test_healthy": 14,
+                    "excess_alarms_per_draw": -1.4
+                  },
+                  {
+                    "fold": 4,
+                    "fa": 0.0,
+                    "n_test_healthy": 8,
+                    "excess_alarms_per_draw": -0.8
+                  }
+                ],
+                "pooled_fa": 0.0,
+                "rated_folds": [
+                  0,
+                  1,
+                  2,
+                  3,
+                  4
+                ],
+                "reading": "OFFSETTING"
+              }
+            }
+          },
+          {
+            "arm": "TL-raw",
+            "n": 20,
+            "m": {
+              "3": [
+                20,
+                20
+              ],
+              "4": [
+                20,
+                20
+              ]
+            },
+            "per_t": {
+              "3": {
+                "folds": [
+                  {
+                    "fold": 0,
+                    "fa": 0.0,
+                    "n_test_healthy": 17,
+                    "excess_alarms_per_draw": -1.7
+                  },
+                  {
+                    "fold": 1,
+                    "fa": 0.0,
+                    "n_test_healthy": 15,
+                    "excess_alarms_per_draw": -1.5
+                  },
+                  {
+                    "fold": 2,
+                    "fa": 0.0,
+                    "n_test_healthy": 12,
+                    "excess_alarms_per_draw": -1.2
+                  },
+                  {
+                    "fold": 3,
+                    "fa": 0.0,
+                    "n_test_healthy": 18,
+                    "excess_alarms_per_draw": -1.8
+                  },
+                  {
+                    "fold": 4,
+                    "fa": 0.0,
+                    "n_test_healthy": 15,
+                    "excess_alarms_per_draw": -1.5
+                  }
+                ],
+                "pooled_fa": 0.0,
+                "rated_folds": [
+                  0,
+                  1,
+                  2,
+                  3,
+                  4
+                ],
+                "reading": "OFFSETTING"
+              },
+              "4": {
+                "folds": [
+                  {
+                    "fold": 0,
+                    "fa": 0.0,
+                    "n_test_healthy": 17,
+                    "excess_alarms_per_draw": -1.7
+                  },
+                  {
+                    "fold": 1,
+                    "fa": 0.0,
+                    "n_test_healthy": 15,
+                    "excess_alarms_per_draw": -1.5
+                  },
+                  {
+                    "fold": 2,
+                    "fa": 0.0,
+                    "n_test_healthy": 12,
+                    "excess_alarms_per_draw": -1.2
+                  },
+                  {
+                    "fold": 3,
+                    "fa": 0.0,
+                    "n_test_healthy": 14,
+                    "excess_alarms_per_draw": -1.4
+                  },
+                  {
+                    "fold": 4,
+                    "fa": 0.0,
+                    "n_test_healthy": 8,
+                    "excess_alarms_per_draw": -0.8
+                  }
+                ],
+                "pooled_fa": 0.0,
+                "rated_folds": [
+                  0,
+                  1,
+                  2,
+                  3,
+                  4
+                ],
+                "reading": "OFFSETTING"
+              }
+            }
+          },
+          {
+            "arm": "TL-raw",
+            "n": 40,
+            "m": {
+              "3": [
+                40,
+                40
+              ],
+              "4": [
+                40,
+                40
+              ]
+            },
+            "per_t": {
+              "3": {
+                "folds": [
+                  {
+                    "fold": 0,
+                    "fa": 0.0,
+                    "n_test_healthy": 17,
+                    "excess_alarms_per_draw": -1.7
+                  },
+                  {
+                    "fold": 1,
+                    "fa": 0.0,
+                    "n_test_healthy": 15,
+                    "excess_alarms_per_draw": -1.5
+                  },
+                  {
+                    "fold": 2,
+                    "fa": 0.0,
+                    "n_test_healthy": 12,
+                    "excess_alarms_per_draw": -1.2
+                  },
+                  {
+                    "fold": 3,
+                    "fa": 0.0,
+                    "n_test_healthy": 18,
+                    "excess_alarms_per_draw": -1.8
+                  },
+                  {
+                    "fold": 4,
+                    "fa": 0.0,
+                    "n_test_healthy": 15,
+                    "excess_alarms_per_draw": -1.5
+                  }
+                ],
+                "pooled_fa": 0.0,
+                "rated_folds": [
+                  0,
+                  1,
+                  2,
+                  3,
+                  4
+                ],
+                "reading": "OFFSETTING"
+              },
+              "4": {
+                "folds": [
+                  {
+                    "fold": 0,
+                    "fa": 0.0,
+                    "n_test_healthy": 17,
+                    "excess_alarms_per_draw": -1.7
+                  },
+                  {
+                    "fold": 1,
+                    "fa": 0.0,
+                    "n_test_healthy": 15,
+                    "excess_alarms_per_draw": -1.5
+                  },
+                  {
+                    "fold": 2,
+                    "fa": 0.0,
+                    "n_test_healthy": 12,
+                    "excess_alarms_per_draw": -1.2
+                  },
+                  {
+                    "fold": 3,
+                    "fa": 0.0,
+                    "n_test_healthy": 14,
+                    "excess_alarms_per_draw": -1.4
+                  },
+                  {
+                    "fold": 4,
+                    "fa": 0.0,
+                    "n_test_healthy": 8,
+                    "excess_alarms_per_draw": -0.8
+                  }
+                ],
+                "pooled_fa": 0.0,
+                "rated_folds": [
+                  0,
+                  1,
+                  2,
+                  3,
+                  4
+                ],
+                "reading": "OFFSETTING"
+              }
+            }
+          }
+        ]
+      },
+      "d13b": {
+        "fold": 1,
+        "per_t": {
+          "3": {
+            "healthy_per_task_group": {
+              "text:You are a research assistant writing a survey on Gaussian process regression for forecasting. Do ALL of the following, exactly one tool call per step: (1) arxiv_search for recent papers on Gaussian process regression for forecasting, (2) wikipedia_search for the core concept behind Gaussian process regression for forecasting, (3) web_search for a recent development in Gaussian process regression for forecasting, (4) arxiv_search for a specific application of Gaussian process regression for forecasting, (5) use the python tool to print how many papers so far, (6) arxiv_search for work combining Gaussian process regression for forecasting with Bayesian optimization for hyperparameters, (7) wikipedia_search for Bayesian optimization for hyperparameters, (8) web_search for benchmark datasets for Gaussian process regression for forecasting, (9) arxiv_search for survey papers on Gaussian process regression for forecasting, (10) use the python tool to print the total number of sources. Finish with a two-line summary of the strongest findings.": 2,
+              "text:You are a research assistant writing a survey on anomaly detection in network traffic. Do ALL of the following, exactly one tool call per step: (1) arxiv_search for recent papers on anomaly detection in network traffic, (2) wikipedia_search for the core concept behind anomaly detection in network traffic, (3) web_search for a recent development in anomaly detection in network traffic, (4) arxiv_search for a specific application of anomaly detection in network traffic, (5) use the python tool to print how many papers so far, (6) arxiv_search for work combining anomaly detection in network traffic with CUSUM change-point detection, (7) wikipedia_search for CUSUM change-point detection, (8) web_search for benchmark datasets for anomaly detection in network traffic, (9) arxiv_search for survey papers on anomaly detection in network traffic, (10) use the python tool to print the total number of sources. Finish with a two-line summary of the strongest findings.": 2,
+              "text:You are a research assistant writing a survey on conformal prediction for time series. Do ALL of the following, exactly one tool call per step: (1) arxiv_search for recent papers on conformal prediction for time series, (2) wikipedia_search for the core concept behind conformal prediction for time series, (3) web_search for a recent development in conformal prediction for time series, (4) arxiv_search for a specific application of conformal prediction for time series, (5) use the python tool to print how many papers so far, (6) arxiv_search for work combining conformal prediction for time series with Gaussian process regression for forecasting, (7) wikipedia_search for Gaussian process regression for forecasting, (8) web_search for benchmark datasets for conformal prediction for time series, (9) arxiv_search for survey papers on conformal prediction for time series, (10) use the python tool to print the total number of sources. Finish with a two-line summary of the strongest findings.": 2,
+              "text:You are a research assistant writing a survey on meta-learning for few-shot classification. Do ALL of the following, exactly one tool call per step: (1) arxiv_search for recent papers on meta-learning for few-shot classification, (2) wikipedia_search for the core concept behind meta-learning for few-shot classification, (3) web_search for a recent development in meta-learning for few-shot classification, (4) arxiv_search for a specific application of meta-learning for few-shot classification, (5) use the python tool to print how many papers so far, (6) arxiv_search for work combining meta-learning for few-shot classification with seismic event detection, (7) wikipedia_search for seismic event detection, (8) web_search for benchmark datasets for meta-learning for few-shot classification, (9) arxiv_search for survey papers on meta-learning for few-shot classification, (10) use the python tool to print the total number of sources. Finish with a two-line summary of the strongest findings.": 2,
+              "text:You are a research assistant writing a survey on transformer models for log analysis. Do ALL of the following, exactly one tool call per step: (1) arxiv_search for recent papers on transformer models for log analysis, (2) wikipedia_search for the core concept behind transformer models for log analysis, (3) web_search for a recent development in transformer models for log analysis, (4) arxiv_search for a specific application of transformer models for log analysis, (5) use the python tool to print how many papers so far, (6) arxiv_search for work combining transformer models for log analysis with reinforcement learning for control, (7) wikipedia_search for reinforcement learning for control, (8) web_search for benchmark datasets for transformer models for log analysis, (9) arxiv_search for survey papers on transformer models for log analysis, (10) use the python tool to print the total number of sources. Finish with a two-line summary of the strongest findings.": 2,
+              "text:You are a research assistant writing a survey on variational autoencoders for novelty detection. Do ALL of the following, exactly one tool call per step: (1) arxiv_search for recent papers on variational autoencoders for novelty detection, (2) wikipedia_search for the core concept behind variational autoencoders for novelty detection, (3) web_search for a recent development in variational autoencoders for novelty detection, (4) arxiv_search for a specific application of variational autoencoders for novelty detection, (5) use the python tool to print how many papers so far, (6) arxiv_search for work combining variational autoencoders for novelty detection with federated learning for privacy, (7) wikipedia_search for federated learning for privacy, (8) web_search for benchmark datasets for variational autoencoders for novelty detection, (9) arxiv_search for survey papers on variational autoencoders for novelty detection, (10) use the python tool to print the total number of sources. Finish with a two-line summary of the strongest findings.": 2,
+              "text:You are a research assistant writing a survey on attention mechanisms in vision. Do ALL of the following, exactly one tool call per step: (1) arxiv_search for recent papers on attention mechanisms in vision, (2) wikipedia_search for the core concept behind attention mechanisms in vision, (3) web_search for a recent development in attention mechanisms in vision, (4) arxiv_search for a specific application of attention mechanisms in vision, (5) use the python tool to print how many papers so far, (6) arxiv_search for work combining attention mechanisms in vision with neural machine translation, (7) wikipedia_search for neural machine translation, (8) web_search for benchmark datasets for attention mechanisms in vision, (9) arxiv_search for survey papers on attention mechanisms in vision, (10) use the python tool to print the total number of sources. Finish with a two-line summary of the strongest findings.": 1,
+              "text:You are a research assistant writing a survey on contrastive learning for embeddings. Do ALL of the following, exactly one tool call per step: (1) arxiv_search for recent papers on contrastive learning for embeddings, (2) wikipedia_search for the core concept behind contrastive learning for embeddings, (3) web_search for a recent development in contrastive learning for embeddings, (4) arxiv_search for a specific application of contrastive learning for embeddings, (5) use the python tool to print how many papers so far, (6) arxiv_search for work combining contrastive learning for embeddings with causal inference from observational data, (7) wikipedia_search for causal inference from observational data, (8) web_search for benchmark datasets for contrastive learning for embeddings, (9) arxiv_search for survey papers on contrastive learning for embeddings, (10) use the python tool to print the total number of sources. Finish with a two-line summary of the strongest findings.": 1,
+              "text:You are a research assistant writing a survey on recommender systems with matrix factorization. Do ALL of the following, exactly one tool call per step: (1) arxiv_search for recent papers on recommender systems with matrix factorization, (2) wikipedia_search for the core concept behind recommender systems with matrix factorization, (3) web_search for a recent development in recommender systems with matrix factorization, (4) arxiv_search for a specific application of recommender systems with matrix factorization, (5) use the python tool to print how many papers so far, (6) arxiv_search for work combining recommender systems with matrix factorization with anomaly detection in network traffic, (7) wikipedia_search for anomaly detection in network traffic, (8) web_search for benchmark datasets for recommender systems with matrix factorization, (9) arxiv_search for survey papers on recommender systems with matrix factorization, (10) use the python tool to print the total number of sources. Finish with a two-line summary of the strongest findings.": 1
+            },
+            "fold_total": 15,
+            "all_folds_total": 77
+          },
+          "4": {
+            "healthy_per_task_group": {
+              "text:You are a research assistant writing a survey on Gaussian process regression for forecasting. Do ALL of the following, exactly one tool call per step: (1) arxiv_search for recent papers on Gaussian process regression for forecasting, (2) wikipedia_search for the core concept behind Gaussian process regression for forecasting, (3) web_search for a recent development in Gaussian process regression for forecasting, (4) arxiv_search for a specific application of Gaussian process regression for forecasting, (5) use the python tool to print how many papers so far, (6) arxiv_search for work combining Gaussian process regression for forecasting with Bayesian optimization for hyperparameters, (7) wikipedia_search for Bayesian optimization for hyperparameters, (8) web_search for benchmark datasets for Gaussian process regression for forecasting, (9) arxiv_search for survey papers on Gaussian process regression for forecasting, (10) use the python tool to print the total number of sources. Finish with a two-line summary of the strongest findings.": 2,
+              "text:You are a research assistant writing a survey on anomaly detection in network traffic. Do ALL of the following, exactly one tool call per step: (1) arxiv_search for recent papers on anomaly detection in network traffic, (2) wikipedia_search for the core concept behind anomaly detection in network traffic, (3) web_search for a recent development in anomaly detection in network traffic, (4) arxiv_search for a specific application of anomaly detection in network traffic, (5) use the python tool to print how many papers so far, (6) arxiv_search for work combining anomaly detection in network traffic with CUSUM change-point detection, (7) wikipedia_search for CUSUM change-point detection, (8) web_search for benchmark datasets for anomaly detection in network traffic, (9) arxiv_search for survey papers on anomaly detection in network traffic, (10) use the python tool to print the total number of sources. Finish with a two-line summary of the strongest findings.": 2,
+              "text:You are a research assistant writing a survey on conformal prediction for time series. Do ALL of the following, exactly one tool call per step: (1) arxiv_search for recent papers on conformal prediction for time series, (2) wikipedia_search for the core concept behind conformal prediction for time series, (3) web_search for a recent development in conformal prediction for time series, (4) arxiv_search for a specific application of conformal prediction for time series, (5) use the python tool to print how many papers so far, (6) arxiv_search for work combining conformal prediction for time series with Gaussian process regression for forecasting, (7) wikipedia_search for Gaussian process regression for forecasting, (8) web_search for benchmark datasets for conformal prediction for time series, (9) arxiv_search for survey papers on conformal prediction for time series, (10) use the python tool to print the total number of sources. Finish with a two-line summary of the strongest findings.": 2,
+              "text:You are a research assistant writing a survey on meta-learning for few-shot classification. Do ALL of the following, exactly one tool call per step: (1) arxiv_search for recent papers on meta-learning for few-shot classification, (2) wikipedia_search for the core concept behind meta-learning for few-shot classification, (3) web_search for a recent development in meta-learning for few-shot classification, (4) arxiv_search for a specific application of meta-learning for few-shot classification, (5) use the python tool to print how many papers so far, (6) arxiv_search for work combining meta-learning for few-shot classification with seismic event detection, (7) wikipedia_search for seismic event detection, (8) web_search for benchmark datasets for meta-learning for few-shot classification, (9) arxiv_search for survey papers on meta-learning for few-shot classification, (10) use the python tool to print the total number of sources. Finish with a two-line summary of the strongest findings.": 2,
+              "text:You are a research assistant writing a survey on transformer models for log analysis. Do ALL of the following, exactly one tool call per step: (1) arxiv_search for recent papers on transformer models for log analysis, (2) wikipedia_search for the core concept behind transformer models for log analysis, (3) web_search for a recent development in transformer models for log analysis, (4) arxiv_search for a specific application of transformer models for log analysis, (5) use the python tool to print how many papers so far, (6) arxiv_search for work combining transformer models for log analysis with reinforcement learning for control, (7) wikipedia_search for reinforcement learning for control, (8) web_search for benchmark datasets for transformer models for log analysis, (9) arxiv_search for survey papers on transformer models for log analysis, (10) use the python tool to print the total number of sources. Finish with a two-line summary of the strongest findings.": 2,
+              "text:You are a research assistant writing a survey on variational autoencoders for novelty detection. Do ALL of the following, exactly one tool call per step: (1) arxiv_search for recent papers on variational autoencoders for novelty detection, (2) wikipedia_search for the core concept behind variational autoencoders for novelty detection, (3) web_search for a recent development in variational autoencoders for novelty detection, (4) arxiv_search for a specific application of variational autoencoders for novelty detection, (5) use the python tool to print how many papers so far, (6) arxiv_search for work combining variational autoencoders for novelty detection with federated learning for privacy, (7) wikipedia_search for federated learning for privacy, (8) web_search for benchmark datasets for variational autoencoders for novelty detection, (9) arxiv_search for survey papers on variational autoencoders for novelty detection, (10) use the python tool to print the total number of sources. Finish with a two-line summary of the strongest findings.": 2,
+              "text:You are a research assistant writing a survey on attention mechanisms in vision. Do ALL of the following, exactly one tool call per step: (1) arxiv_search for recent papers on attention mechanisms in vision, (2) wikipedia_search for the core concept behind attention mechanisms in vision, (3) web_search for a recent development in attention mechanisms in vision, (4) arxiv_search for a specific application of attention mechanisms in vision, (5) use the python tool to print how many papers so far, (6) arxiv_search for work combining attention mechanisms in vision with neural machine translation, (7) wikipedia_search for neural machine translation, (8) web_search for benchmark datasets for attention mechanisms in vision, (9) arxiv_search for survey papers on attention mechanisms in vision, (10) use the python tool to print the total number of sources. Finish with a two-line summary of the strongest findings.": 1,
+              "text:You are a research assistant writing a survey on contrastive learning for embeddings. Do ALL of the following, exactly one tool call per step: (1) arxiv_search for recent papers on contrastive learning for embeddings, (2) wikipedia_search for the core concept behind contrastive learning for embeddings, (3) web_search for a recent development in contrastive learning for embeddings, (4) arxiv_search for a specific application of contrastive learning for embeddings, (5) use the python tool to print how many papers so far, (6) arxiv_search for work combining contrastive learning for embeddings with causal inference from observational data, (7) wikipedia_search for causal inference from observational data, (8) web_search for benchmark datasets for contrastive learning for embeddings, (9) arxiv_search for survey papers on contrastive learning for embeddings, (10) use the python tool to print the total number of sources. Finish with a two-line summary of the strongest findings.": 1,
+              "text:You are a research assistant writing a survey on recommender systems with matrix factorization. Do ALL of the following, exactly one tool call per step: (1) arxiv_search for recent papers on recommender systems with matrix factorization, (2) wikipedia_search for the core concept behind recommender systems with matrix factorization, (3) web_search for a recent development in recommender systems with matrix factorization, (4) arxiv_search for a specific application of recommender systems with matrix factorization, (5) use the python tool to print how many papers so far, (6) arxiv_search for work combining recommender systems with matrix factorization with anomaly detection in network traffic, (7) wikipedia_search for anomaly detection in network traffic, (8) web_search for benchmark datasets for recommender systems with matrix factorization, (9) arxiv_search for survey papers on recommender systems with matrix factorization, (10) use the python tool to print the total number of sources. Finish with a two-line summary of the strongest findings.": 1
+            },
+            "fold_total": 15,
+            "all_folds_total": 66
+          }
+        }
+      },
+      "d13c": {
+        "definitions": {
+          "early_alarm_rate": "per (cell, t, draw), pooled over folds: n_early / n_pos_alarm. n_pos_alarm = positives (headline classes, tau <= t, a step t) whose first alarm is <= t; n_early = those whose first alarm is < tau. Denominator: alarmed positives, not all positives. NaN when n_pos_alarm = 0 at some t; such draws leave E3's headline median",
+          "tpr_post": "positives with some score > theta at a step in tau..t / all positives (alarm state at >= tau, not first crossing >= tau). ESN arms score a running max, so for them tpr_post = TPR by construction",
+          "tpr_first": "(n_pos_alarm - n_pos_alarm_pre_tau) / n_pos: first alarm at a step in tau..t; same meaning for every arm"
+        },
+        "checks": {
+          "first_gt_post_entries": 0,
+          "post_gt_alarm_entries": 0,
+          "esn_post_ne_alarm_entries": 0,
+          "hgb_post_gt_first_entries": 0
+        },
+        "cells": {
+          "ALL-pct": {
+            "10": {
+              "tpr_median": 0.0,
+              "tpr_post_median": 0.0,
+              "tpr_first_median": 0.0
+            },
+            "20": {
+              "tpr_median": 0.28409090909090906,
+              "tpr_post_median": 0.28409090909090906,
+              "tpr_first_median": 0.28409090909090906
+            },
+            "40": {
+              "tpr_median": 0.35119047619047616,
+              "tpr_post_median": 0.35119047619047616,
+              "tpr_first_median": 0.35119047619047616
+            }
+          },
+          "ESN-src": {
+            "0": {
+              "tpr_median": 1.0,
+              "tpr_post_median": 1.0,
+              "tpr_first_median": 1.0
+            },
+            "10": {
+              "tpr_median": 0.0,
+              "tpr_post_median": 0.0,
+              "tpr_first_median": 0.0
+            },
+            "20": {
+              "tpr_median": 0.0,
+              "tpr_post_median": 0.0,
+              "tpr_first_median": 0.0
+            },
+            "40": {
+              "tpr_median": 0.0,
+              "tpr_post_median": 0.0,
+              "tpr_first_median": 0.0
+            }
+          },
+          "MS-raw": {
+            "0": {
+              "tpr_median": 0.09090909090909091,
+              "tpr_post_median": 0.09090909090909091,
+              "tpr_first_median": 0.09090909090909091
+            },
+            "10": {
+              "tpr_median": 0.07088744588744589,
+              "tpr_post_median": 0.07088744588744589,
+              "tpr_first_median": 0.07088744588744589
+            },
+            "20": {
+              "tpr_median": 0.07142857142857142,
+              "tpr_post_median": 0.07142857142857142,
+              "tpr_first_median": 0.07142857142857142
+            },
+            "40": {
+              "tpr_median": 0.047619047619047616,
+              "tpr_post_median": 0.047619047619047616,
+              "tpr_first_median": 0.047619047619047616
+            }
+          },
+          "TL-pct": {
+            "10": {
+              "tpr_median": 0.0,
+              "tpr_post_median": 0.0,
+              "tpr_first_median": 0.0
+            },
+            "20": {
+              "tpr_median": 0.09523809523809523,
+              "tpr_post_median": 0.09523809523809523,
+              "tpr_first_median": 0.09523809523809523
+            },
+            "40": {
+              "tpr_median": 0.047619047619047616,
+              "tpr_post_median": 0.047619047619047616,
+              "tpr_first_median": 0.047619047619047616
+            }
+          },
+          "TL-raw": {
+            "0": {
+              "tpr_median": 0.5584415584415584,
+              "tpr_post_median": 0.5584415584415584,
+              "tpr_first_median": 0.5584415584415584
+            },
+            "10": {
+              "tpr_median": 0.5584415584415584,
+              "tpr_post_median": 0.5584415584415584,
+              "tpr_first_median": 0.5584415584415584
+            },
+            "20": {
+              "tpr_median": 0.5584415584415584,
+              "tpr_post_median": 0.5584415584415584,
+              "tpr_first_median": 0.5584415584415584
+            },
+            "40": {
+              "tpr_median": 0.5584415584415584,
+              "tpr_post_median": 0.5584415584415584,
+              "tpr_first_median": 0.5584415584415584
+            }
+          }
+        },
+        "e2_tpr_first": {
+          "a": "TL-pct",
+          "b": "ESN-src",
+          "n": 20,
+          "B": 2000,
+          "seed": 0,
+          "paired_diff": {
+            "median": 0.07034632034632035,
+            "p10": -0.02056277056277056,
+            "p90": 0.20995670995670995,
+            "mean": 0.08403138528138529,
+            "share_gt_0": 0.78,
+            "n": 200
+          },
+          "ci": {
+            "lo": 0.0,
+            "hi": 0.10673062865497071,
+            "n_skipped": 0
+          }
+        }
       }
     }
   },
@@ -21490,10 +23745,153 @@
           }
         ]
       }
+    },
+    "D-13a": {
+      "verdict": "HOLDS",
+      "readings": [
+        {
+          "arm": "MS-raw",
+          "n": 10,
+          "t": 3,
+          "reading": "OFFSETTING"
+        },
+        {
+          "arm": "MS-raw",
+          "n": 10,
+          "t": 4,
+          "reading": "NOMINAL"
+        },
+        {
+          "arm": "MS-raw",
+          "n": 20,
+          "t": 3,
+          "reading": "OFFSETTING"
+        },
+        {
+          "arm": "MS-raw",
+          "n": 20,
+          "t": 4,
+          "reading": "OFFSETTING"
+        },
+        {
+          "arm": "MS-raw",
+          "n": 40,
+          "t": 3,
+          "reading": "OFFSETTING"
+        },
+        {
+          "arm": "MS-raw",
+          "n": 40,
+          "t": 4,
+          "reading": "OFFSETTING"
+        },
+        {
+          "arm": "ESN-src",
+          "n": 10,
+          "t": 3,
+          "reading": "NOMINAL"
+        },
+        {
+          "arm": "ESN-src",
+          "n": 10,
+          "t": 4,
+          "reading": "OFFSETTING"
+        },
+        {
+          "arm": "ESN-src",
+          "n": 20,
+          "t": 3,
+          "reading": "NOMINAL"
+        },
+        {
+          "arm": "ESN-src",
+          "n": 20,
+          "t": 4,
+          "reading": "OFFSETTING"
+        },
+        {
+          "arm": "ESN-src",
+          "n": 40,
+          "t": 3,
+          "reading": "OFFSETTING"
+        },
+        {
+          "arm": "ESN-src",
+          "n": 40,
+          "t": 4,
+          "reading": "HIGH"
+        },
+        {
+          "arm": "TL-raw",
+          "n": 10,
+          "t": 3,
+          "reading": "HIGH"
+        },
+        {
+          "arm": "TL-raw",
+          "n": 10,
+          "t": 4,
+          "reading": "OFFSETTING"
+        },
+        {
+          "arm": "TL-raw",
+          "n": 20,
+          "t": 3,
+          "reading": "HIGH"
+        },
+        {
+          "arm": "TL-raw",
+          "n": 20,
+          "t": 4,
+          "reading": "OFFSETTING"
+        },
+        {
+          "arm": "TL-raw",
+          "n": 40,
+          "t": 3,
+          "reading": "OFFSETTING"
+        },
+        {
+          "arm": "TL-raw",
+          "n": 40,
+          "t": 4,
+          "reading": "HIGH"
+        }
+      ]
+    },
+    "D-13c": {
+      "i": {
+        "verdict": "HOLDS",
+        "checks": [
+          {
+            "first_gt_post": 0,
+            "post_gt_alarm": 0,
+            "ok": true
+          }
+        ]
+      },
+      "ii": {
+        "verdict": "HOLDS",
+        "checks": [
+          {
+            "esn_post_ne_alarm": 0,
+            "ok": true
+          }
+        ]
+      },
+      "iii": {
+        "verdict": "HOLDS",
+        "checks": [
+          {
+            "hgb_post_gt_first": 11334,
+            "ok": true
+          }
+        ]
+      }
     }
   },
   "git": {
-    "commit": "bad72c04e548d7c3fcff3cd2c74171932eca29b4",
+    "commit": "5042a7a475545732e9d7929d3d8b4637948f1975",
     "dirty": false
   },
   "e3_git": {
