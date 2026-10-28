@@ -17,7 +17,6 @@ from run_e3 import _clean, _json_default
 from sklearn.ensemble import HistGradientBoostingClassifier
 
 from watchdog_agent.data import load_episodes
-from watchdog_agent.evaluation import matched_step_cluster_ci
 from watchdog_agent.experiments.e1 import git_state
 from watchdog_agent.experiments.e2 import (
     build_training_set,
@@ -40,9 +39,12 @@ from watchdog_agent.experiments.e4 import (
     cpu_per_step,
     judge_scores,
     max_abs_diff,
+    mean_auroc_ci,
+    missing_policy,
+    missing_scores,
     operating_point,
     paired_median_diff,
-    require_complete,
+    worst_case_fill,
 )
 from watchdog_agent.experiments.e4_dev import load_template
 from watchdog_agent.features import prefix_feature_table
@@ -102,7 +104,8 @@ def main() -> int:
     t0 = time.time()
     try:
         js, jinfo = judge_scores(load_template(cfg["prompt"]["file"]), runs, judge, JudgeCache(cfg["cache"]), cfg)
-        require_complete(js, runs, cfg)
+        missing = missing_scores(js, runs, cfg)
+        excl = missing_policy(missing)  # decisions.md 2026-10-28 (post hoc, option 1)
     except RunStopped as e:
         print(f"STOPPED: {e}")
         OUT.write_text(json.dumps(_clean({"stopped": str(e), "checks": checks, "git": git}), indent=2))
@@ -110,15 +113,21 @@ def main() -> int:
     print(f"judge: {jinfo['calls']} calls ({jinfo['new_calls']} new) in {time.time() - t0:.0f}s, "
           f"parse failures {jinfo['parse_failures']}")
 
-    # 3. AUROCs, D, J-1.
-    judge_block = auroc_block(js, runs, cfg)
-    ci = matched_step_cluster_ci(js, eval_runs, report, cfg["statistic_D"]["B"], seed=cfg["statistic_D"]["seed"])
-    esn_blocks = [auroc_block(d["target"], runs, cfg) for d in esn_draws]
-    D = paired_median_diff([d["target"] for d in esn_draws], js, eval_runs, report,
-                           cfg["statistic_D"]["B"], cfg["statistic_D"]["seed"])
+    # 3. AUROCs, D, J-1, all on the same sets: a failed run's missing (uid, t) dropped for every scorer.
+    B, seed = cfg["statistic_D"]["B"], cfg["statistic_D"]["seed"]
+    judge_block = auroc_block(js, runs, cfg, excl)
+    ci = mean_auroc_ci(js, eval_runs, report, B, seed, excl)
+    esn_blocks = [auroc_block(d["target"], runs, cfg, excl) for d in esn_draws]
+    D = paired_median_diff([d["target"] for d in esn_draws], js, eval_runs, report, B, seed, excl)
     esn_median = float(np.median([b["headline"] for b in esn_blocks]))
     j1 = {"judge_headline_auroc": judge_block["headline"], "esn_src_median_headline_auroc": esn_median,
           "outcome": "HOLDS" if judge_block["headline"] > esn_median else "FAILS"}
+    # Sensitivity: the missing score set to 0 (worst case for the judge), nothing dropped.
+    worst = worst_case_fill(js, missing)
+    sensitivity = {"missing": [list(m[:2]) for m in missing], "rule": "missing failed-run score set to 0, no pair dropped",
+                   "judge_headline_auroc": auroc_block(worst, runs, cfg)["headline"],
+                   "D": {k: v for k, v in paired_median_diff([d["target"] for d in esn_draws], worst, eval_runs,
+                                                             report, B, seed).items() if k != "per_draw_diff"}}
 
     # 4. J-2 at E3's operating point (E3's folds and draws, n = 20), with MS-raw and ESN-src rerun as the check.
     j2cfg = cfg["expectations"][1]
@@ -172,17 +181,18 @@ def main() -> int:
                      "test-side (task-group) only; one 3.8B local judge",
            "judge": {k: v for k, v in jinfo.items() if k != "responses"} | {"digest": digest, "model_key": judge.model,
                                                                          "reply_counts": texts},
-           "auroc": {"J-local": judge_block | {"headline_ci": {"lo": ci.mean.lo, "hi": ci.mean.hi}},
-                     **{arm: auroc_block(hgb[arm], runs, cfg) for arm in HGB_ARMS},
+           "excluded_pairs": sorted(map(list, excl)),
+           "auroc": {"J-local": judge_block | {"headline_ci": ci},
+                     **{arm: auroc_block(hgb[arm], runs, cfg, excl) for arm in HGB_ARMS},
                      "ESN-src": {"headline_per_fit_draw": aur.tolist(), "headline_median": esn_median,
                                  "headline_min": float(aur.min()), "headline_max": float(aur.max()),
                                  "per_class_median": {c: float(np.median([b["per_class"][c] for b in esn_blocks]))
                                                       for c in head}}},
            "labels": {"MS-raw": "post hoc"},
-           "D": D, "J-1": j1, "J-2": j2, "cost_latency": cost}
+           "D": D, "J-1": j1, "J-2": j2, "sensitivity_missing_as_0": sensitivity, "cost_latency": cost}
     OUT.write_text(json.dumps(_clean(out), indent=2, default=_json_default))
     ok = all(v["ok"] for v in checks.values())
-    print(f"J-local headline AUROC {judge_block['headline']:.3f} [{ci.mean.lo:.3f}, {ci.mean.hi:.3f}]; "
+    print(f"J-local headline AUROC {judge_block['headline']:.3f} [{ci['lo']:.3f}, {ci['hi']:.3f}]; "
           f"ESN-src median {esn_median:.3f}; D {D['point']:+.3f} [{D['lo']:+.3f}, {D['hi']:+.3f}]")
     print(f"J-1 {j1['outcome']}; J-2 {j2['outcome']} (judge mean FA {j2['judge_mean_fa']:.3f}); checks ok: {ok}")
     print(f"wrote {OUT}")

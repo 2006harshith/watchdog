@@ -14,13 +14,13 @@ test-side sampling only.
 import math
 import time
 from collections.abc import Callable, Mapping, Sequence
+from dataclasses import replace
 
 import numpy as np
 import pandas as pd
 
 from watchdog_agent.evaluation import (
     _rows_by_group,
-    matched_step_auroc,
     prefix_eval_set,
 )
 from watchdog_agent.experiments.e2_diagnostics import restrict_classes
@@ -94,24 +94,77 @@ def judge_scores(template: str, runs: pd.DataFrame, judge, cache: JudgeCache, cf
 # ---------------------------------------------------------------- AUROC and D
 
 
-def auroc_block(scores: Scores, runs: pd.DataFrame, cfg: dict) -> dict:
+Excluded = frozenset  # of (uid, t): pairs dropped from that checkpoint's set for every scorer
+
+
+def eval_sets(runs: pd.DataFrame, checkpoints: Sequence[int], exclude: Excluded = frozenset()) -> dict:
+    """prefix_eval_set per checkpoint, minus the excluded (uid, t) pairs (decisions.md 2026-10-28)."""
+    out = {}
+    for t in checkpoints:
+        s = prefix_eval_set(runs, t)
+        keep = np.array([(u, t) not in exclude for u in s.uids], dtype=bool)
+        y = s.y[keep]
+        # dataclasses.replace: a copy of the frozen CheckpointSet with these fields swapped in.
+        out[t] = replace(s, uids=[u for u, k in zip(s.uids, keep) if k], y=y, task_groups=s.task_groups[keep],
+                         n_pos=int(y.sum()), n_neg=int((1 - y).sum()))
+    return out
+
+
+def _arrays(scores: Scores, sets: dict) -> dict:
+    return {t: np.array([scores[u][t] for u in s.uids], dtype=float) for t, s in sets.items()}
+
+
+def auroc_block(scores: Scores, runs: pd.DataFrame, cfg: dict, exclude: Excluded = frozenset()) -> dict:
     report, head = cfg["checkpoints"]["report"], cfg["classes"]["headline"]
-    h = matched_step_auroc(scores, restrict_classes(runs, head), report)
-    return {"headline": h.mean, "per_t": {str(t): v for t, v in h.per_checkpoint.items()},
-            "per_class": {c: matched_step_auroc(scores, restrict_classes(runs, [c]), report).mean for c in head}}
+
+    def mean_auroc(sub):
+        sets = eval_sets(sub, report, exclude)
+        s = _arrays(scores, sets)
+        per = {t: auroc(sets[t].y, s[t]) for t in sets}
+        return float(np.mean(list(per.values()))), per
+
+    h, per_t = mean_auroc(restrict_classes(runs, head))
+    return {"headline": h, "per_t": {str(t): v for t, v in per_t.items()},
+            "per_class": {c: mean_auroc(restrict_classes(runs, [c]))[0] for c in head}}
 
 
-def paired_median_diff(draws: Sequence[Scores], ref: Scores, runs: pd.DataFrame, checkpoints: Sequence[int],
-                       n: int, seed: int) -> dict:
-    """median_j (AUROC_j - AUROC_ref), each AUROC the mean over checkpoints, with a paired task-group
-    cluster-bootstrap 95% CI. The resampling is evaluation._cluster_bootstrap's, call for call: one
-    group draw per replicate shared by every checkpoint, every fit draw and the reference."""
-    sets = {t: prefix_eval_set(runs, t) for t in checkpoints}
-    s_ref = {t: np.array([ref[u][t] for u in s.uids], dtype=float) for t, s in sets.items()}
-    s_d = [{t: np.array([d[u][t] for u in s.uids], dtype=float) for t, s in sets.items()} for d in draws]
+def _cluster_bootstrap(sets: dict, stat: Callable[[dict], float], n: int, seed: int) -> tuple[list, int]:
+    """evaluation._cluster_bootstrap's resampling, call for call: one task-group draw per replicate,
+    shared by every checkpoint and every scorer; one-class replicates skipped and counted."""
     groups = sorted({g for s in sets.values() for g in s.task_groups})
     group_index = {g: k for k, g in enumerate(groups)}
     rows = {t: _rows_by_group(s, group_index) for t, s in sets.items()}
+    rng = np.random.default_rng(seed)
+    reps, skipped = [], 0
+    for _ in range(n):
+        picked = rng.integers(0, len(groups), size=len(groups))
+        idx = {t: np.concatenate([rows[t][k] for k in picked]) for t in sets}
+        if any(np.unique(sets[t].y[idx[t]]).size < 2 for t in sets):
+            skipped += 1
+            continue
+        reps.append(stat(idx))
+    if skipped > MAX_SKIPPED_FRACTION * n:
+        raise ValueError(f"{skipped}/{n} replicates had a one-class checkpoint")
+    return reps, skipped
+
+
+def mean_auroc_ci(scores: Scores, runs: pd.DataFrame, checkpoints: Sequence[int], n: int, seed: int,
+                  exclude: Excluded = frozenset()) -> dict:
+    """matched_step_cluster_ci's mean interval, on the (possibly reduced) checkpoint sets."""
+    sets = eval_sets(runs, checkpoints, exclude)
+    s = _arrays(scores, sets)
+    reps, skipped = _cluster_bootstrap(sets, lambda idx: float(np.mean([auroc(sets[t].y[idx[t]], s[t][idx[t]])
+                                                                        for t in sets])), n, seed)
+    lo, hi = np.percentile(reps, [2.5, 97.5])
+    return {"lo": float(lo), "hi": float(hi), "n_skipped": skipped}
+
+
+def paired_median_diff(draws: Sequence[Scores], ref: Scores, runs: pd.DataFrame, checkpoints: Sequence[int],
+                       n: int, seed: int, exclude: Excluded = frozenset()) -> dict:
+    """median_j (AUROC_j - AUROC_ref), each AUROC the mean over checkpoints, with a paired task-group
+    cluster-bootstrap 95% CI: one group draw per replicate shared by every checkpoint, fit draw and ref."""
+    sets = eval_sets(runs, checkpoints, exclude)
+    s_ref, s_d = _arrays(ref, sets), [_arrays(d, sets) for d in draws]
 
     def stat(idx: dict) -> tuple[float, np.ndarray]:
         y = {t: sets[t].y[idx[t]] for t in sets}
@@ -120,19 +173,10 @@ def paired_median_diff(draws: Sequence[Scores], ref: Scores, runs: pd.DataFrame,
         return float(np.median(diffs)), diffs
 
     point, per_draw = stat({t: np.arange(len(s.uids)) for t, s in sets.items()})
-    rng = np.random.default_rng(seed)  # the same Generator calls as _cluster_bootstrap
-    reps, skipped = [], 0
-    for _ in range(n):
-        picked = rng.integers(0, len(groups), size=len(groups))
-        idx = {t: np.concatenate([rows[t][k] for k in picked]) for t in sets}
-        if any(np.unique(sets[t].y[idx[t]]).size < 2 for t in sets):
-            skipped += 1
-            continue
-        reps.append(stat(idx)[0])
-    if skipped > MAX_SKIPPED_FRACTION * n:
-        raise ValueError(f"{skipped}/{n} replicates had a one-class checkpoint")
+    reps, skipped = _cluster_bootstrap(sets, lambda idx: stat(idx)[0], n, seed)
     lo, hi = np.percentile(reps, [2.5, 97.5])
     return {"point": point, "lo": float(lo), "hi": float(hi), "n_skipped": skipped, "B": n, "seed": seed,
+            "excluded_pairs": sorted(map(list, exclude)),
             "per_draw_diff": per_draw.tolist(), "share_draws_gt_0": float((per_draw > 0).mean())}
 
 
@@ -223,12 +267,27 @@ def cpu_per_step(fn: Callable[[], object], steps: int) -> dict:
     return {"cpu_s_total": cpu, "steps": steps, "cpu_ms_per_step": 1000 * cpu / steps if steps else math.nan}
 
 
-def require_complete(scores: Scores, runs: pd.DataFrame, cfg: dict) -> None:
-    """Every healthy and headline run needs a judge score at every scored step it has. A missing score
-    would drop a run from one scorer's AUROC set (unpairing D) and break a calibration draw; how to
-    handle it was not pre-registered, so the run stops and reports instead of improvising."""
-    missing = [(r["uid"], t) for _, r in restrict_classes(runs, cfg["classes"]["headline"]).iterrows()
-               for t in cfg["checkpoints"]["scored"] if r["T"] >= t + 1 and not np.isfinite(scores[r["uid"]][t])]
-    if missing:
-        raise RunStopped(f"{len(missing)} judge scores missing (parse failures), e.g. {missing[:3]}; "
-                         "the handling of missing scores needs an owner decision")
+def missing_scores(scores: Scores, runs: pd.DataFrame, cfg: dict) -> list[tuple[str, int, bool]]:
+    """(uid, t, healthy) for every healthy or headline run with a scored step t but no judge score."""
+    return [(r["uid"], t, pd.isna(r["failure_class"]))
+            for _, r in restrict_classes(runs, cfg["classes"]["headline"]).iterrows()
+            for t in cfg["checkpoints"]["scored"] if r["T"] >= t + 1 and not np.isfinite(scores[r["uid"]][t])]
+
+
+def missing_policy(missing: list[tuple[str, int, bool]]) -> Excluded:
+    """decisions.md 2026-10-28 (post hoc, option 1): a failed run's missing (uid, t) is dropped from that
+    checkpoint's set for every scorer. A missing score on a healthy run would break a calibration draw
+    and was not decided, so it still stops the run."""
+    healthy = [(u, t) for u, t, h in missing if h]
+    if healthy:
+        raise RunStopped(f"{len(healthy)} judge scores missing on healthy runs, e.g. {healthy[:3]}; "
+                         "not covered by the 2026-10-28 decision")
+    return frozenset((u, t) for u, t, _ in missing)
+
+
+def worst_case_fill(scores: Scores, missing: list[tuple[str, int, bool]]) -> dict:
+    """Sensitivity: a failed run's missing score set to 0, the judge's worst case."""
+    out = {u: np.array(s, dtype=float) for u, s in scores.items()}
+    for u, t, _ in missing:
+        out[u][t] = 0.0
+    return out

@@ -10,7 +10,11 @@ from test_e3 import RecordingESN, RecordingHGB, e3_run  # noqa: F401  (e3_run is
 from test_e4_dev import FakeJudge
 from test_judges import _run
 
-from watchdog_agent.evaluation import paired_matched_step_diff
+from watchdog_agent.evaluation import (
+    matched_step_auroc,
+    matched_step_cluster_ci,
+    paired_matched_step_diff,
+)
 from watchdog_agent.experiments.e2 import (
     build_training_set,
     feature_columns,
@@ -21,12 +25,17 @@ from watchdog_agent.experiments.e2_diagnostics import run_getter
 from watchdog_agent.experiments.e3 import _esn_src
 from watchdog_agent.experiments.e4 import (
     RunStopped,
+    auroc_block,
     check_digest,
+    eval_sets,
     judge_scores,
     max_abs_diff,
+    mean_auroc_ci,
+    missing_policy,
+    missing_scores,
     operating_point,
     paired_median_diff,
-    require_complete,
+    worst_case_fill,
 )
 from watchdog_agent.experiments.e4_dev import load_template
 from watchdog_agent.features import prefix_feature_table
@@ -145,7 +154,7 @@ def test_judge_scores_cover_healthy_and_headline_runs_only(tmp_path):
     assert np.isnan(scores[tc]).all()  # tool_cascade is not judged
     u = judged["uid"].iloc[0]
     assert np.isfinite(scores[u][[2, 3, 4]]).all() and np.isnan(scores[u][[0, 1]]).all()
-    require_complete(scores, runs, _cfg())  # does not raise
+    assert missing_scores(scores, runs, _cfg()) == []
 
 
 def test_judge_run_stops_on_a_changed_template_or_too_many_parse_failures(tmp_path):
@@ -156,12 +165,36 @@ def test_judge_run_stops_on_a_changed_template_or_too_many_parse_failures(tmp_pa
         judge_scores(TEMPLATE, runs, FakeJudge(bad_text="maybe"), JudgeCache(tmp_path / "b.jsonl"), _cfg(subset=0))
 
 
-def test_missing_scores_and_a_different_model_digest_stop_the_run():
+def test_a_failed_runs_missing_score_is_excluded_but_a_healthy_runs_stops_the_run():
     runs = _llama_runs()
     scores = {u: np.full(int(T), 5.0) for u, T in zip(runs["uid"], runs["T"])}
-    scores[runs["uid"].iloc[0]][3] = np.nan
-    with pytest.raises(RunStopped, match="missing"):
-        require_complete(scores, runs, _cfg())
+    failed = runs.loc[runs["failure_class"] == "looping", "uid"].iloc[0]
+    healthy = runs.loc[runs["failure_class"].isna(), "uid"].iloc[0]
+    scores[failed][4] = np.nan
+    missing = missing_scores(scores, runs, _cfg())
+    assert missing == [(failed, 4, False)] and missing_policy(missing) == frozenset({(failed, 4)})
+    assert worst_case_fill(scores, missing)[failed][4] == 0.0 and np.isnan(scores[failed][4])
+    scores[healthy][3] = np.nan
+    with pytest.raises(RunStopped, match="healthy"):
+        missing_policy(missing_scores(scores, runs, _cfg()))
+
+
+def test_exclusion_drops_a_pair_from_its_checkpoint_only_and_is_a_no_op_when_empty():
+    runs, scores = _runs()
+    s = scores(1.0)
+    cfg = {"checkpoints": {"report": [3, 4]}, "classes": {"headline": ["looping"]}}
+    assert auroc_block(s, runs, cfg)["headline"] == pytest.approx(matched_step_auroc(s, runs, [3, 4]).mean, abs=1e-15)
+    ci = matched_step_cluster_ci(s, runs, [3, 4], 300, seed=0).mean
+    ours = mean_auroc_ci(s, runs, [3, 4], 300, seed=0)
+    assert (ours["lo"], ours["hi"]) == pytest.approx((ci.lo, ci.hi), abs=1e-12)
+    u = runs.loc[runs["failure_class"].notna(), "uid"].iloc[0]
+    sets = eval_sets(runs, [3, 4], frozenset({(u, 4)}))
+    assert u in sets[3].uids and u not in sets[4].uids and sets[4].n_pos == eval_sets(runs, [4])[4].n_pos - 1
+    d = paired_median_diff([scores(0.5)], s, runs, [3, 4], 50, 0, exclude=frozenset({(u, 4)}))
+    assert d["excluded_pairs"] == [[u, 4]]
+
+
+def test_a_different_model_digest_stops_the_run():
     check_digest(E4["judge"]["digest"], E4)
     check_digest(E4["judge"]["digest"].removeprefix("sha256:"), E4)  # /api/tags reports the bare hex
     with pytest.raises(RunStopped, match="digest"):
