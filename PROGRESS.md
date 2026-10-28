@@ -526,6 +526,13 @@ Gemini: every table is reported, nothing is tested, and it is labelled descripti
   you to say? · answers: not yet given · NOT ANSWERED, owner override 2026-10-28 ("override it, go
   to step 2"). Overridden again 2026-10-28 to tag sp07-e4. Not owner-marked, not graded.
 
+- 2026-10-28 · SP8 · run-level label and estimand (src/watchdog_agent/organic.py) · Q1: why encode the
+  run-level label as tau = 0, what an AUROC at t = 3 then estimates, and why it is not like-for-like with
+  E2's 0.858? Q2: one way the strict rule mislabels in each direction, how you would notice, and why a
+  programmatic rule over a human or LLM judgement? Q3: how pooling both corpora could give a high AUROC
+  for the wrong reason, why the gate is cold-only, and what "task group = run" assumes? · answers: not
+  yet given · PENDING.
+
 ## Session log
 - 2026-10-28 · SP7 (close) · Write-up committed f3b6405; teach-back on D overridden a second time (NOT
   ANSWERED). Tag sp07-e4 · tests: pass (588, ruff clean) · next: SP8 spec from the chat Project.
