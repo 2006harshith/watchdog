@@ -97,3 +97,21 @@ lookup_hotel, search_catalog), same 4 failure classes. They share 11 of their ~2
   transfer on the four behaviour classes; API-level classes reported separately.
 - Family ↔ class mix: families don't share failure classes, so held-out-family results are reported
   per class.
+
+## SP8 organic corpus: organic_llama8b + organic_llama8b_cold (read by `organic.py` only)
+- What: 240 llama3.1:8b runs (120 per corpus) on the booking environment (flight/hotel/weather lookups,
+  a calculator, a final "grand total"), from the HF dataset itself; not collected on this machine.
+  load_episodes() keeps excluding them (D1). Licence: llama3.1:8b outputs, Llama 3.1 Community License +
+  AUP, as the other llama episodes.
+- Sampling: organic_llama8b temperature 0.9; organic_llama8b_cold temperature 0.2, n_nudges 0-3,
+  n_parallel 4. withhold_rate 0 everywhere. Logprobs on 100% of steps; real step latencies (2.7-10 s).
+- Label (strict, decisions.md 2026-10-28): HEALTHY iff the last synthesis step states
+  metadata.expected_total (a number within 0.5); else FAILED. 11/240 healthy: 1/120 (T = 0.9) and
+  10/120 (cold). The label is confounded with the corpus, so SP8's gate uses the cold corpus only.
+- Estimand: run-level ("will this run end wrong"), scored at matched steps; a failed run is a positive
+  at every checkpoint (tau = 0 encodes it); there is no onset.
+- Schema: the author's old step schema; tool_events parsed from "[name(args) -> result]" (2452/2457 tool
+  steps; 5 unparsed get no event); is_error = the step's error flag; tool latency absent (ENV NaN).
+- Task group = the run (236 distinct expected totals in 240 runs: random itineraries).
+- Not unseen tasks: the same booking environment as the source pool; what is new is organic vs injected
+  failure and the latency regime (llama source steps: 53-57% under 50 ms; here none).

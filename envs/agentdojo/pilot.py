@@ -17,10 +17,21 @@ import urllib.request
 from pathlib import Path
 
 import openai
-from agentdojo.agent_pipeline import AgentPipeline, InitQuery, SystemMessage, ToolsExecutionLoop, ToolsExecutor
+from agentdojo.agent_pipeline import (
+    AgentPipeline,
+    InitQuery,
+    SystemMessage,
+    ToolsExecutionLoop,
+    ToolsExecutor,
+)
 from agentdojo.agent_pipeline.agent_pipeline import load_system_message
 from agentdojo.agent_pipeline.errors import AbortAgentError
-from agentdojo.agent_pipeline.llms.local_llm import LocalLLM, _make_system_prompt, _parse_model_output, reformat_message
+from agentdojo.agent_pipeline.llms.local_llm import (
+    LocalLLM,
+    _make_system_prompt,
+    _parse_model_output,
+    reformat_message,
+)
 from agentdojo.agent_pipeline.llms.openai_llm import (
     OpenAILLM,
     _function_to_openai,
@@ -29,7 +40,10 @@ from agentdojo.agent_pipeline.llms.openai_llm import (
 )
 from agentdojo.functions_runtime import FunctionsRuntime
 from agentdojo.task_suite.load_suites import get_suites
-from agentdojo.task_suite.task_suite import functions_stack_trace_from_messages, model_output_from_messages
+from agentdojo.task_suite.task_suite import (
+    functions_stack_trace_from_messages,
+    model_output_from_messages,
+)
 from agentdojo.types import get_text_content_as_str
 
 BENCHMARK = "v1.2.2"
@@ -217,7 +231,7 @@ def main() -> None:
                 continue
             try:
                 rec = run_one(suites[suite_name], task_id, seed, client)
-            except Exception as e:  # a harness crash is excluded and counted, never relabelled
+            except Exception as e:  # noqa: BLE001  (any harness crash is excluded and counted, never relabelled)
                 rec = {"suite": suite_name, "user_task": task_id, "seed": seed, "crash": f"{type(e).__name__}: {e}"}
             with OUT.open("a", encoding="utf-8") as f:
                 f.write(json.dumps(rec | {"meta": meta}, default=str) + "\n")
