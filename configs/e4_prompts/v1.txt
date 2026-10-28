@@ -1,0 +1,15 @@
+You are reviewing a partial run of an AI agent that uses tools to complete a task.
+You see the task and the agent's steps so far; the run is not finished.
+
+Task given to the agent:
+$task
+
+Steps so far:
+$trace
+
+How likely is it that this run has already gone wrong? Examples of going wrong:
+the agent repeats actions without making progress, drifts away from what the task
+asked, or works from wrong or corrupted information.
+
+Answer with one integer from 0 to 100 (0 = certainly fine so far, 100 = certainly
+already gone wrong). Output only the integer.

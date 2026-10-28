@@ -1,0 +1,29 @@
+# SP7 Step 2: judge prompt development on qwen SOURCE runs only (no llama run is ever read here).
+# Design: docs/decisions.md 2026-10-28 (SP7). Iteration rule, fixed before the first call: at most
+# 3 template versions; revise only if parse failures > 2% or the output is visibly off-format; freeze
+# the version with the highest qwen headline AUROC (mean t = 3, 4) among those with <= 2% failures.
+family: qwen
+dev_set:
+  seed: 0
+  healthy: 30
+  per_class: 10                     # each headline class
+  classes: [looping, goal_drift, context_corruption]
+  min_T: 5                          # a step 4 exists, so every run is scored at t = 2, 3, 4
+  max_tau: 3                        # positives count at t = 3 and 4 (tau <= t)
+checkpoints: {scored: [2, 3, 4], report: [3, 4]}
+judge:
+  name: J-api
+  model: claude-haiku-5-5
+  max_tokens: 16
+  thinking: disabled
+  samples: 3
+price:                              # read 2026-10-28; prompts up to 100K tokens
+  url: https://platform.claude.com/docs/en/about-claude/pricing
+  read_on: "2026-10-28"
+  input_usd_per_mtok: 0.10
+  output_usd_per_mtok: 0.50
+budget_usd: 2.0                     # hard stop over all dev calls, from reported usage
+max_parse_failure_rate: 0.02
+max_versions: 3
+cache: results/e4_dev_cache.jsonl
+prompts_dir: configs/e4_prompts

@@ -25,3 +25,7 @@ mlruns/
 Thumbs.db
 .vscode/
 .idea/
+
+# SP7 judge response caches: keys, prompt hashes, integer replies, tokens, latency; no trace text.
+!results/e4_dev_cache.jsonl
+!results/e4_judge_cache.jsonl
