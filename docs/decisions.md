@@ -508,3 +508,5 @@ Tag sp06-e3 is NOT applied: SP6's done criteria require the threshold-logic teac
   judge on a failed run), with no pair dropped. J-2 needs no rule: the run is failed, so it is never a
   calibration run nor in FA, and a missing step cannot alarm. The monitor reproduction checks keep the
   full E2 / D-6 sets. A missing score on a healthy run would still stop the run (not covered here).
+- 2026-10-28: SP7 write-up docs/sp7_e4_result.md. No gate; D +0.132 [+0.045, +0.206]; J-1 FAILS (expected
+  HOLD), J-2 HOLDS, both unedited. Tag sp07-e4 not applied: the SP7 teach-back on D is NOT ANSWERED.
