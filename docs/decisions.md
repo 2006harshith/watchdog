@@ -521,3 +521,10 @@ Tag sp06-e3 is NOT applied: SP6's done criteria require the threshold-logic teac
   This is a spec change made without the chat Project; the SP8 gate, c, K and O-1..O-4 are re-derived
   for the new data in a new Step 0 report before configs/e5.yaml is written.
 - AgentDojo pilot artefacts stay (envs/agentdojo, data/agentdojo_pilot); its 5 pilot tasks are irrelevant now.
+- 2026-10-28, owner ("strict rule, cold-corpus gate, drop O-2, go"), before any SP8 monitor score:
+  - Label (strict): a run is HEALTHY iff its final synthesis step's text states metadata.expected_total
+    (a number within 0.5 of it); otherwise FAILED. Counts on the final texts: 11/240 healthy
+    (organic_llama8b 1/120, organic_llama8b_cold 10/120).
+  - Gate on organic_llama8b_cold only (10 healthy vs 110 failed), c = 0.5, stated as low-powered;
+    organic_llama8b (T = 0.9) is descriptive only, because the label is confounded with the corpus.
+  - O-2 dropped: fewer than 20 healthy runs exist, so E3's n = 20 operating point cannot be run.
