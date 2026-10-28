@@ -1,6 +1,7 @@
 import copy
 from pathlib import Path
 
+import numpy as np
 import pandas as pd
 import pytest
 import yaml
@@ -282,3 +283,14 @@ def test_group_counts_sum_to_the_pooled_counts_of_every_draw_row(e3_run):
     assert (summed.loc[pooled.index].to_numpy() == pooled.to_numpy()).all()
     # A task group sits in one fold only (folds are by task group).
     assert (groups[groups["n"] > 0].groupby(["family", "task_group"])["fold"].nunique() == 1).all()
+
+
+def test_post_onset_equals_any_alarm_for_running_max_scores():
+    # D-13c: ESN arms score a running max, so a run above theta before tau is still above it at tau..t.
+    runs, scores = _alarm_runs()
+    rm = {u: np.fmax.accumulate(np.asarray(s, dtype=float)) for u, s in scores.items()}
+    out = group_counts(rm, 0.5, runs, 4, ["looping"])
+    np.testing.assert_array_equal(out["n_pos_alarm_post"], out["n_pos_alarm"])
+    # Per-step scores (HGB arms) can drop back below theta: p_pre alarms but is not post-onset.
+    per_step = group_counts(scores, 0.5, runs, 4, ["looping"])
+    assert per_step["n_pos_alarm_post"].sum() < per_step["n_pos_alarm"].sum()

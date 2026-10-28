@@ -9,9 +9,13 @@ from watchdog_agent.experiments.e3 import group_frame
 from watchdog_agent.experiments.e3_diagnostics import (
     FA,
     TPR,
+    TPR_FIRST,
+    TPR_POST,
     FamilyCounts,
     bootstrap_weights,
     conformal_alpha_eff,
+    d13a_reading,
+    paired,
     plugin_expected_fa,
     run_diagnostics,
     simulate_fa,
@@ -58,7 +62,10 @@ def _diag_cfg():
             "d10": {"reps": 2000, "seed": 0, "m": [3, 4], "alphas": [0.5], "distributions": ["uniform"],
                     "tolerance": 0.05, "other_distribution_tolerance": 0.05},
             "d11": {"n": 8, "subsets": 50, "subset_size": 2, "seed": 0},
-            "d12": {"B": 40, "seed": 0}}
+            "d12": {"B": 40, "seed": 0},
+            "d13": {"a": {"arms": ["MS-raw", "ESN-src", "TL-raw"], "n": [4, 8, 14], "min_healthy": 1,
+                          "nominal_band": [0.03, 0.2], "high_if_pooled_gt": 0.12, "expect_offsetting_at_n": 8},
+                    "b": {"fold": 1}, "c": {"e2": {"a": "TL-pct", "b": "ESN-src", "n": 8}}}}
 
 
 @pytest.fixture(scope="module")
@@ -121,3 +128,65 @@ def test_a_group_in_two_folds_is_rejected():
                           "undefined": [False], "m": [4]})
     with pytest.raises(ValueError, match="more than one fold"):
         FamilyCounts(groups, draws, [3])
+
+
+SPEC_13A = {"nominal_band": [0.03, 0.20], "high_if_pooled_gt": 0.12}
+
+
+@pytest.mark.parametrize("pooled, fas, reading", [
+    (0.10, [], "UNRATED"),
+    (0.13, [0.10, 0.10], "HIGH"),  # pooled above 0.12 wins over the per-fold band
+    (0.12, [0.03, 0.20], "NOMINAL"),  # both band edges and the pooled cut are inclusive
+    (0.10, [0.02, 0.15], "OFFSETTING"),  # a fold below the band
+    (0.10, [0.21, 0.05], "OFFSETTING"),  # a fold above it
+])
+def test_d13a_reading_rule(pooled, fas, reading):
+    assert d13a_reading(pooled, fas, SPEC_13A) == reading
+
+
+def test_d13a_pooled_fa_is_the_mean_over_draws_when_every_draw_tests_the_same_runs(diag):
+    groups, frame, out = diag
+    llama = FamilyCounts(groups[groups["family"] == "llama"], frame[frame["family"] == "llama"], [3, 4])
+    ones = llama.ones()
+    for row in out["families"]["llama"]["d13a"]["rows"]:
+        c = llama.cell(row["arm"], row["n"], "conformal", 0.5)
+        for t, v in row["per_t"].items():
+            den = c.counts[int(t)]["n_healthy"] @ ones[int(t)]
+            if v["pooled_fa"] is None or len(set(den)) != 1:
+                continue
+            assert v["pooled_fa"] == pytest.approx(np.nanmean(llama.ratio(c, int(t), FA, ones)), abs=1e-12)
+            assert sum(f["n_test_healthy"] for f in v["folds"]) == den[0]
+
+
+def test_d13b_counts_partition_fold_and_family(diag):
+    _, _, out = diag
+    for fam in out["families"].values():
+        for v in fam["d13b"]["per_t"].values():
+            assert sum(v["healthy_per_task_group"].values()) == v["fold_total"] <= v["all_folds_total"]
+            assert all(fam["fold_of_task_group"][g] == fam["d13b"]["fold"] for g in v["healthy_per_task_group"])
+
+
+def test_d13c_tpr_orderings_and_esn_identity(diag):
+    groups, frame, out = diag
+    for family, fam in out["families"].items():
+        ch = fam["d13c"]["checks"]
+        assert ch["first_gt_post_entries"] == 0 and ch["post_gt_alarm_entries"] == 0
+        assert ch["esn_post_ne_alarm_entries"] == 0
+        fc = FamilyCounts(groups[groups["family"] == family], frame[frame["family"] == family], [3, 4])
+        c, ones = fc.cell("TL-pct", 8, "conformal", 0.5), fc.ones()
+        first, post, anyt = (fc.headline(c, f, ones) for f in (TPR_FIRST, TPR_POST, TPR))
+        ok = np.isfinite(anyt)
+        assert (first[ok] <= post[ok] + 1e-12).all() and (post[ok] <= anyt[ok] + 1e-12).all()
+
+
+def test_d13c_e2_restatement_keeps_the_budget_and_matches_a_direct_paired_median(diag):
+    groups, frame, out = diag
+    e2 = out["families"]["llama"]["d13c"]["e2_tpr_first"]
+    assert e2["n"] == 8  # the budget, not the number of draws
+    llama = FamilyCounts(groups[groups["family"] == "llama"], frame[frame["family"] == "llama"], [3, 4])
+    tl, src = (llama.cell(a, 8, "conformal", 0.5) for a in ("TL-pct", "ESN-src"))
+    d = paired(llama, tl, src, TPR_FIRST, llama.ones())
+    assert e2["paired_diff"]["n"] == np.isfinite(d).sum()
+    if e2["paired_diff"]["median"] is not None:
+        assert e2["paired_diff"]["median"] == pytest.approx(np.nanmedian(d), abs=1e-12)
+        assert e2["ci"]["lo"] <= e2["ci"]["hi"]

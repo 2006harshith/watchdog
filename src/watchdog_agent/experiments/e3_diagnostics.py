@@ -1,7 +1,7 @@
-"""SP6 close-out diagnostics D-8..D-12. POST HOC.
+"""SP6 close-out diagnostics D-8..D-13. POST HOC.
 
-Design and expected outcomes: docs/decisions.md, "2026-10-27 — SP6 close-out diagnostics", committed
-before the first run. Input: E3's per-(cell, draw, fold, task group) alarm counts
+Design and expected outcomes: docs/decisions.md, "2026-10-27 — SP6 close-out diagnostics" (D-8..D-12)
+and "2026-10-28 — SP6 close-out part 2, D-13", each committed before its first run. Input: E3's per-(cell, draw, fold, task group) alarm counts
 (results/e3_group_counts.parquet), so nothing is refitted or rescored here.
 
 Every statistic is a function of task-group weights w: w = 1 gives E3's own numbers, a fold mask gives
@@ -21,7 +21,9 @@ CELL_KEYS = ["arm", "n", "rule", "alpha"]
 FA = ("n_healthy_alarm", "n_healthy")
 TPR = ("n_pos_alarm", "n_pos")
 TPR_POST = ("n_pos_alarm_post", "n_pos")
-COUNT_FIELDS = ("n_healthy", "n_healthy_alarm", "n_pos", "n_pos_alarm", "n_pos_alarm_post")
+TPR_FIRST = ("n_pos_alarm_first_post", "n_pos")  # first alarm at a step in tau..t
+COUNT_FIELDS = ("n_healthy", "n_healthy_alarm", "n_pos", "n_pos_alarm", "n_pos_alarm_pre_tau", "n_pos_alarm_post")
+ESN_ARMS = ("ESN-src", "ESN-refit")
 
 
 @dataclass
@@ -69,6 +71,7 @@ class FamilyCounts:
                     # np.add.at: unbuffered a[i, j] += v, so repeated (draw, group) pairs (one per fold) add up.
                     np.add.at(a, (dpos, gp), st[f].to_numpy(float))
                     counts[t][f] = a
+                counts[t]["n_pos_alarm_first_post"] = counts[t]["n_pos_alarm"] - counts[t]["n_pos_alarm_pre_tau"]
                 dt = d[d["t"] == t].set_index("draw").reindex(ids)
                 undefined[t] = dt["undefined"].fillna(True).to_numpy(bool)
                 m[t] = dt["m"].to_numpy(float)
@@ -250,7 +253,7 @@ def run_diagnostics(groups: pd.DataFrame, draws: pd.DataFrame, e3: dict, cfg: di
     """evaluate_expectations=False skips the verdicts, whose n values (10, 20, 40) are E3's own."""
     report, alpha = e3_cfg["checkpoints"]["report"], float(cfg["alpha"])
     families = [e3_cfg["families"]["primary"], *e3_cfg["families"]["descriptive"]]
-    out: dict = {"what": "SP6 close-out diagnostics D-8..D-12 on E3's task-group counts", "post_hoc": True,
+    out: dict = {"what": "SP6 close-out diagnostics D-8..D-13 on E3's task-group counts", "post_hoc": True,
                  "caveat": CAVEAT, "config": cfg, "families": {}}
     out["d10_simulation"] = d10_simulation(cfg["d10"])
     for family in families:
@@ -313,6 +316,9 @@ def family_diagnostics(fc: FamilyCounts, g: pd.DataFrame, e3_fam: dict, cfg: dic
     out["d10_cells"] = d10_cells(fc, ones, common)
     out["d11"] = d11(fc, cfg["d11"], alpha, ones, has_refit="ESN-refit" in arms)
     out["d12"] = d12(fc, arms, ns, alpha, cfg, drop, has_refit="ESN-refit" in arms)
+    out["d13a"] = d13a(fc, cfg["d13"]["a"], alpha, ones)
+    out["d13b"] = d13b(fc, g, cfg["d13"]["b"])
+    out["d13c"] = d13c(fc, cfg["d13"]["c"], cfg["d12"], alpha, ones)
     return out
 
 
@@ -336,27 +342,37 @@ def d8(fc, arms, ns, alpha, drop, ones, common, e3_fam) -> dict:
     return {"dropped_folds": {str(t): v for t, v in drop.items()}, "rule": "conformal", "alpha": alpha, "rows": rows}
 
 
+def _folds(fc: FamilyCounts) -> list[int]:
+    return sorted(set(fc.fold_of[fc.fold_of >= 0].tolist()))
+
+
+def fold_rows(fc: FamilyCounts, c: Cell, t: int, alpha: float, ones: dict) -> list[dict]:
+    """Per fold at t: FA pooled over draws, healthy test runs, excess alarms per draw over alpha."""
+    ok = ~c.undefined[t]
+    rows = []
+    for f in _folds(fc):
+        wf = fc.only_folds(ones, [f])
+        alarms = float((c.counts[t]["n_healthy_alarm"][ok] @ wf[t]).sum())
+        healthy = float((c.counts[t]["n_healthy"][ok] @ wf[t]).sum())
+        rows.append({"fold": f, "fa": _j(fc.pooled_over_draws(c, t, FA, wf)),
+                     "n_test_healthy": int((c.counts[t]["n_healthy"] @ wf[t]).max()),
+                     "excess_alarms_per_draw": (alarms - alpha * healthy) / max(1, int(ok.sum()))})
+    return rows
+
+
 def d9(fc, arms, spec, alpha, ones) -> dict:
     rows = []
-    folds = sorted(set(fc.fold_of[fc.fold_of >= 0].tolist()))
+    folds = _folds(fc)
     rest = fc.only_folds(ones, [f for f in folds if f != spec["fold"]])
     for arm in arms:
         for n in spec["n"]:
             c = fc.cell(arm, n, "conformal", alpha)
             per_t = {}
             for t in fc.report:
-                ok = ~c.undefined[t]
-                fold_rows = []
-                for f in folds:
-                    wf = fc.only_folds(ones, [f])
-                    alarms = float((c.counts[t]["n_healthy_alarm"][ok] @ wf[t]).sum())
-                    healthy = float((c.counts[t]["n_healthy"][ok] @ wf[t]).sum())
-                    fold_rows.append({"fold": f, "fa": _j(fc.pooled_over_draws(c, t, FA, wf)),
-                                      "n_test_healthy": int((c.counts[t]["n_healthy"] @ wf[t]).max()),
-                                      "excess_alarms_per_draw": (alarms - alpha * healthy) / max(1, int(ok.sum()))})
-                total = sum(r["excess_alarms_per_draw"] for r in fold_rows)
-                f1 = next(r for r in fold_rows if r["fold"] == spec["fold"])
-                per_t[str(t)] = {"folds": fold_rows, "fold_tested": f1["n_test_healthy"] > 0, "fold_fa": f1["fa"],
+                folds_t = fold_rows(fc, c, t, alpha, ones)
+                total = sum(r["excess_alarms_per_draw"] for r in folds_t)
+                f1 = next(r for r in folds_t if r["fold"] == spec["fold"])
+                per_t[str(t)] = {"folds": folds_t, "fold_tested": f1["n_test_healthy"] > 0, "fold_fa": f1["fa"],
                                  "rest_fa": _j(fc.pooled_over_draws(c, t, FA, rest)),
                                  "fold_share_of_excess": _j(f1["excess_alarms_per_draw"] / total) if total else None}
             tested = [v for v in per_t.values() if v["fold_tested"]]
@@ -466,7 +482,98 @@ def d12(fc, arms, ns, alpha, cfg, drop, has_refit) -> dict:
                       for name, fn in stats.items()}}
 
 
-# ---------------------------------------------------------------- expectations (docs/decisions.md 2026-10-27)
+def d13a_reading(pooled: float | None, rated_fas: Sequence[float], spec: dict) -> str:
+    """decisions.md 2026-10-28: HIGH / NOMINAL / OFFSETTING over the rated folds, UNRATED if none."""
+    lo, hi = spec["nominal_band"]
+    if not rated_fas:
+        return "UNRATED"
+    if pooled > spec["high_if_pooled_gt"]:
+        return "HIGH"
+    return "NOMINAL" if all(lo <= x <= hi for x in rated_fas) else "OFFSETTING"
+
+
+def d13a(fc, spec, alpha, ones) -> dict:
+    rows = []
+    for arm in spec["arms"]:
+        for n in spec["n"]:
+            if (arm, n, "conformal", alpha) not in fc.cells:
+                continue
+            c = fc.cell(arm, n, "conformal", alpha)
+            per_t = {}
+            for t in fc.report:
+                folds = fold_rows(fc, c, t, alpha, ones)
+                rated = [r for r in folds if r["n_test_healthy"] >= spec["min_healthy"]]
+                pooled = _j(fc.pooled_over_draws(c, t, FA, ones))
+                per_t[str(t)] = {"folds": folds, "pooled_fa": pooled, "rated_folds": [r["fold"] for r in rated],
+                                 "reading": d13a_reading(pooled, [r["fa"] for r in rated], spec)}
+            m = {str(t): [int(np.nanmin(c.m[t])), int(np.nanmax(c.m[t]))] if np.isfinite(c.m[t]).any() else None
+                 for t in fc.report}
+            rows.append({"arm": arm, "n": n, "m": m, "per_t": per_t})
+    return {"rule": "conformal", "alpha": alpha, "spec": spec,
+            "caveat": "per-fold FA carries test-sampling noise that pooling over draws does not remove",
+            "rows": rows}
+
+
+def d13b(fc, g, spec) -> dict:
+    sub = g[g["n"] > 0]
+    out = {"fold": spec["fold"], "per_t": {}}
+    for t in fc.report:
+        # A group's healthy test runs at t are a property of the data, not of the cell or draw.
+        per_group = sub[sub["t"] == t].groupby("task_group")["n_healthy"].agg(["min", "max"])
+        if (per_group["min"] != per_group["max"]).any():
+            raise ValueError(f"healthy test runs per task group differ across cells at t={t}")
+        healthy = per_group["max"].astype(int)
+        in_fold = [tg for tg in healthy.index if fc.fold_of[fc.task_groups.index(tg)] == spec["fold"]]
+        fold = healthy[in_fold].sort_values(ascending=False, kind="stable")
+        out["per_t"][str(t)] = {"healthy_per_task_group": {tg: int(v) for tg, v in fold.items() if v > 0},
+                                "fold_total": int(fold.sum()), "all_folds_total": int(healthy.sum())}
+    return out
+
+
+def d13c(fc, spec, d12_spec, alpha, ones) -> dict:
+    first_gt_post = post_gt_alarm = esn_post_ne_alarm = hgb_post_gt_first = 0
+    for (arm, _, _, _), c in fc.cells.items():
+        for t in fc.report:
+            k = c.counts[t]
+            first_gt_post += int((k["n_pos_alarm_first_post"] > k["n_pos_alarm_post"]).sum())
+            post_gt_alarm += int((k["n_pos_alarm_post"] > k["n_pos_alarm"]).sum())
+            if arm in ESN_ARMS:
+                esn_post_ne_alarm += int((k["n_pos_alarm_post"] != k["n_pos_alarm"]).sum())
+            else:
+                hgb_post_gt_first += int((k["n_pos_alarm_post"] > k["n_pos_alarm_first_post"]).sum())
+    cells: dict = {}
+    for (arm, n, rule, a), c in sorted(fc.cells.items()):
+        if rule == "conformal" and a == alpha:
+            cells.setdefault(arm, {})[str(n)] = {
+                name: _j(median_over_draws(fc.headline(c, f, ones)))
+                for name, f in (("tpr_median", TPR), ("tpr_post_median", TPR_POST), ("tpr_first_median", TPR_FIRST))}
+    e2 = spec["e2"]
+    tl, src = fc.cell(e2["a"], e2["n"], "conformal", alpha), fc.cell(e2["b"], e2["n"], "conformal", alpha)
+    # Same B, seed and generator as D-12, so this interval uses D-12's resamples.
+    M = bootstrap_weights(len(fc.task_groups), d12_spec["B"], d12_spec["seed"])
+    boot = median_over_draws(paired(fc, tl, src, TPR_FIRST, {t: M for t in fc.report}))
+    return {
+        "definitions": {
+            "early_alarm_rate": "per (cell, t, draw), pooled over folds: n_early / n_pos_alarm. n_pos_alarm = positives "
+                                "(headline classes, tau <= t, a step t) whose first alarm is <= t; n_early = those whose "
+                                "first alarm is < tau. Denominator: alarmed positives, not all positives. NaN when "
+                                "n_pos_alarm = 0 at some t; such draws leave E3's headline median",
+            "tpr_post": "positives with some score > theta at a step in tau..t / all positives (alarm state at >= tau, not "
+                        "first crossing >= tau). ESN arms score a running max, so for them tpr_post = TPR by construction",
+            "tpr_first": "(n_pos_alarm - n_pos_alarm_pre_tau) / n_pos: first alarm at a step in tau..t; same meaning for "
+                         "every arm",
+        },
+        "checks": {"first_gt_post_entries": first_gt_post, "post_gt_alarm_entries": post_gt_alarm,
+                   "esn_post_ne_alarm_entries": esn_post_ne_alarm, "hgb_post_gt_first_entries": hgb_post_gt_first},
+        "cells": cells,
+        # The summary nests: its own "n" counts draws and must not overwrite the budget n.
+        "e2_tpr_first": {"a": e2["a"], "b": e2["b"], "n": e2["n"], "B": d12_spec["B"], "seed": d12_spec["seed"],
+                         "paired_diff": _summary(paired(fc, tl, src, TPR_FIRST, ones)),
+                         "ci": percentile_ci(np.asarray(boot, dtype=float))},
+    }
+
+
+# ---------------------------------------------------------------- expectations (docs/decisions.md 2026-10-27, 2026-10-28)
 
 
 def _verdict(checks: list) -> str:
@@ -535,4 +642,16 @@ def evaluate(out: dict, cfg: dict, alpha: float) -> dict:
             "ok": st[f"MS-raw.n{n}.conformal.fa_mean"]["lo"] <= 0.10 <= st[f"MS-raw.n{n}.conformal.fa_mean"]["hi"]}
            for n in (10, 20)],
         c=[{"ci": [e2["lo"], e2["hi"]], "ok": e2["lo"] <= 0 <= e2["hi"]}])
+
+    at_n = cfg["d13"]["a"]["expect_offsetting_at_n"]
+    readings = [{"arm": r["arm"], "n": r["n"], "t": int(t), "reading": v["reading"]}
+                for r in fam["d13a"]["rows"] for t, v in r["per_t"].items()]
+    res["D-13a"] = {"verdict": "HOLDS" if any(x["reading"] == "OFFSETTING" for x in readings if x["n"] == at_n)
+                    else "FAILS", "readings": readings}
+    ch = fam["d13c"]["checks"]
+    res["D-13c"] = _block(
+        i=[{"first_gt_post": ch["first_gt_post_entries"], "post_gt_alarm": ch["post_gt_alarm_entries"],
+            "ok": ch["first_gt_post_entries"] == 0 and ch["post_gt_alarm_entries"] == 0}],
+        ii=[{"esn_post_ne_alarm": ch["esn_post_ne_alarm_entries"], "ok": ch["esn_post_ne_alarm_entries"] == 0}],
+        iii=[{"hgb_post_gt_first": ch["hgb_post_gt_first_entries"], "ok": ch["hgb_post_gt_first_entries"] > 0}])
     return res

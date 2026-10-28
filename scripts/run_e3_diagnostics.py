@@ -1,9 +1,10 @@
-"""SP6 close-out diagnostics D-8..D-12 (POST HOC) -> results/e3_diagnostics.json.
+"""SP6 close-out diagnostics D-8..D-13 (POST HOC) -> results/e3_diagnostics.json.
 
 Run from a clean commit: uv run python scripts/run_e3_diagnostics.py
 Needs results/e3_group_counts.parquet from `uv run python scripts/run_e3.py` (gitignored): this script
 only re-weights E3's counts, it fits and scores nothing. Design and expected outcomes:
-docs/decisions.md, "2026-10-27 — SP6 close-out diagnostics", committed before the first run.
+docs/decisions.md, "2026-10-27 — SP6 close-out diagnostics" and "2026-10-28 — ... D-13", each
+committed before its first run.
 """
 
 import json

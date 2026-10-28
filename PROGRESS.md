@@ -15,9 +15,9 @@
   Step 3 (d0cd3e9, bad72c0): per-(draw, fold, task group) alarm counts incl. post-onset
   (results/e3_group_counts.parquet, gitignored); E3 rerun from clean 0d3fc92 reproduces 711a23e
   exactly (max diff 0; group counts sum to pooled). Step 4 (cbd5108 design before run, 0d3fc92 code,
-  b90cab6 results/e3_diagnostics.json from clean bad72c0), POST HOC: D-8 a/b/c HOLD, D-8d FAILS;
+  b90cab6 results/e3_diagnostics.json from clean bad72c0), POST HOC: D-8 a/b/d HOLD, D-8c FAILS;
   D-9 FAILS (TL-pct concentrated in fold 1 at n=20/40, ALL-pct n=40 and ESN-refit spread);
-  D-10a FAILS; D-11a FAILS, b/c HOLD; D-12 HOLDS. Close-out part 2 spec received 2026-10-28
+  D-10 a/b/c FAIL, d HOLDS; D-11a FAILS, b/c/d HOLD; D-12 HOLDS. Close-out part 2 spec received 2026-10-28
   (Steps 6-8: D-13, D-14, docs/sp6_e3_result.md, tag sp06-e3). Threshold-logic teach-back
   overridden a third time 2026-10-28. Next: Step 6 (D-13) plan, wait for "go".
   SP5 closed 2026-10-26 (tag sp05-e2): gate FAIL as pre-registered, write-up docs/sp5_e2_result.md;
