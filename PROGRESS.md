@@ -55,6 +55,10 @@
   (5cd0237). No third-party API, so the Llama-licence question no longer arises. BLOCKED: Ollama not
   installed (winget absent; Claude's install was blocked by the permission classifier). Next: owner
   installs Ollama and runs `ollama pull phi4-mini:3.8b`, then `uv run python scripts/run_e4_prompt_dev.py v1`.
+  Done 2026-10-28: Ollama 0.40.12, phi4-mini:3.8b digest 78fad5d1; stop-at-newline decoding (3dc1d39);
+  v1 on 60 qwen dev runs (0d5be1b): 0/240 parse failures, qwen headline AUROC 0.738, 29/30 repeat calls
+  identical, p50 3.0 s/call; v1 frozen by the pre-set rule. FREEZE configs/e4.yaml committed 15b31e8,
+  before any llama judge call. Next: Step 3 plan (e4.py), wait for "go".
   SP5 closed 2026-10-26 (tag sp05-e2): gate FAIL as pre-registered, write-up docs/sp5_e2_result.md;
   recalibration teach-back NOT ANSWERED (owner override, fourth time).
 - SP5 history (E2 ablation, GATE). Step 0 (pre-registration, ae18348), Step 1

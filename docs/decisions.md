@@ -497,3 +497,6 @@ Tag sp06-e3 is NOT applied: SP6's done criteria require the threshold-logic teac
   words is still a counted parse failure. The decoding options are hashed into the cache key's model
   field. Smoke calls were direct (not cached, not scored). First call 144 s (58 s model load), then
   about 3 s per call with the stop.
+- 2026-10-28: Step 2 closed. v1 frozen by the pre-set rule (0/240 parse failures on qwen, AUROC 0.738).
+  configs/e4.yaml (prompt sha256 4bc3bf11..., J-local phi4-mini@78fad5d1, no gate, D, J-1, J-2
+  verbatim) committed at 15b31e8, before the first llama judge call.
