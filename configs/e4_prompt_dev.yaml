@@ -18,6 +18,9 @@ judge:                              # docs/decisions.md 2026-10-28: J-local repl
   temperature: 0.0
   seed: 0
   num_predict: 16
+  stop: ["\n"]                      # phi4-mini replies "10", a blank line, then an explanation, despite
+                                    # "Output only the integer" (3-call smoke test on qwen dev prompts,
+                                    # 2026-10-28): stop at the first newline
   num_ctx: 4096                     # longest dev prompt is 4,245 chars; a filled context is refused, not truncated
   samples: 1                        # scoring samples per (run, t)
   determinism_subset: {prompts: 30, samples: 3, seed: 0}

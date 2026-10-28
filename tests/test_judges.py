@@ -206,7 +206,17 @@ def test_ollama_request_is_deterministic_and_reply_maps_to_the_common_record():
     assert body["options"] == {"temperature": 0.0, "seed": 0, "num_predict": 16, "num_ctx": 4096}
     assert r["text"] == "35" and r["input_tokens"] == 420 and r["output_tokens"] == 2
     assert r["server_total_s"] == pytest.approx(2.5) and r["server_load_s"] == pytest.approx(1.0)
-    assert j.model == "phi4-mini:3.8b@sha256:abcde"  # the digest is part of every cache key
+    assert j.model.startswith("phi4-mini:3.8b@sha256:abcde#")  # weights and options are in every cache key
+
+
+def test_ollama_stop_option_is_sent_and_changes_the_cache_identity():
+    fake = FakeTransport([_ollama_ok()])
+    plain = OllamaJudge("m", "sha256:0", transport=fake)
+    stopped = OllamaJudge("m", "sha256:0", stop=["\n"], transport=fake)
+    stopped.call("p")
+    assert fake.calls[0][2]["options"]["stop"] == ["\n"] and "stop" not in plain.options
+    assert plain.model != stopped.model  # replies under different decoding never share a cache entry
+    assert stopped.model == OllamaJudge("m", "sha256:0", stop=["\n"]).model
 
 
 def test_ollama_refuses_a_prompt_that_filled_the_context():

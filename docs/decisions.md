@@ -490,3 +490,10 @@ Tag sp06-e3 is NOT applied: SP6's done criteria require the threshold-logic teac
   subset, SD reported); the cost row is $0 plus measured local GPU time. Superseded: J-api =
   claude-haiku-5-5 (thinking off x3). Limit stated in advance: a small local judge, so J-1 is about this
   judge, not LLM judges in general.
+- 2026-10-28 (Step 2, before any scored call): a 3-call smoke test on qwen dev prompts showed
+  phi4-mini answering "10", a blank line, then an explanation, despite "Output only the integer";
+  every reply would fail the strict parser. Decoding now stops at the first newline (Ollama option
+  stop: ["\n"]); the template (v1) and the strict parser are unchanged, so a reply that starts with
+  words is still a counted parse failure. The decoding options are hashed into the cache key's model
+  field. Smoke calls were direct (not cached, not scored). First call 144 s (58 s model load), then
+  about 3 s per call with the stop.

@@ -41,7 +41,8 @@ def main() -> int:
     jc = cfg["judge"]
     if jc["provider"] == "ollama":
         judge = OllamaJudge(jc["model"], ollama_digest(jc["model"]), num_predict=jc["num_predict"],
-                            num_ctx=jc["num_ctx"], seed=jc["seed"], temperature=jc["temperature"])
+                            num_ctx=jc["num_ctx"], seed=jc["seed"], temperature=jc["temperature"],
+                            stop=jc.get("stop"))
         print(f"judge {judge.model} (local, Ollama)")
     else:
         judge = AnthropicJudge(jc["model"], max_tokens=jc["max_tokens"])

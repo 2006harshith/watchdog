@@ -235,12 +235,16 @@ class OllamaJudge:
     give the same reply; the determinism subset measures whether it does."""
 
     def __init__(self, name: str, digest: str, num_predict: int = 16, num_ctx: int = 4096, seed: int = 0,
-                 temperature: float = 0.0, keep_alive: str = "30m", base_url: str = OLLAMA_URL,
-                 transport: Transport | None = None):
+                 temperature: float = 0.0, stop: Sequence[str] | None = None, keep_alive: str = "30m",
+                 base_url: str = OLLAMA_URL, transport: Transport | None = None):
         self.name, self.digest = name, digest
-        self.model = f"{name}@{digest[:12]}"  # the cache key's model field
         self.num_ctx = num_ctx
         self.options = {"temperature": temperature, "seed": seed, "num_predict": num_predict, "num_ctx": num_ctx}
+        if stop:
+            self.options["stop"] = list(stop)
+        # The cache key's model field: weights (digest) and decoding options, since either changes a reply.
+        opts = hashlib.sha256(json.dumps(self.options, sort_keys=True).encode()).hexdigest()[:8]
+        self.model = f"{name}@{digest[:12]}#{opts}"
         self.keep_alive, self.url = keep_alive, f"{base_url}/api/chat"
         # The first call loads 2.5 GB into a 4 GB GPU, so the timeout is long.
         self.transport = transport or (lambda url, headers, body: urllib_transport(url, headers, body, timeout=600))
