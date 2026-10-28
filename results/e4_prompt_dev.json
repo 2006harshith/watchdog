@@ -1,0 +1,110 @@
+{
+  "versions": {
+    "v1": {
+      "prompt_sha256": "4bc3bf11b3fbd2b4a05121f9aa1e3ce000273ab905cab06dac804fd13b103563",
+      "runs": 60,
+      "prompts": 180,
+      "calls": 240,
+      "new_calls": 240,
+      "parse_failures": 0,
+      "parse_failure_rate": 0.0,
+      "refusals": 0,
+      "headline_auroc": {
+        "per_t": {
+          "3": {
+            "auroc": 0.6955555555555556,
+            "n_pos": 30,
+            "n_neg": 30,
+            "missing": 0
+          },
+          "4": {
+            "auroc": 0.7794444444444445,
+            "n_pos": 30,
+            "n_neg": 30,
+            "missing": 0
+          }
+        },
+        "mean": 0.7375
+      },
+      "per_class_auroc_mean": {
+        "looping": 0.9225000000000001,
+        "goal_drift": 0.725,
+        "context_corruption": 0.565
+      },
+      "determinism": {
+        "prompts": 30,
+        "share_identical_text": 0.9666666666666667,
+        "sd_median": 0.0,
+        "n_sd": 30
+      },
+      "cost_latency_new_calls": {
+        "calls": 240,
+        "latency_s_p50": 3.0439704500004154,
+        "latency_s_p95": 5.244845465001434,
+        "input_tokens_mean": 476.6875,
+        "output_tokens_mean": 2.0,
+        "usd_per_call_mean": 0.0,
+        "calls_per_run": 4.0,
+        "usd_per_1000_runs": 0.0,
+        "usd_total": 0.0
+      },
+      "git": {
+        "commit": "3dc1d399a358c52b0a078a07252c8993d1ab434c",
+        "dirty": false
+      }
+    }
+  },
+  "config": {
+    "family": "qwen",
+    "dev_set": {
+      "seed": 0,
+      "healthy": 30,
+      "per_class": 10,
+      "classes": [
+        "looping",
+        "goal_drift",
+        "context_corruption"
+      ],
+      "min_T": 5,
+      "max_tau": 3
+    },
+    "checkpoints": {
+      "scored": [
+        2,
+        3,
+        4
+      ],
+      "report": [
+        3,
+        4
+      ]
+    },
+    "judge": {
+      "name": "J-local",
+      "provider": "ollama",
+      "model": "phi4-mini:3.8b",
+      "temperature": 0.0,
+      "seed": 0,
+      "num_predict": 16,
+      "stop": [
+        "\n"
+      ],
+      "num_ctx": 4096,
+      "samples": 1,
+      "determinism_subset": {
+        "prompts": 30,
+        "samples": 3,
+        "seed": 0
+      }
+    },
+    "price": {
+      "input_usd_per_mtok": 0.0,
+      "output_usd_per_mtok": 0.0
+    },
+    "budget_usd": 2.0,
+    "max_parse_failure_rate": 0.02,
+    "max_versions": 3,
+    "cache": "results/e4_dev_cache.jsonl",
+    "prompts_dir": "configs/e4_prompts"
+  }
+}
