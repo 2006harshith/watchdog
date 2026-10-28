@@ -1,0 +1,86 @@
+# SP7 E4: cheap monitor vs an LLM judge at matched steps on held-out llama. NO GATE.
+# FROZEN before the first llama judge call. Nothing here changes after a llama score exists.
+# Decisions: docs/decisions.md 2026-10-28 (SP7 spec; owner decisions after Step 0; J-local; stop option).
+# Prompt developed on qwen source runs only: results/e4_prompt_dev.json (v1, clean 3dc1d39).
+
+family: llama                       # gemini skipped (SP6 descriptive only)
+checkpoints:
+  scored: [2, 3, 4]                 # judge scored at every checkpoint; running max over {2..t} for alarms
+  report: [3, 4]                    # headline = mean over these, as E2
+classes:
+  headline: [looping, goal_drift, context_corruption]
+scope: healthy and headline-class llama runs only (479 prompts at t = 2, 3, 4); tool_cascade not judged
+
+prompt:
+  file: configs/e4_prompts/v1.txt
+  sha256: 4bc3bf11b3fbd2b4a05121f9aa1e3ce000273ab905cab06dac804fd13b103563   # CRLF-normalised text; checked before any call
+  frozen_by_rule: >-
+    configs/e4_prompt_dev.yaml: revise only if parse failures > 2% or off-format output. v1 had 0 / 240
+    parse failures on qwen (headline AUROC 0.738), so v1 is frozen without revision.
+
+judge:
+  name: J-local
+  provider: ollama
+  model: phi4-mini:3.8b
+  digest: sha256:78fad5d182a7c33065e153a5f8ba210754207ba9d91973f57dffa7f487363753   # refuse to run if the pulled digest differs
+  temperature: 0.0
+  seed: 0
+  num_predict: 16
+  stop: ["\n"]
+  num_ctx: 4096
+  samples: 1
+  determinism_subset: {prompts: 30, samples: 3, seed: 0}
+  parse_failures: missing and counted; if more than 2% fail, stop and report
+  ties: integer scores 0-100; AUROC counts a tie as 1/2; the alarm rule is strict (score > theta)
+cache: results/e4_judge_cache.jsonl   # committed; keys, hashes, replies, tokens, latency; no trace text
+leakage_checks:
+  - 'forbidden_hits(template) is empty'
+  - 'label_invariant holds for every prompt'
+  - 'forbidden_hits(prompt) is empty on every llama prompt'
+
+monitors:
+  gated: none
+  primary: ESN-src                  # distribution over its 30 fit draws (2026-10-26 rule)
+  esn_src: recomputed exactly as E3 (scores are not on disk); per-draw AUROC must reproduce
+           results/e2_closeout.json d6.subsets.aurocs and results/e3_recalibration.json
+           families.llama.esn_src.headline_auroc_per_fit_draw (max abs diff <= 1e-9)
+  reported_not_gated:
+    MS-raw: post hoc (labelled so)
+    TL-pct: as E2 (cross-fitted target percentile)
+    TL-raw: as E2
+    ESN-refit: as E3 (fitted on n/2 = 10 target healthy runs per draw); reported at J-2's operating point only
+  hgb_scores_from: results/e2_prefix_scores.csv   # reused, not recomputed; reproduction checked
+
+statistic_D:
+  definition: >-
+    D = median over ESN-src's 30 fit draws of (AUROC_ESN-src,draw - AUROC_J-local), each AUROC the mean
+    matched-step AUROC over t = 3, 4, headline classes vs all healthy llama runs (the E2 metric).
+  ci: paired task-group cluster bootstrap, B = 2000, seed 0; each replicate recomputes all 30 draws and the judge
+  covers: test-side (task-group) sampling only; the 30 fit draws are held fixed
+  gate: 'none. Step 0c power (results/e4_step0_power.json): 80% power needs delta 0.196 / 0.178 / 0.137 at rho 0 / 0.3 / 0.6'
+
+expectations:                       # verbatim from the SP7 spec; "best judge" = the one judge (J-local)
+  - id: J-1
+    text: "the best judge's headline AUROC > ESN-src's median AUROC. I expect this to HOLD."
+    holds_if: judge headline AUROC > median over the 30 fit draws of ESN-src headline AUROC
+  - id: J-2
+    text: >-
+      at conformal alpha=0.10, n=20, on E3's folds and draws, each judge's pooled mean FA <= 0.12.
+      Judges spend no target runs, like MS-raw and ESN-src. Report ties at theta: discrete scores plus the
+      strict ">" can push FA well below alpha_eff.
+    holds_if: mean over E3's 200 draws of headline FA (mean of t = 3, 4) <= 0.12, m = n = 20
+reported_only:
+  - 'per-class AUROC: looping, goal_drift, context_corruption'
+  - 'first-crossing TPR at the J-2 operating point'
+  - 'judge determinism: share identical and SD on the subset'
+  - 'share of calibration scores tied at theta'
+
+cost_latency:
+  judge: tokens in/out per call, wall-clock per call p50/p95, model load time; $0 (local, no per-token price)
+  monitors: CPU time per step for ESN-src and the HGB arms on this machine
+  machine: Windows 10, GTX 1650 4 GB (judge on GPU via Ollama 0.40.12); measured on the run date
+not_allowed:
+  - 'any claim at unequal FA without stating both FAs'
+  - '"cheaper" stated as a finding (it is a measured property, reported)'
+  - 'extending the result to organic failures (that is SP8)'
+  - '"LLM judges" in general: this is one 3.8B local judge'

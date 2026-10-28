@@ -116,3 +116,14 @@ def test_budget_stops_spending_before_the_next_call(tmp_path):
     with pytest.raises(BudgetExceeded):
         run_version(TEMPLATE, runs, judge, JudgeCache(tmp_path / "c.jsonl"), cfg)
     assert judge.calls == 3
+
+
+def test_frozen_e4_config_pins_the_prompt_judge_and_expectations():
+    frozen = yaml.safe_load(Path("configs/e4.yaml").read_text(encoding="utf-8"))
+    assert prompt_hash(load_template(frozen["prompt"]["file"])) == frozen["prompt"]["sha256"]
+    assert frozen["family"] == "llama" and frozen["monitors"]["gated"] == "none"
+    j = frozen["judge"]
+    assert (j["model"], j["temperature"], j["seed"], j["stop"], j["samples"]) == ("phi4-mini:3.8b", 0.0, 0, ["\n"], 1)
+    assert j["digest"].startswith("sha256:78fad5d182a7")
+    assert [e["id"] for e in frozen["expectations"]] == ["J-1", "J-2"]
+    assert "I expect this to HOLD" in frozen["expectations"][0]["text"]
