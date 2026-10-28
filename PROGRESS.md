@@ -98,7 +98,8 @@
   (HGB vs E2 1.1e-16, noLat fingerprint, ESN-src vs D-6 0.0). GATE FAIL: MS-raw on the cold corpus AUROC
   0.510 [0.355, 0.674]. O-1 HOLDS (0.510 < 0.858). O-3 HOLDS: MS-raw-noLat 0.615 [0.468, 0.756], +0.104
   above MS-raw. TL-raw 0.498, TL-pct 0.526, ESN-src median 0.451 (0.405-0.620). T=0.9 corpus: 1 healthy
-  run, CIs undefined. Next: Step 5 write-up docs/sp8_e5_result.md (plan first).
+  run, CIs undefined. Step 5: write-up docs/sp8_e5_result.md. Not tagged: the SP8 label/estimand
+  teach-back is NOT ANSWERED. Next: that teach-back, or an owner override to tag sp08-e5.
   SP5 closed 2026-10-26 (tag sp05-e2): gate FAIL as pre-registered, write-up docs/sp5_e2_result.md;
   recalibration teach-back NOT ANSWERED (owner override, fourth time).
 - SP5 history (E2 ablation, GATE). Step 0 (pre-registration, ae18348), Step 1
@@ -171,7 +172,7 @@
 | SP5 | E2 ablation — GATE (spec to be rewritten after SP3) | done — gate FAIL (pre-registered fail path); write-up docs/sp5_e2_result.md; recalibration teach-back NOT ANSWERED (owner override) | sp05-e2 |
 | SP6 | E3 recalibration curve (teach-back: threshold logic) | done — write-up docs/sp6_e3_result.md; threshold-logic teach-back NOT ANSWERED (owner override x4) | sp06-e3 |
 | SP7 | E4 cheap monitor vs LLM judge (gate dropped: power) | done — docs/sp7_e4_result.md: D +0.132 [+0.045, +0.206], J-1 FAILS, J-2 HOLDS; teach-back on D NOT ANSWERED (owner override x2) | sp07-e4 |
-| SP8 | E5 organic runs on AgentDojo — GATE | not started | |
+| SP8 | E5 frozen monitors on organic failures (AgentDojo dropped; organic llama8b) — GATE | write-up done (docs/sp8_e5_result.md): GATE FAIL, MS-raw cold 0.510 [0.355, 0.674]; O-1, O-3 HOLD; not tagged: teach-back NOT ANSWERED | |
 | SP9 | Supervisor agent + Streamlit demo on HF Spaces | not started | |
 | SP10 | Write-up: arXiv report, README, blog | not started | |
 | SP11 | Phase 2: budgeted human review | not started | |
@@ -545,6 +546,10 @@ Gemini: every table is reported, nothing is tested, and it is labelled descripti
   yet given · NOT ANSWERED, owner override 2026-10-28 ("override it, go to step 2"). Not owner-marked.
 
 ## Session log
+- 2026-10-28 · SP8 · AgentDojo pilots 0/20 (dropped); organic llama8b corpora with a strict run-level
+  label; configs/e5.yaml pre-registered 51c7723 before any score; E5 from clean 4eacb51, reproduction
+  exact; GATE FAIL (0.510 [0.355, 0.674]); O-1, O-3 HOLD; write-up · tests: pass (610, ruff clean) ·
+  next: label teach-back or override to tag.
 - 2026-10-28 · SP7 (close) · Write-up committed f3b6405; teach-back on D overridden a second time (NOT
   ANSWERED). Tag sp07-e4 · tests: pass (588, ruff clean) · next: SP8 spec from the chat Project.
 - 2026-10-28 · SP7 (Steps 0-3) · No API credit: J-local phi4-mini via Ollama. Prompt v1 frozen on qwen

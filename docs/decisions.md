@@ -528,3 +528,6 @@ Tag sp06-e3 is NOT applied: SP6's done criteria require the threshold-logic teac
   - Gate on organic_llama8b_cold only (10 healthy vs 110 failed), c = 0.5, stated as low-powered;
     organic_llama8b (T = 0.9) is descriptive only, because the label is confounded with the corpus.
   - O-2 dropped: fewer than 20 healthy runs exist, so E3's n = 20 operating point cannot be run.
+- 2026-10-28: SP8 write-up docs/sp8_e5_result.md. GATE FAIL (MS-raw cold 0.510 [0.355, 0.674]), O-1 and O-3
+  HOLD, O-2 dropped, O-4 untestable, all unedited. Tag sp08-e5 not applied: the label/estimand teach-back
+  is NOT ANSWERED.
