@@ -48,7 +48,8 @@
   (synthetic, real llama groups): 80% power needs delta 0.196 / 0.178 / 0.137 at rho 0 / 0.3 / 0.6,
   so the gate is uninformative at delta <= 0.15 unless rho >= 0.6. STOPPED for owner decision.
   Owner decisions 2026-10-28: no gate (D reported with CI; J-1, J-2 kept), one judge claude-haiku-5-5
-  thinking off x3 samples, no local judge. Step 1 (judges.py) started 2026-10-28 under override.
+  thinking off x3 samples, no local judge. Step 1 done 2026-10-28 (judges.py d175ba2, power JSON
+  0e85d4a); SP7 teach-back on D NOT ANSWERED (override). Next: Step 2 plan (prompt dev on qwen).
   SP5 closed 2026-10-26 (tag sp05-e2): gate FAIL as pre-registered, write-up docs/sp5_e2_result.md;
   recalibration teach-back NOT ANSWERED (owner override, fourth time).
 - SP5 history (E2 ablation, GATE). Step 0 (pre-registration, ae18348), Step 1
@@ -271,6 +272,8 @@
 - 2026-10-28: Owner override again ("override, go") to start SP7 Step 1 (judges.py) with the SP6
   threshold-logic teach-back NOT ANSWERED. SP7's Step 1 teach-back moves from the dropped gate
   statistic to D (paired bootstrap of a median over fit draws). Risk accepted.
+- 2026-10-28: Owner override of the SP7 teach-back on D ("override it, go to step 2"). NOT ANSWERED.
+  Claude disagreed: D is the headline number of SP7. Risk accepted.
 - Proposed for the SP4 spec, NOT decided: a length-only baseline in SP5 (length alone AUROC 0.592;
   ESN score vs length Spearman 0.85/0.80), and matched-step prefix evaluation instead of episode-max.
 
@@ -466,6 +469,16 @@ Gemini: every table is reported, nothing is tested, and it is labelled descripti
   it ill do it later"). Overridden a third time 2026-10-28 for the close-out part 2 ("override it,
   i'll do it later go"). Overridden a fourth time 2026-10-28 to close SP6 and tag sp06-e3 ("override
   it and tag sp06-e3"). Still NOT ANSWERED, not owner-marked, not graded.
+
+- 2026-10-28 · SP7 · statistic D (paired task-group bootstrap of a median over 30 fit draws;
+  evaluation._cluster_bootstrap, scripts/run_e4_step0_power.py; e4.py's D lands in Step 3) · Q1: why
+  resample task groups, not runs, and why one shared resample for monitor and judge and for t=3,4;
+  what each mistake does to the CI width? Q2: what uncertainty does D's CI include and leave out when
+  the 30 fit draws are recomputed inside each replicate; why the median, not the mean, given ESN-src's
+  bimodal fit-draw AUROCs? Q3: why picking the better of two judges on the test data biases D against
+  the monitor and why re-select per replicate; with no delta, what does a CI of [-0.15, +0.05] allow
+  you to say? · answers: not yet given · NOT ANSWERED, owner override 2026-10-28 ("override it, go
+  to step 2"). Not owner-marked, not graded. Eleven teach-backs owed before deploy (SP9).
 
 ## Session log
 - 2026-10-28 · SP6 (close) · Threshold-logic teach-back overridden a fourth time (NOT ANSWERED). Tag
