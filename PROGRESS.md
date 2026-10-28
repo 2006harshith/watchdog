@@ -49,7 +49,10 @@
   so the gate is uninformative at delta <= 0.15 unless rho >= 0.6. STOPPED for owner decision.
   Owner decisions 2026-10-28: no gate (D reported with CI; J-1, J-2 kept), one judge claude-haiku-5-5
   thinking off x3 samples, no local judge. Step 1 done 2026-10-28 (judges.py d175ba2, power JSON
-  0e85d4a); SP7 teach-back on D NOT ANSWERED (override). Next: Step 2 plan (prompt dev on qwen).
+  0e85d4a); SP7 teach-back on D NOT ANSWERED (override). Step 2 harness committed fb6841d (template v1
+  with the failure-mode examples line, owner-approved; judge caches committed). BLOCKED: no
+  ANTHROPIC_API_KEY in .env. Next: owner adds the key, then `uv run python scripts/run_e4_prompt_dev.py v1`
+  (540 calls, about $0.02-0.05, hard stop $2). Llama licence call still owed before Step 3.
   SP5 closed 2026-10-26 (tag sp05-e2): gate FAIL as pre-registered, write-up docs/sp5_e2_result.md;
   recalibration teach-back NOT ANSWERED (owner override, fourth time).
 - SP5 history (E2 ablation, GATE). Step 0 (pre-registration, ae18348), Step 1
