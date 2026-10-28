@@ -68,6 +68,9 @@
   on D (and SP6's) is NOT ANSWERED. SP7 closed 2026-10-28 (tag sp07-e4) under owner override of the
   teach-back on D (second override for it). Twelve teach-backs owed before deploy (SP9). Next: SP8 needs
   a spec from the chat Project (paste docs/sp7_e4_result.md and this section).
+- Save point: SP8 (E5 frozen monitors on organic AgentDojo failures, GATE). Step 0 (read-only + pilot)
+  started 2026-10-28 under owner override of the SP6 and SP7 teach-backs ("override go"), which also
+  approves installing AgentDojo in its own environment and pulling llama3.1:8b in Ollama.
   SP5 closed 2026-10-26 (tag sp05-e2): gate FAIL as pre-registered, write-up docs/sp5_e2_result.md;
   recalibration teach-back NOT ANSWERED (owner override, fourth time).
 - SP5 history (E2 ablation, GATE). Step 0 (pre-registration, ae18348), Step 1
@@ -295,6 +298,9 @@
 - 2026-10-28: Second owner override of the SP7 teach-back on D, to close SP7 and tag sp07-e4 ("override
   it and tag sp07-e4"). NOT ANSWERED. Claude disagreed: the tag marks SP7 done while its core statistic
   is undefended. Risk accepted.
+- 2026-10-28: Owner override of the teach-back HARD RULE to start SP8 with the SP6 and SP7 teach-backs
+  NOT ANSWERED ("override go"). Claude disagreed: SP8's gate is an AUROC cluster CI and O-2 is E3's
+  threshold logic. Risk accepted.
 - Proposed for the SP4 spec, NOT decided: a length-only baseline in SP5 (length alone AUROC 0.592;
   ESN score vs length Spearman 0.85/0.80), and matched-step prefix evaluation instead of episode-max.
 
