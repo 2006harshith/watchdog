@@ -474,3 +474,12 @@ Tag sp06-e3 is NOT applied: SP6's done criteria require the threshold-logic teac
 - Best judge is re-selected inside every bootstrap resample, so the CI includes the selection.
 - The power check states the monitor-judge score correlation it assumes (ρ = 0, 0.3, 0.6).
 - Step 0d covers qwen traces as well as llama (prompt development sends qwen traces to J-api).
+- 2026-10-28, after the Step 0 report (owner: "drop the gate, Haiku thinking off ×3, no local judge"):
+  - NO GATE. Step 0c's power check: 80% power needs δ = 0.196 / 0.178 / 0.137 at monitor-judge
+    correlation 0 / 0.3 / 0.6, so a non-inferiority gate at δ ≤ 0.15 is uninformative here. D (median
+    over ESN-src's 30 fit draws of AUROC_ESN-src,draw − AUROC_judge, paired task-group cluster
+    bootstrap, B = 2000, seed 0) is reported with its CI; J-1 and J-2 stay pre-registered.
+  - One judge, J-api = claude-haiku-5-5, thinking disabled, default sampling (the API rejects
+    temperature since 2026-10-21), 3 samples per (run, t), score = their mean, sample SD reported.
+    This replaces "T=0 × 1": T=0 cannot be set on this model. "Best judge" becomes the one judge.
+  - No J-local: no runtime or model is installed, and the owner declined to install one.
