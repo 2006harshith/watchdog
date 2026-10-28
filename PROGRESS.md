@@ -94,7 +94,11 @@
   data card (3ccd493); label/estimand teach-back NOT ANSWERED (override). Step 2: MS-raw-noLat fitted
   from clean 138c75d (MS-raw reproduces E2 to 1.1e-16; noLat fingerprint 34838f50); configs/e5.yaml
   (gate, O-1, O-3, O-4 untestable, O-2 dropped) committed BEFORE any SP8 score and before e5.py exists.
-  Next: Step 4 plan (e5.py), wait for "go".
+  Step 4 2026-10-28 (code 4eacb51; results/e5_organic.json from clean 4eacb51): reproduction exact
+  (HGB vs E2 1.1e-16, noLat fingerprint, ESN-src vs D-6 0.0). GATE FAIL: MS-raw on the cold corpus AUROC
+  0.510 [0.355, 0.674]. O-1 HOLDS (0.510 < 0.858). O-3 HOLDS: MS-raw-noLat 0.615 [0.468, 0.756], +0.104
+  above MS-raw. TL-raw 0.498, TL-pct 0.526, ESN-src median 0.451 (0.405-0.620). T=0.9 corpus: 1 healthy
+  run, CIs undefined. Next: Step 5 write-up docs/sp8_e5_result.md (plan first).
   SP5 closed 2026-10-26 (tag sp05-e2): gate FAIL as pre-registered, write-up docs/sp5_e2_result.md;
   recalibration teach-back NOT ANSWERED (owner override, fourth time).
 - SP5 history (E2 ablation, GATE). Step 0 (pre-registration, ae18348), Step 1

@@ -1,0 +1,455 @@
+{
+  "what": "SP8 E5: frozen source monitors on organic llama8b runs (run-level labels); GATE",
+  "config": {
+    "data": {
+      "loader": "watchdog_agent.organic.load_organic",
+      "corpora": [
+        "organic_llama8b",
+        "organic_llama8b_cold"
+      ],
+      "gate_corpus": "organic_llama8b_cold",
+      "descriptive_corpus": "organic_llama8b",
+      "label": "strict: HEALTHY iff the last synthesis step states metadata.expected_total (a number within 0.5); else FAILED",
+      "estimand": "run-level (\"will this run end wrong\"), read at matched steps; a failed run is a positive at every checkpoint (tau = 0); no onset exists",
+      "task_group": "the run (random itineraries)"
+    },
+    "checkpoints": {
+      "scored": [
+        2,
+        3,
+        4
+      ],
+      "report": [
+        3,
+        4
+      ]
+    },
+    "monitors": {
+      "primary": "MS-raw",
+      "secondary": "ESN-src",
+      "reported": [
+        "TL-raw",
+        "TL-pct"
+      ],
+      "sensitivity": "MS-raw-noLat",
+      "nolat_fingerprint": "34838f50ce4f60b6"
+    },
+    "gate": {
+      "text": "On organic_llama8b_cold, MS-raw's mean matched-step AUROC over t = 3, 4 (run-level labels) has a run-level cluster-bootstrap 95% CI (B = 2000, seed 0) whose lower bound is > 0.5. Low-powered: with about 10 healthy runs it passes only if the true AUROC is about 0.65 or more.",
+      "arm": "MS-raw",
+      "corpus": "organic_llama8b_cold",
+      "c": 0.5,
+      "B": 2000,
+      "seed": 0,
+      "pass_if": "ci_lower_bound > c",
+      "on_fail": "the negative result is written up; SP9's scope is decided in the chat Project"
+    },
+    "expectations": [
+      {
+        "id": "O-1",
+        "text": "MS-raw's organic AUROC < its synthetic llama AUROC (E2: 0.858). Expected to HOLD.",
+        "corpus": "organic_llama8b_cold",
+        "holds_if": "MS-raw headline AUROC < 0.858",
+        "note": "different estimands (run-level here, onset-based in E2); the write-up states both next to each other"
+      },
+      {
+        "id": "O-2",
+        "status": "dropped",
+        "reason": "fewer than 20 healthy runs exist (11 in total), so E3's n = 20 operating point cannot be run"
+      },
+      {
+        "id": "O-3",
+        "text": "MS-raw-noLat's AUROC >= MS-raw's - 0.05. Stated as HOLD so it can fail. If it fails, MS-raw's organic signal is mostly latency.",
+        "corpus": "organic_llama8b_cold",
+        "holds_if": "AUROC(MS-raw-noLat) >= AUROC(MS-raw) - 0.05"
+      },
+      {
+        "id": "O-4",
+        "status": "untestable",
+        "hypothesis_verbatim": "Hypothesis for SP8, stated before any SP8 data is seen: on a held-out family whose ESN signal is content-driven, TL-pct ranks failures above ESN_best, but it does not alarm at 5% FPR until its threshold is recalibrated (SP6). Both halves can come out wrong. The SP8 spec fixes the test and threshold before the run.",
+        "source": "docs/sp5_e2_result.md section 6",
+        "reason": "its premise is a held-out family whose ESN signal is content-driven; these runs are llama, whose ESN signal SP5's close-out traced to the m channel, not content (results/e2_channel_attribution.json); no new family is in the SP8 data"
+      }
+    ],
+    "reproduction": [
+      "frozen MS-raw on the llama E2 prefix rows equals results/e2_prefix_scores.csv (max abs diff <= 1e-9)",
+      "ESN-src's 30 fit-draw headline AUROCs equal results/e2_closeout.json d6.subsets.aurocs (<= 1e-9)",
+      "MS-raw-noLat refitted reproduces the committed fingerprint"
+    ],
+    "reported_only": [
+      "per-t AUROC and AUROC per corpus; the T = 0.9 corpus AUROC rests on its single healthy run",
+      "ESN-src as a distribution over its 30 fit draws (median, range)",
+      "latency and output-token quantiles: organic healthy/failed vs llama source vs qwen source",
+      "no operating point (O-2 dropped), so no any-alarm or first-crossing TPR"
+    ],
+    "caveat": "CI = run-level cluster bootstrap (each run its own task group); ESN draw spread = fit-set variability only",
+    "not_allowed": [
+      "organic and synthetic AUROCs in one comparison without the estimand note",
+      "any claim at unequal FA without both FAs",
+      "generalising beyond llama3.1:8b, these two corpora of the booking environment, and the dataset collection"
+    ]
+  },
+  "git": {
+    "commit": "4eacb51b523d0c1c3872dafafef76b25d4fd3aae",
+    "dirty": false
+  },
+  "checks": {
+    "MS-raw.llama_vs_e2_prefix_scores": {
+      "value": 1.1102230246251565e-16,
+      "ok": true
+    },
+    "TL-raw.llama_vs_e2_prefix_scores": {
+      "value": 1.1102230246251565e-16,
+      "ok": true
+    },
+    "TL-pct.llama_vs_e2_prefix_scores": {
+      "value": 1.1102230246251565e-16,
+      "ok": true
+    },
+    "MS-raw-noLat.fingerprint": {
+      "value": "34838f50ce4f60b613d10ff6aae3ca47adb7e783f134eaac8fa946aca259e7d9",
+      "ok": true
+    },
+    "ESN-src.fit_draw_aurocs_vs_d6": {
+      "value": 0.0,
+      "ok": true
+    }
+  },
+  "esn_channels": [
+    "e",
+    "u",
+    "m",
+    "x"
+  ],
+  "caveat": "CI = run-level cluster bootstrap (each run its own task group); ESN draw spread = fit-set variability only",
+  "gate": {
+    "text": "On organic_llama8b_cold, MS-raw's mean matched-step AUROC over t = 3, 4 (run-level labels) has a run-level cluster-bootstrap 95% CI (B = 2000, seed 0) whose lower bound is > 0.5. Low-powered: with about 10 healthy runs it passes only if the true AUROC is about 0.65 or more.",
+    "auroc": 0.5104545454545455,
+    "ci": {
+      "lo": 0.35546361019736844,
+      "hi": 0.6736344696969696,
+      "n_skipped": 0
+    },
+    "c": 0.5,
+    "outcome": "FAIL"
+  },
+  "O-1": {
+    "auroc": 0.5104545454545455,
+    "synthetic_e2": 0.858,
+    "outcome": "HOLDS",
+    "estimand_note": "different estimands (run-level here, onset-based in E2); the write-up states both next to each other"
+  },
+  "O-3": {
+    "noLat": 0.6147727272727272,
+    "MS-raw": 0.5104545454545455,
+    "difference": 0.10431818181818175,
+    "outcome": "HOLDS"
+  },
+  "O-2": {
+    "id": "O-2",
+    "status": "dropped",
+    "reason": "fewer than 20 healthy runs exist (11 in total), so E3's n = 20 operating point cannot be run"
+  },
+  "O-4": {
+    "id": "O-4",
+    "status": "untestable",
+    "hypothesis_verbatim": "Hypothesis for SP8, stated before any SP8 data is seen: on a held-out family whose ESN signal is content-driven, TL-pct ranks failures above ESN_best, but it does not alarm at 5% FPR until its threshold is recalibrated (SP6). Both halves can come out wrong. The SP8 spec fixes the test and threshold before the run.",
+    "source": "docs/sp5_e2_result.md section 6",
+    "reason": "its premise is a held-out family whose ESN signal is content-driven; these runs are llama, whose ESN signal SP5's close-out traced to the m channel, not content (results/e2_channel_attribution.json); no new family is in the SP8 data"
+  },
+  "per_corpus": {
+    "organic_llama8b": {
+      "runs": 120,
+      "healthy": 1,
+      "arms": {
+        "MS-raw": {
+          "headline": 0.0546218487394958,
+          "per_t": {
+            "3": 0.04201680672268908,
+            "4": 0.06722689075630252
+          },
+          "ci": {
+            "lo": null,
+            "hi": null,
+            "undefined": "733/2000 replicates had a one-class checkpoint"
+          }
+        },
+        "MS-raw-noLat": {
+          "headline": 0.31092436974789917,
+          "per_t": {
+            "3": 0.15966386554621848,
+            "4": 0.46218487394957986
+          },
+          "ci": {
+            "lo": null,
+            "hi": null,
+            "undefined": "733/2000 replicates had a one-class checkpoint"
+          }
+        },
+        "TL-raw": {
+          "headline": 0.4012605042016807,
+          "per_t": {
+            "3": 0.4957983193277311,
+            "4": 0.3067226890756303
+          },
+          "ci": {
+            "lo": null,
+            "hi": null,
+            "undefined": "733/2000 replicates had a one-class checkpoint"
+          }
+        },
+        "TL-pct": {
+          "undefined": "no healthy reference for family='llama' at t=2"
+        }
+      },
+      "ESN-src": {
+        "headline_per_fit_draw": [
+          0.6176470588235294,
+          0.4831932773109244,
+          0.45798319327731096,
+          0.4495798319327731,
+          0.49159663865546216,
+          0.6050420168067226,
+          0.5336134453781513,
+          0.5336134453781513,
+          0.5546218487394958,
+          0.4873949579831933,
+          0.6302521008403361,
+          0.4621848739495798,
+          0.4495798319327731,
+          0.46638655462184875,
+          0.5504201680672269,
+          0.44117647058823534,
+          0.47058823529411764,
+          0.5294117647058824,
+          0.4453781512605042,
+          0.4411764705882353,
+          0.4579831932773109,
+          0.4369747899159664,
+          0.4453781512605042,
+          0.44957983193277307,
+          0.5084033613445378,
+          0.5,
+          0.45378151260504207,
+          0.4411764705882353,
+          0.4453781512605042,
+          0.3907563025210084
+        ],
+        "headline_median": 0.4642857142857143,
+        "headline_min": 0.3907563025210084,
+        "headline_max": 0.6302521008403361,
+        "median_draw": 13,
+        "median_draw_ci": {
+          "lo": null,
+          "hi": null,
+          "undefined": "733/2000 replicates had a one-class checkpoint"
+        }
+      }
+    },
+    "organic_llama8b_cold": {
+      "runs": 120,
+      "healthy": 10,
+      "arms": {
+        "MS-raw": {
+          "headline": 0.5104545454545455,
+          "per_t": {
+            "3": 0.49,
+            "4": 0.5309090909090909
+          },
+          "ci": {
+            "lo": 0.35546361019736844,
+            "hi": 0.6736344696969696,
+            "n_skipped": 0
+          }
+        },
+        "MS-raw-noLat": {
+          "headline": 0.6147727272727272,
+          "per_t": {
+            "3": 0.5604545454545454,
+            "4": 0.6690909090909091
+          },
+          "ci": {
+            "lo": 0.46845005580357146,
+            "hi": 0.7562703043953043,
+            "n_skipped": 0
+          }
+        },
+        "TL-raw": {
+          "headline": 0.4977272727272727,
+          "per_t": {
+            "3": 0.5045454545454545,
+            "4": 0.4909090909090909
+          },
+          "ci": {
+            "lo": 0.4864864864864865,
+            "hi": 0.5095238095238095,
+            "n_skipped": 0
+          }
+        },
+        "TL-pct": {
+          "headline": 0.5263636363636364,
+          "per_t": {
+            "3": 0.5045454545454545,
+            "4": 0.5481818181818182
+          },
+          "ci": {
+            "lo": 0.4365126147419337,
+            "hi": 0.6072773125996809,
+            "n_skipped": 0
+          }
+        }
+      },
+      "ESN-src": {
+        "headline_per_fit_draw": [
+          0.4795454545454545,
+          0.44545454545454544,
+          0.5440909090909092,
+          0.41454545454545455,
+          0.4877272727272727,
+          0.4231818181818182,
+          0.6200000000000001,
+          0.4645454545454546,
+          0.4536363636363636,
+          0.5736363636363636,
+          0.40454545454545454,
+          0.43136363636363634,
+          0.45045454545454544,
+          0.4213636363636364,
+          0.42272727272727273,
+          0.4268181818181818,
+          0.42772727272727273,
+          0.46454545454545454,
+          0.4363636363636364,
+          0.5095454545454545,
+          0.4481818181818182,
+          0.44681818181818184,
+          0.4518181818181818,
+          0.4822727272727273,
+          0.6118181818181818,
+          0.5536363636363637,
+          0.4313636363636364,
+          0.4722727272727273,
+          0.45045454545454544,
+          0.4718181818181818
+        ],
+        "headline_median": 0.4511363636363636,
+        "headline_min": 0.40454545454545454,
+        "headline_max": 0.6200000000000001,
+        "median_draw": 22,
+        "median_draw_ci": {
+          "lo": 0.2799318086883877,
+          "hi": 0.6548868795690649,
+          "n_skipped": 0
+        }
+      }
+    }
+  },
+  "latency_shift": {
+    "organic_cold.healthy": {
+      "runs": 10,
+      "steps": 178,
+      "latency_s_q10_q50_q90": [
+        2.68896,
+        2.83075,
+        4.896450000000011
+      ],
+      "share_latency_below_0_05s": 0.0,
+      "output_tokens_q10_q50_q90": [
+        18.0,
+        24.0,
+        45.0
+      ]
+    },
+    "organic_cold.failed": {
+      "runs": 110,
+      "steps": 1898,
+      "latency_s_q10_q50_q90": [
+        2.7071899999999998,
+        2.8344,
+        4.396209999999991
+      ],
+      "share_latency_below_0_05s": 0.0,
+      "output_tokens_q10_q50_q90": [
+        18.0,
+        24.0,
+        46.0
+      ]
+    },
+    "organic_t09.all": {
+      "runs": 120,
+      "steps": 760,
+      "latency_s_q10_q50_q90": [
+        2.7029300000000003,
+        2.8834999999999997,
+        7.23749
+      ],
+      "share_latency_below_0_05s": 0.0,
+      "output_tokens_q10_q50_q90": [
+        23.0,
+        24.0,
+        255.0
+      ]
+    },
+    "llama_source.healthy": {
+      "runs": 77,
+      "steps": 528,
+      "latency_s_q10_q50_q90": [
+        0.0003,
+        0.0018,
+        10.18999
+      ],
+      "share_latency_below_0_05s": 0.571969696969697,
+      "output_tokens_q10_q50_q90": [
+        18.0,
+        42.0,
+        120.0
+      ]
+    },
+    "llama_source.failed": {
+      "runs": 116,
+      "steps": 775,
+      "latency_s_q10_q50_q90": [
+        0.0003,
+        0.0006,
+        3.1145
+      ],
+      "share_latency_below_0_05s": 0.5329032258064517,
+      "output_tokens_q10_q50_q90": [
+        18.0,
+        27.0,
+        120.0
+      ]
+    },
+    "qwen_source.healthy": {
+      "runs": 900,
+      "steps": 6457,
+      "latency_s_q10_q50_q90": [
+        0.33608,
+        2.5469,
+        5.61552000000002
+      ],
+      "share_latency_below_0_05s": 0.04971348923648753,
+      "output_tokens_q10_q50_q90": [
+        21.0,
+        25.0,
+        83.0
+      ]
+    },
+    "qwen_source.failed": {
+      "runs": 753,
+      "steps": 5699,
+      "latency_s_q10_q50_q90": [
+        0.25458000000000003,
+        2.6758,
+        2.9421399999999998
+      ],
+      "share_latency_below_0_05s": 0.0754518336550272,
+      "output_tokens_q10_q50_q90": [
+        21.0,
+        25.0,
+        66.0
+      ]
+    }
+  },
+  "unparsed_tool_steps": 5
+}
