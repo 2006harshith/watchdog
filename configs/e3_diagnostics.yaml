@@ -36,3 +36,16 @@ d11:
 d12:
   B: 2000
   seed: 0
+
+d13:                                        # POST HOC, docs/decisions.md 2026-10-28
+  a:
+    arms: [MS-raw, ESN-src, TL-raw]
+    n: [10, 20, 40]
+    min_healthy: 5                          # a fold is rated only with this many healthy test runs at t
+    nominal_band: [0.03, 0.20]
+    high_if_pooled_gt: 0.12
+    expect_offsetting_at_n: 20
+  b:
+    fold: 1
+  c:
+    e2: {a: TL-pct, b: ESN-src, n: 20}

@@ -12,9 +12,14 @@
   expectation (TL-pct − ESN-src TPR median +0.115, 81.5% of draws > 0); E-3 FAILS (ESN-refit beats
   ESN-src, +0.320 over 30 paired draws); E-4 HOLDS. Caveat: E-2/E-3 compare TPR at unequal realised
   FA (TL-pct and ESN-refit ~0.29 vs ESN-src ~0.10). Teach-back re-asked 2026-10-27, overridden again.
-  Next (2026-10-27): paste results/e3_recalibration.json and this "Current" section into the chat
-  Project and ask for the SP6 next-step/write-up spec, including how to compare TPR at unequal
-  realised FA. Plan before code, wait for "go". Threshold-logic teach-back still owed (SP9).
+  Step 3 (d0cd3e9, bad72c0): per-(draw, fold, task group) alarm counts incl. post-onset
+  (results/e3_group_counts.parquet, gitignored); E3 rerun from clean 0d3fc92 reproduces 711a23e
+  exactly (max diff 0; group counts sum to pooled). Step 4 (cbd5108 design before run, 0d3fc92 code,
+  b90cab6 results/e3_diagnostics.json from clean bad72c0), POST HOC: D-8 a/b/c HOLD, D-8d FAILS;
+  D-9 FAILS (TL-pct concentrated in fold 1 at n=20/40, ALL-pct n=40 and ESN-refit spread);
+  D-10a FAILS; D-11a FAILS, b/c HOLD; D-12 HOLDS. Close-out part 2 spec received 2026-10-28
+  (Steps 6-8: D-13, D-14, docs/sp6_e3_result.md, tag sp06-e3). Threshold-logic teach-back
+  overridden a third time 2026-10-28. Next: Step 6 (D-13) plan, wait for "go".
   SP5 closed 2026-10-26 (tag sp05-e2): gate FAIL as pre-registered, write-up docs/sp5_e2_result.md;
   recalibration teach-back NOT ANSWERED (owner override, fourth time).
 - SP5 history (E2 ablation, GATE). Step 0 (pre-registration, ae18348), Step 1
@@ -85,7 +90,7 @@
 | SP3 | E1 reproduce collapse — GATE (teach-back: metrics). Pass: on the same held-out llama3.1:8b episodes, the qwen-fitted monitor is >= 0.15 AUROC below the llama-fitted one, with non-overlapping episode-bootstrap 95% CIs. Reference: 0.527 vs 0.885, arXiv 2608.02464 §5 (transferred vs refitted, not before/after) | done — gate FAIL; diagnostics D-1..D-5 done (docs/sp3_e1_result.md); teach-back owner-marked passed | sp03-e1 |
 | SP4 | Feature sets + matched-step evaluation (teach-back: feature definitions) | done — audit in results/sp4_feature_audit.json; split/metrics teach-backs owner-marked, feature-definitions teach-back not answered (owner override) | sp04-features, sp04-closeout |
 | SP5 | E2 ablation — GATE (spec to be rewritten after SP3) | done — gate FAIL (pre-registered fail path); write-up docs/sp5_e2_result.md; recalibration teach-back NOT ANSWERED (owner override) | sp05-e2 |
-| SP6 | E3 recalibration curve (teach-back: threshold logic) | in progress — Steps 0–2 done; threshold-logic teach-back NOT ANSWERED (owner override x2) | |
+| SP6 | E3 recalibration curve (teach-back: threshold logic) | in progress — Steps 0–4 done; threshold-logic teach-back NOT ANSWERED (owner override x3) | |
 | SP7 | E4 cost/latency vs LLM judges — GATE | not started | |
 | SP8 | E5 organic runs on AgentDojo — GATE | not started | |
 | SP9 | Supervisor agent + Streamlit demo on HF Spaces | not started | |
@@ -224,6 +229,10 @@
   validity claim above all, rest on this logic. Risk accepted. Nine teach-backs owed before deploy.
 - 2026-10-27: Second owner override of the SP6 threshold-logic teach-back, after Step 2's run showed
   E-1 FAILS. Claude disagreed: the E-1 failure is the mechanism Q2 asks about. Risk accepted.
+- 2026-10-28: Third owner override of the SP6 threshold-logic teach-back, to start the close-out
+  part 2 (Steps 6-8) ("override it, i'll do it later go"). NOT ANSWERED, not owner-marked. Claude
+  disagreed: the write-up's lead (E-1, alpha_eff(m), D-12) is this logic, and tag sp06-e3 needs the
+  teach-back answered under SP6's done criteria, so tagging will need a further override. Risk accepted.
 - Proposed for the SP4 spec, NOT decided: a length-only baseline in SP5 (length alone AUROC 0.592;
   ESN score vs length Spearman 0.85/0.80), and matched-step prefix evaluation instead of episode-max.
 
@@ -416,7 +425,8 @@ Gemini: every table is reported, nothing is tested, and it is labelled descripti
   to step 2"). Not owner-marked, not graded. SP6 done criteria require it answered. Claude disagreed:
   every E3 number, and E-1 in particular, rests on this logic. Nine teach-backs owed before deploy
   (SP9). Re-asked 2026-10-27 at resume after Step 2 (E-1 FAILS); overridden a second time ("override
-  it ill do it later"). Still NOT ANSWERED, not owner-marked, not graded.
+  it ill do it later"). Overridden a third time 2026-10-28 for the close-out part 2 ("override it,
+  i'll do it later go"). Still NOT ANSWERED, not owner-marked, not graded.
 
 ## Session log
 - 2026-10-27 · SP6 (Step 2 recorded) · No code change. PROGRESS.md brought up to date with Step 2

@@ -348,3 +348,59 @@ Expected:
 (a) The FA CIs of TL-pct, ALL-pct and ESN-refit at n=20 are wider than 0.15.
 (b) MS-raw's mean-FA CI at n=10/20 contains 0.10.
 (c) The CI of E-2's median paired difference (any-alarm TPR) contains 0.
+
+## 2026-10-28 — SP6 close-out part 2, D-13: design and expected outcomes (POST HOC)
+
+Post hoc, as D-8..D-12. E-1..E-4 and the D-8..D-12 outcomes (including D-8d, D-9 and D-10a FAILS)
+are reported unedited. Written and committed before any D-13 number is computed. When this was
+written the author had seen E3's headline, results/e3_diagnostics.json (D-8..D-12) and the code of
+e3.py, and nothing per fold for MS-raw, ESN-src or TL-raw.
+
+Owner override, 2026-10-28: the SP6 threshold-logic teach-back is overridden a third time to start
+this work. NOT ANSWERED, not owner-marked. Claude disagreed (the write-up's lead is this logic, and
+tag sp06-e3 needs it answered under SP6's done criteria). Risk accepted.
+
+Input: results/e3_group_counts.parquet (the clean 0d3fc92 rerun that reproduces 711a23e). Nothing is
+refitted or rescored. Config: configs/e3_diagnostics.yaml, block d13. Output: new keys in
+results/e3_diagnostics.json; the D-8..D-12 values must come out unchanged.
+
+### D-13a Per-fold FA of the arms that spend no target runs on fitting or reference
+Design: FA(t) per fold for MS-raw, ESN-src and TL-raw at n = 10, 20, 40, conformal α = 0.10, t = 3
+and 4. A fold's FA pools its healthy test runs over draws (total alarms / total healthy), as D-9.
+Each row has n_test_healthy. Per-fold FA carries test-sampling noise that pooling over draws does not
+remove (the same few test runs in every draw).
+Reading, fixed now, per (arm, n, t): a fold is rated only if it has ≥ 5 healthy test runs at t.
+- HIGH if the pooled FA over all tested folds is > 0.12.
+- NOMINAL if not HIGH and every rated fold's FA is in [0.03, 0.20].
+- OFFSETTING if not HIGH and some rated fold's FA is outside [0.03, 0.20].
+- UNRATED if no fold is rated.
+Expected: OFFSETTING for at least one of the three arms at n = 20 at some t. The folds are
+task-group disjoint, so exchangeability between other folds' healthy runs and a fold's test runs is
+not expected to hold fold by fold. If every cell reads NOMINAL, the write-up says the near-nominal
+pooled FA of these arms is near nominal per fold; if OFFSETTING, it says the pooled value hides
+offsetting fold errors.
+
+### D-13b Fold 1's healthy test runs by task group
+Design: per task group in fold 1, its healthy test runs at t = 3 and t = 4, with fold 1's total and
+the all-fold total. Report only. No reading from run counts alone.
+
+### D-13c Definitions of early_alarm_rate and tpr_post (from e3.py and thresholds.py)
+- early_alarm_rate (thresholds.fa_tpr, e3._Pool.frame): per (cell, t, draw), pooled over folds,
+  n_early / n_pos_alarm. Positives: headline classes, tau ≤ t, a step t. n_pos_alarm: positives
+  whose first alarm (first step with score > θ) is ≤ t. n_early: those whose first alarm is < tau.
+  The denominator is ALARMED positives, not all positives. A draw with no alarmed positive at some
+  t is NaN, and E3's headline (mean over t) leaves it out of the median: a selection.
+- tpr_post (e3.group_counts): positives with SOME score > θ at a step in tau..t, over all positives.
+  That is "above θ at some step ≥ tau", not "first crossing ≥ tau". ESN arms score a running max
+  (e2_diagnostics._esn_running_max), so once above θ they stay above it: for ESN-src and ESN-refit,
+  tpr_post = TPR by construction. HGB arms score each checkpoint separately and can drop back
+  below θ. So D-11a's ESN drops of 0.0 are mechanical, and D-11's E-2/E-3 restatements compare an
+  any-alarm ESN rate with a stricter HGB rate.
+- Added: first-crossing TPR = (n_pos_alarm − n_pos_alarm_pre_tau) / n_pos, the positives whose
+  first alarm is at a step in tau..t. Same meaning for every arm. Reported per cell (conformal
+  α = 0.10), with E-2 (TL-pct − ESN-src, n = 20) restated as a paired median difference and a D-12
+  bootstrap interval (same B, seed and resample).
+Checks, expected to hold (mechanical, not findings): (i) first-crossing ≤ post-onset ≤ any-alarm in
+every group row of every cell; (ii) post-onset = any-alarm in every group row of ESN-src and
+ESN-refit; (iii) post-onset > first-crossing in at least one row of some HGB arm (otherwise the
+distinction does not matter on these data, and the write-up says so).
