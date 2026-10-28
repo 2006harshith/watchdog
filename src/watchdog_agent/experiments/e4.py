@@ -50,7 +50,8 @@ class RunStopped(RuntimeError):
 
 
 def check_digest(pulled: str, cfg: dict) -> None:
-    if pulled != cfg["judge"]["digest"]:
+    # /api/tags reports the bare hex; the config writes it "sha256:<hex>". Same value, two spellings.
+    if pulled.removeprefix("sha256:") != cfg["judge"]["digest"].removeprefix("sha256:"):
         raise RunStopped(f"pulled {cfg['judge']['model']} digest {pulled} != frozen {cfg['judge']['digest']}")
 
 

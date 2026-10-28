@@ -163,5 +163,6 @@ def test_missing_scores_and_a_different_model_digest_stop_the_run():
     with pytest.raises(RunStopped, match="missing"):
         require_complete(scores, runs, _cfg())
     check_digest(E4["judge"]["digest"], E4)
+    check_digest(E4["judge"]["digest"].removeprefix("sha256:"), E4)  # /api/tags reports the bare hex
     with pytest.raises(RunStopped, match="digest"):
         check_digest("sha256:other", E4)
