@@ -1,0 +1,85 @@
+{
+  "what": "SP7 Step 0c power check for D (monitor - best judge), synthetic equal-AUROC scores",
+  "config": {
+    "target_auroc": 0.77,
+    "sigma_group": 0.5,
+    "sigma_checkpoint": 0.3,
+    "rho_judges": 0.6,
+    "rho_monitor_judge": [
+      0.0,
+      0.3,
+      0.6
+    ],
+    "deltas": [
+      0.1,
+      0.15,
+      0.2
+    ],
+    "seed": 0,
+    "headline": [
+      "looping",
+      "goal_drift",
+      "context_corruption"
+    ],
+    "checkpoints": [
+      3,
+      4
+    ],
+    "S": 200,
+    "B": 1000
+  },
+  "git": {
+    "commit": "d175ba2b5269f09bedb7c72ccecef4ff8bcf8a05",
+    "dirty": false
+  },
+  "sklearn_auroc_check_max_abs_diff": 0.0,
+  "data": {
+    "runs": 170,
+    "task_groups": 25,
+    "per_t": {
+      "3": {
+        "pos": 92,
+        "neg": 77
+      },
+      "4": {
+        "pos": 79,
+        "neg": 60
+      }
+    }
+  },
+  "per_rho": [
+    {
+      "rho": 0.0,
+      "mean_D_under_equality": -0.006743854934278716,
+      "ci_half_width_median": 0.11116786058394262,
+      "power": {
+        "0.1": 0.365,
+        "0.15": 0.64,
+        "0.2": 0.81
+      },
+      "delta_for_80pct_power": 0.19565681285656245
+    },
+    {
+      "rho": 0.3,
+      "mean_D_under_equality": -0.013883894471882909,
+      "ci_half_width_median": 0.09387175527701666,
+      "power": {
+        "0.1": 0.4,
+        "0.15": 0.695,
+        "0.2": 0.91
+      },
+      "delta_for_80pct_power": 0.17781626104011153
+    },
+    {
+      "rho": 0.6,
+      "mean_D_under_equality": -0.016221756641817187,
+      "ci_half_width_median": 0.06954358036314293,
+      "power": {
+        "0.1": 0.5,
+        "0.15": 0.87,
+        "0.2": 0.965
+      },
+      "delta_for_80pct_power": 0.1365021066676706
+    }
+  ]
+}
