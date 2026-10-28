@@ -1,7 +1,7 @@
 """SP8 Step 0d pilot: AgentDojo no-attack runs of llama3.1:8b via Ollama, recorded raw. NO monitor scores.
 
-Run (Ollama running, llama3.1:8b pulled): uv run python pilot.py   (from envs/agentdojo)
-Writes ../../data/agentdojo_pilot/pilot.jsonl (gitignored /data/) and pilot_tasks.json here (committed):
+Run (Ollama running, llama3.1:8b pulled): uv run python pilot.py [openai|local]   (from envs/agentdojo)
+Writes ../../data/agentdojo_pilot/pilot_<provider>.jsonl (gitignored /data/) and pilot_tasks.json here (committed):
 the pilot's user tasks, which are excluded from SP8 permanently.
 
 The run itself is AgentDojo's own: its default pipeline (system message, query, LLM, tools loop), its
@@ -11,6 +11,7 @@ element: temperature 0.7, a seed per (run seed, call index), logprobs requested,
 
 import json
 import random
+import sys
 import time
 import urllib.request
 from pathlib import Path
@@ -19,6 +20,7 @@ import openai
 from agentdojo.agent_pipeline import AgentPipeline, InitQuery, SystemMessage, ToolsExecutionLoop, ToolsExecutor
 from agentdojo.agent_pipeline.agent_pipeline import load_system_message
 from agentdojo.agent_pipeline.errors import AbortAgentError
+from agentdojo.agent_pipeline.llms.local_llm import LocalLLM, _make_system_prompt, _parse_model_output, reformat_message
 from agentdojo.agent_pipeline.llms.openai_llm import (
     OpenAILLM,
     _function_to_openai,
@@ -28,13 +30,16 @@ from agentdojo.agent_pipeline.llms.openai_llm import (
 from agentdojo.functions_runtime import FunctionsRuntime
 from agentdojo.task_suite.load_suites import get_suites
 from agentdojo.task_suite.task_suite import functions_stack_trace_from_messages, model_output_from_messages
+from agentdojo.types import get_text_content_as_str
 
 BENCHMARK = "v1.2.2"
 MODEL = "llama3.1:8b"
 OLLAMA = "http://localhost:11434"
 TEMPERATURE = 0.7
 SEEDS = [0, 1]
-OUT = Path(__file__).resolve().parents[2] / "data" / "agentdojo_pilot" / "pilot.jsonl"
+# Which AgentDojo driver: "openai" = native tool calling (pilot 1), "local" = prompt-based (re-pilot, option A).
+PROVIDER = sys.argv[1] if len(sys.argv) > 1 else "openai"
+OUT = Path(__file__).resolve().parents[2] / "data" / "agentdojo_pilot" / f"pilot_{PROVIDER}.jsonl"
 TASKS_FILE = Path(__file__).with_name("pilot_tasks.json")
 
 
@@ -66,6 +71,52 @@ class RecordingLLM(OpenAILLM):
                            for tc in (choice.message.tool_calls or [])],
         })
         output = _openai_to_assistant_message(choice.message)
+        return query, runtime, env, [*messages, output], extra_args
+
+
+class RecordingLocalLLM(LocalLLM):
+    """AgentDojo's LocalLLM (prompt-based tool calling: tools in the system prompt, one
+    <function=name>{json}</function> parsed per message) with temperature 0.7, a seed per call,
+    logprobs and a call log. Its message conversion, top_p and parser are AgentDojo's own. Unlike
+    chat_completion_request it does not swallow a request error into an empty reply."""
+
+    def __init__(self, client, model, run_seed: int):
+        super().__init__(client, model, temperature=TEMPERATURE)
+        self.run_seed, self.calls = run_seed, []
+
+    def query(self, query, runtime, env=None, messages=(), extra_args={}):  # noqa: B006
+        msgs = []
+        for m in messages:  # verbatim from LocalLLM.query
+            role, content = m["role"], m["content"]
+            if role == "system" and content is not None:
+                content = _make_system_prompt(get_text_content_as_str(content), runtime.functions.values())
+            if role == "tool":
+                role = self.tool_delimiter
+                if "error" in m and m["error"] is not None:
+                    content = json.dumps({"error": m["error"]})
+                else:
+                    func_result = "Success" if m["content"] == "None" else m["content"]
+                    content = json.dumps({"result": func_result})
+            msgs.append({"role": role, "content": content})
+        msgs = [{"role": d["role"], "content": reformat_message(d)} for d in msgs]  # as chat_completion_request
+        seed = self.run_seed * 1000 + len(self.calls)
+        start = time.perf_counter()
+        completion = self.client.chat.completions.create(model=self.model, messages=msgs, temperature=self.temperature,
+                                                         top_p=self.top_p, seed=seed, logprobs=True)
+        latency = time.perf_counter() - start
+        choice = completion.choices[0]
+        text = choice.message.content or ""
+        lp = getattr(choice, "logprobs", None)
+        output = _parse_model_output(text)
+        self.calls.append({
+            "seed": seed, "latency_s": latency, "finish_reason": choice.finish_reason,
+            "prompt_tokens": getattr(completion.usage, "prompt_tokens", None),
+            "completion_tokens": getattr(completion.usage, "completion_tokens", None),
+            "logprobs": [t.logprob for t in lp.content] if lp is not None and lp.content else None,
+            "content": text,
+            "tool_calls": [{"id": None, "name": tc.function, "arguments": json.dumps(dict(tc.args))}
+                           for tc in (output["tool_calls"] or [])],
+        })
         return query, runtime, env, [*messages, output], extra_args
 
 
@@ -113,7 +164,8 @@ def serialise(messages) -> list:
 def run_one(suite, task_id: str, seed: int, client) -> dict:
     """AgentDojo's run_task_with_pipeline for a no-attack run, keeping the trace it discards."""
     user_task = suite.get_user_task_by_id(task_id)
-    llm, tool_log = RecordingLLM(client, MODEL, seed), []
+    llm = (RecordingLocalLLM if PROVIDER == "local" else RecordingLLM)(client, MODEL, seed)
+    tool_log: list = []
     pipeline = AgentPipeline([SystemMessage(load_system_message(None)), InitQuery(), llm,
                               ToolsExecutionLoop([TimedToolsExecutor(tool_log), llm])])
     environment = suite.load_and_inject_default_environment({})
@@ -153,7 +205,7 @@ def main() -> None:
     suites = get_suites(BENCHMARK)
     tasks = pick_pilot_tasks(suites)
     TASKS_FILE.write_text(json.dumps({"benchmark": BENCHMARK, "seed": 0, "excluded_from_sp8": tasks}, indent=2))
-    meta = ollama_meta() | {"benchmark": BENCHMARK, "temperature": TEMPERATURE}
+    meta = ollama_meta() | {"benchmark": BENCHMARK, "temperature": TEMPERATURE, "provider": PROVIDER}
     client = openai.OpenAI(base_url=f"{OLLAMA}/v1", api_key="ollama")  # Ollama ignores the key; the client needs one
     OUT.parent.mkdir(parents=True, exist_ok=True)
     done = set()
