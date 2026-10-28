@@ -199,3 +199,10 @@ def test_a_different_model_digest_stops_the_run():
     check_digest(E4["judge"]["digest"].removeprefix("sha256:"), E4)  # /api/tags reports the bare hex
     with pytest.raises(RunStopped, match="digest"):
         check_digest("sha256:other", E4)
+
+
+def test_cpu_per_step_repeats_a_fast_call_until_the_clock_can_see_it():
+    from watchdog_agent.experiments.e4 import cpu_per_step
+
+    c = cpu_per_step(lambda: sum(range(2000)), steps=10, min_cpu_s=0.05)
+    assert c["repeats"] > 1 and c["cpu_s_total"] >= 0.05 and c["cpu_ms_per_step"] > 0

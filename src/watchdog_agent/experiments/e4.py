@@ -259,12 +259,18 @@ def max_abs_diff(a, b, path: str = "") -> tuple[float, str]:
 # ---------------------------------------------------------------- cost: CPU time per step
 
 
-def cpu_per_step(fn: Callable[[], object], steps: int) -> dict:
-    """process_time (CPU, not wall) of one call of fn, per step it scores."""
-    start = time.process_time()
-    fn()
+def cpu_per_step(fn: Callable[[], object], steps: int, min_cpu_s: float = 1.0, max_repeats: int = 1000) -> dict:
+    """process_time (CPU, not wall) of fn per step it scores. fn is repeated until min_cpu_s of CPU has
+    passed: Windows' process clock ticks every ~15.6 ms, so one fast call can read as 0."""
+    start, repeats = time.process_time(), 0
+    while repeats < max_repeats:
+        fn()
+        repeats += 1
+        if time.process_time() - start >= min_cpu_s:
+            break
     cpu = time.process_time() - start
-    return {"cpu_s_total": cpu, "steps": steps, "cpu_ms_per_step": 1000 * cpu / steps if steps else math.nan}
+    return {"cpu_s_total": cpu, "repeats": repeats, "steps": steps,
+            "cpu_ms_per_step": 1000 * cpu / (repeats * steps) if steps else math.nan}
 
 
 def missing_scores(scores: Scores, runs: pd.DataFrame, cfg: dict) -> list[tuple[str, int, bool]]:

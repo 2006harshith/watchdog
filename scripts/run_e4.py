@@ -162,10 +162,8 @@ def main() -> int:
     cost["ESN-src"] = cpu_per_step(lambda: _esn_running_max(monitor, runs, to_run), steps)
     needed = sorted(set(e2_cfg["checkpoints"]["train"]) | set(e3_cfg["checkpoints"]["scored"]))
     steps_by_uid = dict(zip(runs["uid"], runs["steps_parsed"]))
-    built: dict = {}
-    feat = cpu_per_step(lambda: built.setdefault("table", prefix_feature_table(steps_by_uid, needed)), 1)
-    n_rows = len(built["table"])  # one row per (run, scored prefix): what the HGB arms score
-    cost["HGB.features"] = feat | {"steps": n_rows, "cpu_ms_per_step": 1000 * feat["cpu_s_total"] / n_rows}
+    n_rows = len(prefix_feature_table(steps_by_uid, needed))  # one row per (run, scored prefix)
+    cost["HGB.features"] = cpu_per_step(lambda: prefix_feature_table(steps_by_uid, needed), n_rows)
     table = prefix_feature_table(dict(zip(episodes["uid"], episodes["steps_parsed"])), needed)
     train = build_training_set(table, episodes, family, e2_cfg)
     rows = table[table.index.get_level_values("uid").isin(set(runs["uid"]))]
