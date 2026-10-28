@@ -463,3 +463,14 @@ Owner-approved ("add the amendments to the write-up and go"), after D-13 and D-1
 Tag sp06-e3 is NOT applied: SP6's done criteria require the threshold-logic teach-back, still NOT ANSWERED.
 - 2026-10-28 (later): owner override of SP6's done criterion; tag sp06-e3 applied with the
   threshold-logic teach-back NOT ANSWERED (fourth override for SP6). Claude disagreed. Risk accepted.
+
+## 2026-10-28 — SP7 spec: owner decisions before Step 0
+- Override: SP7 starts with the SP6 threshold-logic teach-back NOT ANSWERED. Claude disagreed.
+- Judge sampling: temperature 0, 1 sample per (run, t), plus a determinism subset (3 samples on a fixed
+  subset, SD reported). Rejected: T=0 x 3 (near-identical samples at 3x the cost).
+- ESN-src's 30 fit-draw scores are not on disk (E3 kept only counts). They are recomputed exactly as E3
+  did, and must reproduce results/e2_closeout.json (D-6 AUROCs) and results/e3_recalibration.json
+  (esn_src.headline_auroc_per_fit_draw) exactly. HGB arms are reused from results/e2_prefix_scores.csv.
+- Best judge is re-selected inside every bootstrap resample, so the CI includes the selection.
+- The power check states the monitor-judge score correlation it assumes (ρ = 0, 0.3, 0.6).
+- Step 0d covers qwen traces as well as llama (prompt development sends qwen traces to J-api).

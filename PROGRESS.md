@@ -36,6 +36,17 @@
   2026-10-28). SP6 closed 2026-10-28 (tag sp06-e3) with the threshold-logic teach-back NOT ANSWERED
   (owner override, fourth time for SP6). Next: SP7 needs a spec from the chat Project (paste
   docs/sp6_e3_result.md and this section). Ten teach-backs owed before deploy (SP9).
+- Save point: SP7 (E4 cheap monitor vs LLM judges, GATE) — Step 0 (read-only report) started
+  2026-10-28 under an owner override of the SP6 teach-back. Owner decisions on the SP7 spec: judge
+  sampling T=0 x 1 sample plus a determinism subset (not T=0 x 3); ESN-src fit-draw scores recomputed
+  with exact reproduction (they are not on disk); best judge re-selected inside each bootstrap
+  resample; power check at stated monitor-judge correlations; Step 0d covers qwen traces too.
+  Step 0 report 2026-10-28 (read-only, nothing spent): no local LLM runtime or model installed;
+  J-api proposal claude-haiku-5-5 at $0.10/$0.50 per MTok (platform.claude.com/docs/en/about-claude/
+  pricing, read 2026-10-28), which rejects temperature (API 2026-10-21) so T=0 is impossible there;
+  479 scoped llama calls per sample (healthy + headline, t=2..4), prefix p50 556 chars; power check
+  (synthetic, real llama groups): 80% power needs delta 0.196 / 0.178 / 0.137 at rho 0 / 0.3 / 0.6,
+  so the gate is uninformative at delta <= 0.15 unless rho >= 0.6. STOPPED for owner decision.
   SP5 closed 2026-10-26 (tag sp05-e2): gate FAIL as pre-registered, write-up docs/sp5_e2_result.md;
   recalibration teach-back NOT ANSWERED (owner override, fourth time).
 - SP5 history (E2 ablation, GATE). Step 0 (pre-registration, ae18348), Step 1
@@ -253,6 +264,8 @@
   sp06-e3 ("override it and tag sp06-e3"). NOT ANSWERED, not owner-marked. Claude disagreed: the tag
   marks SP6 done while the logic behind its lead (conformal alpha_eff, exchangeability, D-12) is
   undefended. Risk accepted.
+- 2026-10-28: Owner override of the teach-back HARD RULE to start SP7 Step 0 with the SP6
+  threshold-logic teach-back NOT ANSWERED ("override, go"). Claude disagreed (same reason). Risk accepted.
 - Proposed for the SP4 spec, NOT decided: a length-only baseline in SP5 (length alone AUROC 0.592;
   ESN score vs length Spearman 0.85/0.80), and matched-step prefix evaluation instead of episode-max.
 
