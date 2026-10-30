@@ -531,3 +531,100 @@ Tag sp06-e3 is NOT applied: SP6's done criteria require the threshold-logic teac
 - 2026-10-28: SP8 write-up docs/sp8_e5_result.md. GATE FAIL (MS-raw cold 0.510 [0.355, 0.674]), O-1 and O-3
   HOLD, O-2 dropped, O-4 untestable, all unedited. Tag sp08-e5 not applied: the label/estimand teach-back
   is NOT ANSWERED.
+
+## 2026-10-30 — SP9: supervisor + replay demo (Streamlit, HF Spaces). No gate.
+- Owner override of the teach-back HARD RULE to start SP9 Step 0 with the SP6, SP7 and SP8 teach-backs
+  NOT ANSWERED ("override go"). Claude disagreed: the demo's theta line is the SP6 threshold logic.
+  Risk accepted. The spec's own Step 1 asks the SP6 threshold-logic teach-back after Step 0.
+- Step 0 choices (owner, before any Step 0 code or run):
+  - L-2 replaces latency at the STEP level: each step's latency_s is set to the constant before the
+    episode is built, which removes it from the ESN's m input (log latency) and from the x input that
+    the vendored adapter derives from it (log(latency / n_tools)) when a tool event has no measured
+    latency. Measured tool latencies are untouched. The ±0.10 rule applies to this version. The spec's
+    m-only wording is NOT run (owner chose step-level; only one version is reported).
+  - L-2's reference is D-6's 0.770 (E2's llama setting, the same 30 fit draws), not E4's 0.768 (one
+    pair dropped). The as-is draws must reproduce results/e2_closeout.json d6.subsets.aurocs; the
+    drop is reported paired per draw.
+- SP9 spec, verbatim (as pasted 2026-10-30):
+
+```text
+SP9: Supervisor + replay demo (Streamlit, HF Spaces). No gate. Plan first, wait for my "go".
+
+Why: SP5–SP8 give one honest story. The frozen monitors rank injected llama failures (MS-raw 0.858;
+ESN-src median 0.768), and conformal thresholds from n ≥ 10 healthy runs hold FA near α pooled (with
+offsetting folds, SP6 D-13a). On organic failures they are at chance (SP8). SP9 packages that story and
+shows both halves. It adds no new claim.
+
+Decisions (defaults chosen; override before pasting)
+- Mode: replay recorded traces only.
+  - No live agent: there is no API credit, Spaces hardware is CPU (verified in Step 0), and SP8 says a
+    live supervisor on organic failures would be at chance.
+  - A local live mode is out of scope.
+- Supervisor: a pure component, supervisor.step(state, step) -> (score, theta, action).
+  - Actions: continue / flag / halt. Halt = first alarm (running max > theta), the E3 rule.
+  - No side effects; the demo drives it step by step.
+- Monitors in the demo: MS-raw and ESN-src side by side, unless Step 0 removes one.
+  - theta = conformal α=0.10 from n=20 llama healthy runs, using one seeded draw recorded in config.
+  - The UI says it is one calibration draw.
+- Traces in the demo:
+  - llama injected runs (headline classes) and organic_llama8b_cold, both labelled.
+  - Gemini is excluded: D6 is eval-only, and public redistribution is not evaluation.
+  - Qwen is excluded (it is training data).
+  - Licences are checked in Step 0 before any trace ships.
+- Content:
+  - Per trace: steps, score curve, theta line, alarm step, true label and τ (or "run-level, no τ" for
+    organic runs).
+  - A "What this shows" page that quotes the allowed and not-allowed lists of the SP5–SP8 write-ups
+    verbatim, with no number that isn't in a write-up.
+- Artifacts:
+  - Frozen models are serialised with fingerprints and checked at app start. The app refuses to start
+    on a mismatch.
+  - scikit-learn is pinned to the training version.
+  - No user upload. If overridden: JSON only, schema-validated, size-capped, and never a pickle.
+- Dependencies: streamlit (new; it is the UI and replaces nothing). Charts use streamlit's built-ins
+  (no plotly). Pinned in a Spaces-only requirements file.
+
+Step 0. Blocking diagnostics. POST HOC; the design and expectations are committed before the run.
+ L-1: MS-raw-noLat (SP8 fingerprint 34838f50) on E2's llama setting.
+      - Matched-step headline AUROC, t = 3, 4, task-group cluster CI, against MS-raw 0.858.
+      - Expectation, written before the run: drop ≤ 0.10.
+ L-2: ESN-src, 30 fit draws, with the latency input to m replaced by a constant (source healthy median),
+      other m inputs untouched. Median AUROC against 0.768. Same expectation.
+ L-3 (read-only): what the < 50 ms llama steps are. Step types, which fields, whether the latency is
+      logged or derived.
+ Rule: if L-1 or L-2 drops by more than 0.10, that monitor is shown in the demo only with the note
+ "synthetic score depends on latency values that are not generation time", or it is dropped. I decide
+ which before Step 2.
+ Also report:
+ - Spaces hardware and Streamlit SDK support, from HF docs read on the day (URL recorded);
+ - licence lines for the llama traces and for the dataset, for public redistribution;
+ - whether the pinned Streamlit version has an app-testing API.
+ Stop and report.
+
+Step 1. The SP6 threshold-logic teach-back is asked. Step 4 does not publish with it unanswered unless
+ I override, and the override is recorded.
+
+Step 2. src/watchdog_agent/supervisor.py + tests:
+ - replayed scores equal offline scores exactly, for every demo trace;
+ - the alarm step equals the E3 rule;
+ - fingerprint checks for the frozen models.
+
+Step 3. app/ (Streamlit).
+ - Local run, plus a smoke test (the app-testing API if Step 0 confirmed it).
+ - Show me screenshots before Step 4.
+
+Step 4. Publish to HF Spaces, only after my explicit yes.
+ - I push, or a token comes from an env var. No token is ever committed.
+ - Public by default: say so before publishing.
+ - After deploy, check that the live app passes the fingerprint check and loads every demo trace.
+
+Step 5. README demo section (claims limited to the write-ups' allowed lists), PROGRESS.md,
+ decisions.md, tag sp09-demo.
+
+Done: Step 0 committed before its run and reported; tests + ruff clean; replay equals offline exactly;
+licences recorded; the live app verified; tag sp09-demo.
+```
+- Open, decided before Step 2 (Claude's Step 0 plan): theta per fold from one E3 draw (no shown trace
+  scored against a theta calibrated on its own task group); organic traces show per-trace alarms only,
+  never an aggregate FA/TPR (SP8 has no operating point there); the ESN-src fit draw shown is fixed by
+  a seed in config before its AUROC is looked at.

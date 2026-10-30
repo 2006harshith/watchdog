@@ -102,6 +102,9 @@
   under owner override of the label/estimand teach-back (second override for it; NOT ANSWERED).
   Thirteen teach-backs owed before deploy (SP9). Next: SP9 needs a spec from the chat Project (paste
   docs/sp8_e5_result.md and this section).
+- Save point: SP9 (supervisor + replay demo, no gate). Spec received 2026-10-30 (verbatim in
+  docs/decisions.md). Step 0 started under owner override of the SP6/SP7/SP8 teach-backs ("override
+  go"); design configs/sp9_step0.yaml committed before any Step 0 code or run.
   SP5 closed 2026-10-26 (tag sp05-e2): gate FAIL as pre-registered, write-up docs/sp5_e2_result.md;
   recalibration teach-back NOT ANSWERED (owner override, fourth time).
 - SP5 history (E2 ablation, GATE). Step 0 (pre-registration, ae18348), Step 1
@@ -338,6 +341,9 @@
   ("override it and tag sp08-e5"). NOT ANSWERED, not owner-marked. Claude disagreed: the tag marks SP8
   done while the estimand behind the gate and the not-like-for-like-with-E2 claim is undefended. Risk
   accepted. Thirteen teach-backs owed before deploy (SP9).
+- 2026-10-30: Owner override of the teach-back HARD RULE to start SP9 Step 0 with the SP6, SP7 and SP8
+  teach-backs NOT ANSWERED ("override go"). Claude disagreed: the demo's theta line is the SP6
+  threshold logic. Risk accepted. Step 0 choices: step-level latency for L-2; reference 0.770 (D-6).
 - Proposed for the SP4 spec, NOT decided: a length-only baseline in SP5 (length alone AUROC 0.592;
   ESN score vs length Spearman 0.85/0.80), and matched-step prefix evaluation instead of episode-max.
 

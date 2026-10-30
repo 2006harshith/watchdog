@@ -1,0 +1,51 @@
+# SP9 Step 0: blocking latency diagnostics before the demo. POST HOC (after SP5-SP8 results), but this
+# design and its expectations are committed before experiments/sp9_step0.py exists and before any run.
+# Decisions: docs/decisions.md 2026-10-30 (SP9; owner: step-level latency, reference 0.770).
+# Setting: E2's llama target (configs/e2.yaml), headline classes vs all healthy runs, t = 3, 4.
+
+L-1:
+  arm: MS-raw-noLat                          # e5_models.fit_ms_models; MS-raw without the 4 ms__log_latency__* aggregates
+  nolat_fingerprint: 34838f50ce4f60b6        # results/e5_nolat_fingerprint.json; must reproduce before any L-1 number
+  reference: {arm: MS-raw, auroc: 0.858}     # E2, results/e2_ablation.json; MS-raw must reproduce e2_prefix_scores.csv
+  metric: mean matched-step AUROC over t = 3, 4 (E2's primary), headline classes vs all healthy runs
+  ci: paired task-group cluster bootstrap of noLat - MS-raw, 95% (e2.paired; B = E2 n_primary, seed = E2 seed)
+  also: noLat's own task-group cluster CI (e2's matched_step_cluster_ci)
+  expectation:
+    text: "MS-raw-noLat's headline AUROC drops by at most 0.10 from MS-raw's. Stated as HOLD so it can fail."
+    holds_if: AUROC(MS-raw) - AUROC(MS-raw-noLat) <= 0.10
+
+L-2:
+  arm: ESN-src                               # e3._esn_src's 30 fit draws: llama n 30, fit_size 21, pool_runs 28, seed 0 (D-6)
+  transform: >-
+    step level: in every run the monitor sees (fit, val and scored), each step's latency_s is replaced by
+    the constant c of that fit draw; measured tool-event latencies are untouched. This removes latency
+    from m (log latency) and from x's tool latency where the adapter derives it from step latency.
+  constant: c = median of latency_s over every step of the fit draw's 21 fit runs (source healthy median, per draw)
+  reproduction: the as-is draws equal results/e2_closeout.json d6.subsets.aurocs (max abs diff <= 1e-9)
+  reference: {median: 0.770, source: D-6, results/e2_closeout.json d6.subsets.median}
+  report: >-
+    per draw: as-is AUROC, constant-latency AUROC, paired drop (as-is - constant); the drop's median,
+    10th and 90th percentile, min, max, share of draws with drop > 0.10; the constant-latency median.
+    Spread = fit-set variability only; test-set sampling is not in it.
+  expectation:
+    text: "ESN-src's median headline AUROC with constant step latency drops by at most 0.10 from 0.770. Stated as HOLD so it can fail."
+    holds_if: 0.770 - median(constant-latency AUROC over the 30 draws) <= 0.10
+
+L-3:
+  read_only: true
+  population: llama source runs (ollama_llama8b, load_episodes), every step
+  report:
+    - share of steps with latency_s < 0.05, by step position (0, 1, 2, ...), by action/step type, by healthy vs failed
+    - which fields those steps carry (step-dict keys, tool events and their own latency_s), vs steps >= 0.05 s
+    - whether latency_s is in the raw parquet steps or filled by a default (adapter 1.0 s, 1 ms floor), and its quantiles
+    - output_tokens and token_logprobs coverage on those steps (a generation of n tokens in < 50 ms at ~7 tok/s is impossible)
+
+rule: >-
+  If L-1 or L-2 drops by more than 0.10, that monitor is shown in the demo only with the note "synthetic
+  score depends on latency values that are not generation time", or it is dropped. The owner decides
+  which before Step 2.
+
+also_report:
+  - Spaces hardware and Streamlit SDK support, from HF docs read on the day (URL and date recorded)
+  - licence lines for the llama traces and for the dataset, for public redistribution
+  - whether the Streamlit version to pin has an app-testing API (docs or source, not installed in Step 0)
