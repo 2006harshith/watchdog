@@ -105,6 +105,11 @@
 - Save point: SP9 (supervisor + replay demo, no gate). Spec received 2026-10-30 (verbatim in
   docs/decisions.md). Step 0 started under owner override of the SP6/SP7/SP8 teach-backs ("override
   go"); design configs/sp9_step0.yaml committed before any Step 0 code or run.
+  Step 0 2026-10-30 (code 88b685a; results/sp9_step0.json from clean 88b685a; reproduction exact):
+  L-1 FAILS (MS-raw-noLat 0.582 [0.329, 0.704] vs 0.858); L-2 FAILS (ESN-src constant latency median
+  0.482 vs 0.770, 29/30 draws drop > 0.10); L-3: 55% of llama steps < 50 ms with ~26 generated tokens,
+  so latency_s is not generation time there. HF Spaces has no Streamlit SDK now (Docker + PRO plan).
+  STOPPED for owner decisions (note/drop both monitors; host).
   SP5 closed 2026-10-26 (tag sp05-e2): gate FAIL as pre-registered, write-up docs/sp5_e2_result.md;
   recalibration teach-back NOT ANSWERED (owner override, fourth time).
 - SP5 history (E2 ablation, GATE). Step 0 (pre-registration, ae18348), Step 1

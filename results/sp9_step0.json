@@ -1,0 +1,387 @@
+{
+  "what": "SP9 Step 0: latency diagnostics (L-1, L-2, L-3); POST HOC",
+  "config": {
+    "L-1": {
+      "arm": "MS-raw-noLat",
+      "nolat_fingerprint": "34838f50ce4f60b6",
+      "reference": {
+        "arm": "MS-raw",
+        "auroc": 0.858
+      },
+      "metric": "mean matched-step AUROC over t = 3, 4 (E2's primary), headline classes vs all healthy runs",
+      "ci": "paired task-group cluster bootstrap of noLat - MS-raw, 95% (e2.paired; B = E2 n_primary, seed = E2 seed)",
+      "also": "noLat's own task-group cluster CI (e2's matched_step_cluster_ci)",
+      "expectation": {
+        "text": "MS-raw-noLat's headline AUROC drops by at most 0.10 from MS-raw's. Stated as HOLD so it can fail.",
+        "holds_if": "AUROC(MS-raw) - AUROC(MS-raw-noLat) <= 0.10"
+      }
+    },
+    "L-2": {
+      "arm": "ESN-src",
+      "transform": "step level: in every run the monitor sees (fit, val and scored), each step's latency_s is replaced by the constant c of that fit draw; measured tool-event latencies are untouched. This removes latency from m (log latency) and from x's tool latency where the adapter derives it from step latency.",
+      "constant": "c = median of latency_s over every step of the fit draw's 21 fit runs (source healthy median, per draw)",
+      "reproduction": "the as-is draws equal results/e2_closeout.json d6.subsets.aurocs (max abs diff <= 1e-9)",
+      "reference": {
+        "median": 0.77,
+        "source": "D-6",
+        "results/e2_closeout.json d6.subsets.median": null
+      },
+      "report": "per draw: as-is AUROC, constant-latency AUROC, paired drop (as-is - constant); the drop's median, 10th and 90th percentile, min, max, share of draws with drop > 0.10; the constant-latency median. Spread = fit-set variability only; test-set sampling is not in it.",
+      "expectation": {
+        "text": "ESN-src's median headline AUROC with constant step latency drops by at most 0.10 from 0.770. Stated as HOLD so it can fail.",
+        "holds_if": "0.770 - median(constant-latency AUROC over the 30 draws) <= 0.10"
+      }
+    },
+    "L-3": {
+      "read_only": true,
+      "population": "llama source runs (ollama_llama8b, load_episodes), every step",
+      "report": [
+        "share of steps with latency_s < 0.05, by step position (0, 1, 2, ...), by action/step type, by healthy vs failed",
+        "which fields those steps carry (step-dict keys, tool events and their own latency_s), vs steps >= 0.05 s",
+        "whether latency_s is in the raw parquet steps or filled by a default (adapter 1.0 s, 1 ms floor), and its quantiles",
+        "output_tokens and token_logprobs coverage on those steps (a generation of n tokens in < 50 ms at ~7 tok/s is impossible)"
+      ]
+    },
+    "rule": "If L-1 or L-2 drops by more than 0.10, that monitor is shown in the demo only with the note \"synthetic score depends on latency values that are not generation time\", or it is dropped. The owner decides which before Step 2.",
+    "also_report": [
+      "Spaces hardware and Streamlit SDK support, from HF docs read on the day (URL and date recorded)",
+      "licence lines for the llama traces and for the dataset, for public redistribution",
+      "whether the Streamlit version to pin has an app-testing API (docs or source, not installed in Step 0)"
+    ]
+  },
+  "git": {
+    "commit": "88b685a902120212f6c566eee25700eb3d21dda6",
+    "dirty": false
+  },
+  "L-3": {
+    "steps": 1303,
+    "missing_latency": 0,
+    "share_fast": 0.5487336914811972,
+    "exact_values_among_fast": {
+      "0.0003": 270,
+      "0.0004": 184,
+      "0.0005": 79,
+      "0.0008": 25,
+      "0.0009": 24
+    },
+    "by_position": {
+      "0": {
+        "steps": 193,
+        "share_fast": 0.8341968911917098
+      },
+      "1": {
+        "steps": 193,
+        "share_fast": 0.8341968911917098
+      },
+      "2": {
+        "steps": 193,
+        "share_fast": 0.6839378238341969
+      },
+      "3": {
+        "steps": 193,
+        "share_fast": 0.48186528497409326
+      },
+      "4": {
+        "steps": 162,
+        "share_fast": 0.37037037037037035
+      },
+      "5": {
+        "steps": 81,
+        "share_fast": 0.2962962962962963
+      },
+      "6": {
+        "steps": 56,
+        "share_fast": 0.26785714285714285
+      },
+      "7": {
+        "steps": 47,
+        "share_fast": 0.2978723404255319
+      },
+      "8": {
+        "steps": 33,
+        "share_fast": 0.30303030303030304
+      },
+      "9": {
+        "steps": 32,
+        "share_fast": 0.28125
+      },
+      "10": {
+        "steps": 31,
+        "share_fast": 0.2903225806451613
+      },
+      "11": {
+        "steps": 30,
+        "share_fast": 0.3
+      },
+      "12": {
+        "steps": 30,
+        "share_fast": 0.3
+      },
+      "13": {
+        "steps": 29,
+        "share_fast": 0.3103448275862069
+      }
+    },
+    "by_action": {
+      "synthesis": {
+        "steps": 164,
+        "share_fast": 0.35365853658536583
+      },
+      "tool_call": {
+        "steps": 1139,
+        "share_fast": 0.5768217734855136
+      }
+    },
+    "by_healthy": {
+      "False": {
+        "steps": 775,
+        "share_fast": 0.5329032258064517
+      },
+      "True": {
+        "steps": 528,
+        "share_fast": 0.571969696969697
+      }
+    },
+    "fast": {
+      "steps": 715,
+      "latency_q": [
+        0.0003,
+        0.0003,
+        0.0004,
+        0.0012,
+        0.0269
+      ],
+      "output_tokens_q": [
+        18.0,
+        26.0,
+        127.80000000000007
+      ],
+      "logprobs_share": 1.0,
+      "tool_events_per_step_mean": 0.9188811188811189,
+      "tool_event_latency_present_share": 1.0,
+      "tool_event_latency_q": [
+        1e-06,
+        2e-06,
+        1.8e-05
+      ],
+      "key_sets": {
+        "action, error, latency_s, logprobs_available, output_tokens, schema, task, text, token_logprobs, tool_events": 715
+      }
+    },
+    "not_fast": {
+      "steps": 588,
+      "latency_q": [
+        2.5041,
+        2.70497,
+        3.0096,
+        9.58051,
+        43.0841
+      ],
+      "output_tokens_q": [
+        18.0,
+        37.0,
+        86.20000000000027
+      ],
+      "logprobs_share": 1.0,
+      "tool_events_per_step_mean": 0.8197278911564626,
+      "tool_event_latency_present_share": 1.0,
+      "tool_event_latency_q": [
+        3e-06,
+        2.3e-05,
+        5.1e-05
+      ],
+      "key_sets": {
+        "action, error, latency_s, logprobs_available, output_tokens, schema, task, text, token_logprobs, tool_events": 588
+      }
+    }
+  },
+  "L-1": {
+    "MS-raw": 0.8582860109070896,
+    "MS-raw-noLat": 0.5818458486111211,
+    "MS-raw-noLat_ci": {
+      "lo": 0.3285348017045838,
+      "hi": 0.7038123148776604
+    },
+    "paired_noLat_minus_MS-raw": {
+      "point": -0.2764401622959686,
+      "lo": -0.49897839847009245,
+      "hi": -0.1822664978289492,
+      "n_skipped": 1
+    },
+    "expectation": {
+      "reference": 0.8582860109070896,
+      "value": 0.5818458486111211,
+      "drop": 0.27644016229596846,
+      "outcome": "FAILS"
+    }
+  },
+  "L-2": {
+    "channels": [
+      "e",
+      "u",
+      "m",
+      "x"
+    ],
+    "constants_s": [
+      2.64,
+      0.0015,
+      2.6362,
+      0.0014,
+      2.6806,
+      2.7096,
+      0.0013,
+      0.0015,
+      2.6928,
+      2.6928,
+      2.664,
+      2.6928,
+      2.7075,
+      2.6928,
+      2.6894,
+      2.6836,
+      2.6931,
+      2.6836,
+      2.7299,
+      2.6836,
+      2.6818,
+      0.0014,
+      2.6818,
+      2.64,
+      2.6816,
+      2.7075,
+      0.0015,
+      2.6818,
+      0.0015,
+      0.0015
+    ],
+    "as_is": [
+      0.7810975050449459,
+      0.857134309920496,
+      0.6134833772904769,
+      0.7633263704741415,
+      0.8058364722784095,
+      0.7566909264831665,
+      0.6799753470708342,
+      0.7683861772056599,
+      0.8267562308357574,
+      0.6224818155610671,
+      0.8135938657746583,
+      0.8290947151362671,
+      0.8198387880693879,
+      0.8230727651544933,
+      0.8411355178485063,
+      0.6052656548184892,
+      0.7708592430317802,
+      0.8110498311998038,
+      0.8361738403771977,
+      0.6668075618199449,
+      0.6735896487478765,
+      0.5971790294643899,
+      0.611307081745992,
+      0.8338477450819223,
+      0.6791485000964913,
+      0.5658603687635058,
+      0.7616017673392467,
+      0.7884182456692088,
+      0.676327618904669,
+      0.806194026116976
+    ],
+    "constant": [
+      0.4966379634857896,
+      0.5453351225915892,
+      0.4575119661113057,
+      0.4685076549757342,
+      0.48131484869927355,
+      0.4664313649110017,
+      0.45459063272079236,
+      0.4688063610394375,
+      0.49667519006401784,
+      0.4663746613870444,
+      0.5052722662587825,
+      0.5182019205340614,
+      0.47282558067505787,
+      0.5290048352857929,
+      0.5211473767472667,
+      0.44655743495176625,
+      0.47373617255978295,
+      0.5083957250784439,
+      0.5273488779611509,
+      0.4729015228946434,
+      0.4910620176924525,
+      0.4376897662051762,
+      0.43712285009065416,
+      0.5224465545461693,
+      0.4569515720932892,
+      0.48355475702063483,
+      0.4774180300528677,
+      0.48995451209953134,
+      0.4839790208873863,
+      0.489896319512445
+    ],
+    "summary": {
+      "as_is_median": 0.7696227101187201,
+      "constant_median": 0.4824348028599542,
+      "constant_min": 0.43712285009065416,
+      "constant_max": 0.5453351225915892,
+      "drop_median": 0.2944433226835539,
+      "drop_p10": 0.15844811329745287,
+      "drop_p90": 0.32044148934902916,
+      "drop_min": 0.08230561174287093,
+      "drop_max": 0.34701320739433006,
+      "share_drop_above_threshold": 0.9666666666666667,
+      "per_draw_drop": [
+        0.2844595415591563,
+        0.31179918732890677,
+        0.15597141117917118,
+        0.2948187154984073,
+        0.32452162357913594,
+        0.2902595615721648,
+        0.22538471435004181,
+        0.2995798161662224,
+        0.3300810407717396,
+        0.15610715417402266,
+        0.3083215995158758,
+        0.31089279460220565,
+        0.34701320739433006,
+        0.29406792986870045,
+        0.3199881411012395,
+        0.1587082198667229,
+        0.29712307047199726,
+        0.3026541061213599,
+        0.30882496241604673,
+        0.19390603892530156,
+        0.18252763105542402,
+        0.15948926325921375,
+        0.17418423165533786,
+        0.311401190535753,
+        0.22219692800320212,
+        0.08230561174287093,
+        0.28418373728637897,
+        0.2984637335696775,
+        0.19234859801728266,
+        0.316297706604531
+      ]
+    },
+    "expectation": {
+      "reference": 0.77,
+      "value": 0.4824348028599542,
+      "drop": 0.2875651971400458,
+      "outcome": "FAILS"
+    },
+    "caveat": "spread = fit-set variability only; test-set sampling is not in it"
+  },
+  "checks": {
+    "MS-raw.llama_vs_e2_prefix_scores": {
+      "value": 1.1102230246251565e-16,
+      "ok": true
+    },
+    "MS-raw-noLat.fingerprint": {
+      "value": "34838f50ce4f60b613d10ff6aae3ca47adb7e783f134eaac8fa946aca259e7d9",
+      "ok": true
+    },
+    "ESN-src.fit_draw_aurocs_vs_d6": {
+      "value": 0.0,
+      "ok": true
+    }
+  }
+}

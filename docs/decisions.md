@@ -628,3 +628,39 @@ licences recorded; the live app verified; tag sp09-demo.
   scored against a theta calibrated on its own task group); organic traces show per-trace alarms only,
   never an aggregate FA/TPR (SP8 has no operating point there); the ESN-src fit draw shown is fixed by
   a seed in config before its AUROC is looked at.
+- 2026-10-30, SP9 Step 0 report (results/sp9_step0.json from clean 88b685a; design 11589d3 before run).
+  Reproduction exact: MS-raw vs E2 prefix scores 1.1e-16, noLat fingerprint 34838f50, ESN-src as-is
+  draws vs D-6 max diff 0.0.
+  - L-1 FAILS: MS-raw-noLat 0.582 [0.329, 0.704] vs MS-raw 0.858; paired noLat − MS-raw −0.276
+    [−0.499, −0.182] (task-group cluster bootstrap, 1 replicate skipped).
+  - L-2 FAILS: ESN-src with constant step latency, median 0.482 (range 0.437–0.545) vs 0.770; paired
+    per-draw drop median +0.294 (p10 0.158, p90 0.320, min 0.082); 29/30 draws drop > 0.10. On these
+    runs the step-level and m-only versions are the same transform: every llama tool event carries a
+    measured latency_s, so x's tool latency never derives from step latency. The constant's value does
+    not matter (a constant column standardises to 0).
+  - L-3: 715/1303 llama steps (54.9%) have latency_s < 50 ms (median 0.4 ms, max 27 ms); the rest
+    2.5–43 s (median 3.0 s). The value is in the raw parquet on every step (none missing, same keys as
+    slow steps), not an adapter default. Fast steps still carry token logprobs (100%) and output_tokens
+    median 26 (p90 128): at the ~7 tok/s measured in SP8 Step 0 that is seconds of generation, so on
+    those steps latency_s is not generation time; what it measures cannot be told from the trace.
+    Fast share by step position: 0.83 at steps 0-1, 0.68 at 2, 0.48 at 3, 0.37 at 4, ~0.30 after.
+    Healthy 0.57 vs failed 0.53 overall. Tool-event latencies are microseconds (simulated tools).
+  - Rule triggered for BOTH demo monitors (note or drop): owner decides before Step 2.
+  - Spaces (read 2026-10-30): https://huggingface.co/docs/hub/spaces-config-reference says `sdk` "Can be
+    either gradio, docker, or static" (no streamlit). https://huggingface.co/docs/hub/spaces-overview:
+    CPU Basic 2 vCPU / 16 GB, free hardware, sleeps when unused; "Gradio and Docker Spaces run on compute
+    and require a paid plan to create: PRO for personal accounts"; "Free personal accounts in good
+    standing can still host up to 2 Gradio Spaces running on ZeroGPU"; static Spaces are free. A
+    Streamlit app on Spaces therefore needs a Docker Space and a PRO plan.
+  - Streamlit: latest 1.66.1 on PyPI (requires_python >= 3.11). App testing API:
+    `from streamlit.testing.v1 import AppTest` (AppTest.from_file(...).run(); `at.exception`), per
+    https://docs.streamlit.io/develop/api-reference/app-testing (introducing version not stated there).
+    Not installed.
+  - Licences: HF dataset card licence field is now "mixed-see-licensing" (docs/data_card.md records MIT;
+    to update): llama episodes "Built with Llama", bound by the Llama 3.1 Community License + AUP;
+    Apache-2.0 covers the project's own code/format; tool results from Open-Meteo CC BY 4.0, Wikipedia
+    CC BY-SA 4.0. Llama 3.1 licence (https://dev.meta.ai/llama/llama3_1/license, read via a fetch
+    summary, full text to be read before publishing): redistributing "Llama Materials" (Llama 3.1 and
+    Documentation) requires a copy of the Agreement and a prominent "Built with Llama"; training a model
+    on outputs requires "Llama" at the start of its name (no demo monitor is trained on llama output:
+    MS-raw and ESN-src are fitted on qwen source runs). Not legal advice.
