@@ -109,7 +109,9 @@
   L-1 FAILS (MS-raw-noLat 0.582 [0.329, 0.704] vs 0.858); L-2 FAILS (ESN-src constant latency median
   0.482 vs 0.770, 29/30 draws drop > 0.10); L-3: 55% of llama steps < 50 ms with ~26 generated tokens,
   so latency_s is not generation time there. HF Spaces has no Streamlit SDK now (Docker + PRO plan).
-  STOPPED for owner decisions (note/drop both monitors; host).
+  Owner 2026-10-30: both monitors DROPPED from the demo; SP6 teach-back overridden again (Step 1, NOT
+  ANSWERED); Steps 2-5 paused. Next: paste docs/decisions.md's SP9 section and results/sp9_step0.json
+  into the chat Project for a re-scoped SP9 and an erratum decision for SP5-SP7.
   SP5 closed 2026-10-26 (tag sp05-e2): gate FAIL as pre-registered, write-up docs/sp5_e2_result.md;
   recalibration teach-back NOT ANSWERED (owner override, fourth time).
 - SP5 history (E2 ablation, GATE). Step 0 (pre-registration, ae18348), Step 1
@@ -183,7 +185,7 @@
 | SP6 | E3 recalibration curve (teach-back: threshold logic) | done — write-up docs/sp6_e3_result.md; threshold-logic teach-back NOT ANSWERED (owner override x4) | sp06-e3 |
 | SP7 | E4 cheap monitor vs LLM judge (gate dropped: power) | done — docs/sp7_e4_result.md: D +0.132 [+0.045, +0.206], J-1 FAILS, J-2 HOLDS; teach-back on D NOT ANSWERED (owner override x2) | sp07-e4 |
 | SP8 | E5 frozen monitors on organic failures (AgentDojo dropped; organic llama8b) — GATE | done — docs/sp8_e5_result.md: GATE FAIL, MS-raw cold 0.510 [0.355, 0.674]; O-1, O-3 HOLD; label/estimand teach-back NOT ANSWERED (owner override x2) | sp08-e5 |
-| SP9 | Supervisor agent + Streamlit demo on HF Spaces | not started | |
+| SP9 | Supervisor agent + Streamlit demo on HF Spaces | Step 0 done (results/sp9_step0.json): L-1, L-2 FAIL, both monitors dropped from the demo; paused for re-scope in the chat Project; SP6 teach-back NOT ANSWERED (override x5) | |
 | SP10 | Write-up: arXiv report, README, blog | not started | |
 | SP11 | Phase 2: budgeted human review | not started | |
 
@@ -564,6 +566,10 @@ Gemini: every table is reported, nothing is tested, and it is labelled descripti
   2026-10-30 to tag sp08-e5 ("override it and tag sp08-e5"). Not owner-marked, not graded.
 
 ## Session log
+- 2026-10-30 · SP9 (Step 0) · Pre-registered 11589d3, code 88b685a, results f7af642 from clean 88b685a:
+  L-1 and L-2 FAIL (latency carries both monitors' injected-llama signal), L-3 latency not generation
+  time; both monitors dropped; SP6 teach-back overridden (Step 1) · tests: 8 new pass, ruff clean ·
+  next: chat Project re-scopes SP9.
 - 2026-10-30 · SP8 (close) · No code change; label/estimand teach-back overridden a second time (NOT
   ANSWERED). Tag sp08-e5 · tests: pass (610) · next: SP9 spec from the chat Project.
 - 2026-10-28 · SP8 · AgentDojo pilots 0/20 (dropped); organic llama8b corpora with a strict run-level

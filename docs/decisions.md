@@ -664,3 +664,10 @@ licences recorded; the live app verified; tag sp09-demo.
     Documentation) requires a copy of the Agreement and a prominent "Built with Llama"; training a model
     on outputs requires "Llama" at the start of its name (no demo monitor is trained on llama output:
     MS-raw and ESN-src are fitted on qwen source runs). Not legal advice.
+- 2026-10-30, owner after the Step 0 report ("override, drop both monitors, take it to the chat
+  Project"): (1) override of the SP9 Step 1 SP6 threshold-logic teach-back (NOT ANSWERED, not
+  owner-marked; fifth override for it). Claude disagreed earlier for the same reason as before. Risk
+  accepted. (2) MS-raw and ESN-src are both DROPPED from the demo under the Step 0 rule (L-1, L-2 FAIL).
+  (3) SP9 Steps 2-5 paused: the chat Project re-scopes SP9 and decides whether the SP5-SP7 write-ups
+  need an erratum (their injected-llama rankings rest mostly on step latency that is not generation
+  time). Host not decided (HF Spaces needs Docker + PRO for Streamlit). No code until a new spec.
